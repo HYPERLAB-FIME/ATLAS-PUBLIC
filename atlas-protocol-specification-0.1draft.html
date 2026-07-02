@@ -971,14 +971,14 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <p>
     This specification defines the <strong>Agent Trust Layer and Assurance Standard (ATLAS) protocol</strong>
     — a chained-capability-token audit framework for agentic commerce.
-    ATLAS standardises how accredited <em>assessor agents</em> obtain bounded, encrypted evidence from
+    ATLAS standardises how accredited <em>Assessor agents</em> obtain bounded, encrypted evidence from
     <em>shopping agents</em>, evaluate intent fidelity and policy compliance, and produce signed artifacts
     that can be consumed upstream and downstream without exposing raw conversations or unnecessary personal data.
   </p>
   <p>
     ATLAS supports two audit-initiation patterns: a <strong>holder-mediated</strong> path
-    (merchant or credential provider commissions an assessor) and a <strong>direct</strong> path
-    (shopping agent self-commissions an assessor for compliance or regulatory evidence).
+    (merchant or credential provider commissions an Assessor) and a <strong>direct</strong> path
+    (shopping agent self-commissions an Assessor for compliance or regulatory evidence).
     Application trust relies on chained JWS/JWT delegation tokens and JWE-encrypted evidence over
     HTTPS with standard TLS. Downstream payment-rail integration uses compact <code>CBReportToken</code>
     references assembled into a <code>redeem_tokens</code> field by the merchant processor for
@@ -1019,13 +1019,13 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     through autonomous shopping agents, merchant agents, and credential providers before it is
     expressed as cryptographic payment artifacts. Existing protocols — AP2, Verifiable Intent (VI),
     and UCP — secure the lower layers (mandate delegation, checkout authorisation, and payment
-    completion) but do not define a standard protocol for an independent assessor to retrieve and
+    completion) but do not define a standard protocol for an independent Assessor to retrieve and
     assess the <em>pre-checkout</em> intent interpretation and agent reasoning that produced those
     artifacts.
   </p>
   <p>
     ATLAS fills this gap. It defines a portable, cryptographically verifiable protocol through which
-    <em>assessor agents</em> accredited by a <em>certification body (CB)</em> may obtain scoped,
+    <em>Assessor agents</em> accredited by a <em>certification body (CB)</em> may obtain scoped,
     encrypted evidence from a <em>shopping agent</em> — without requiring trust in any individual
     intermediary and without revealing sensitive user intent to parties with no legitimate need.
   </p>
@@ -1086,7 +1086,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <p>
     Existing protocols address complementary problems.  AP2 and Verifiable Intent (VI) provide
     strong cryptographic controls once the flow is expressed as mandates and payment artifacts,
-    but do not define a standard protocol for an independent assessor to assess how the agent
+    but do not define a standard protocol for an independent Assessor to assess how the agent
     interpreted user intent, propagated constraints, and selected merchants before those
     artifacts were created.  Know Your Agent (KYA) frameworks establish pre-runtime identity — who built the agent and which keys
     it holds — but cannot guarantee what the agent actually did during a live transaction.
@@ -1101,7 +1101,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     liability, and undetected fraud — with no independent record to adjudicate the outcome.
   </p>
   <p>
-    ATLAS standardises how accredited <em>assessor agents</em>, operating as neutral third
+    ATLAS standardises how accredited <em>Assessor agents</em>, operating as neutral third
     parties, obtain bounded and encrypted evidence from the shopping agent, evaluate it
     against a named policy referential, and produce a compact cryptographic trust signal
     (<code>CBReportToken</code>) that can be carried in ISO 8583, EMV 3DS, and ISO 20022
@@ -1110,12 +1110,12 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h3 id="s1-2"><span class="secno-heading">1.2</span> Design Goals<a class="self-link" href="#s1-2" title="§ 1.2 Design Goals">§</a></h3>
   <ol>
-    <li><strong>Privacy by default.</strong> Structured summaries; encrypt user intent and agent reasoning so only the designated assessor can read it.</li>
-    <li><strong>Cryptographic chain of trust.</strong> Verifiable chain across shopping agent, assessor, merchant, CP, processor, network, bank, and certification body.</li>
+    <li><strong>Privacy by default.</strong> Structured summaries; encrypt user intent and agent reasoning so only the designated Assessor can read it.</li>
+    <li><strong>Cryptographic chain of trust.</strong> Verifiable chain across Shopping Agent, Assessor, Merchant, CP, processor, network, bank, and certification body.</li>
     <li><strong>Complementarity with AP2/VI/UCP.</strong> Align with mandate delegation, key binding, verifier receipts — don't replace them.</li>
     <li><strong>Durable evidence.</strong> Support real-time processing decisions and later dispute review.</li>
     <li><strong>Direct audit commissioning.</strong> Shopping agent may self-commission audits without a merchant holder.</li>
-    <li><strong>Scheme-level assessor roster.</strong> Discover eligible assessors, CB trust anchors, and accreditation metadata without ad hoc configuration.</li>
+    <li><strong>Scheme-level Assessor roster.</strong> Discover eligible Assessors, CB trust anchors, and accreditation metadata without ad hoc configuration.</li>
     <li><strong>Separation of authority.</strong> Separate authority to request an audit / read private evidence / redeem downstream reports.</li>
     <li><strong>Rail-compatible token.</strong> Downstream token fits in ISO 8583 / EMV 3DS / ISO 20022.</li>
     <li><strong>Chained signed-token model.</strong> JWS/JWT + JWE over HTTPS/TLS.</li>
@@ -1225,7 +1225,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h4 id="s1-4-3">What the Assessor Evaluates: Agent Data vs. Referential</h4>
   <p>
-    an ATLAS assessor agent evaluates a structured evidence package produced by the shopping agent
+    an ATLAS Assessor Agent evaluates a structured evidence package produced by the shopping agent
     against a named <strong>policy referential</strong> (<code>policy_referential</code> claim in
     <code>AuditDelegation</code>).  The evidence package — transmitted as a private JWE, never
     forwarded to the merchant or payment network — contains:
@@ -1280,7 +1280,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     </table>
   </div>
   <p>
-    The assessor produces an <code>AuditResult</code> (Link 4) containing a binary or graded
+    the Assessor produces an <code>AuditResult</code> (Link 4) containing a binary or graded
     <code>verdict</code>, a hash of the evidence reviewed, the <code>policy_referential</code>
     applied, and — when the certification body so requires — a <code>cb_report_token</code>
     that can be redeemed by the payment network or issuer for a certified trust-assurance report.
@@ -1340,19 +1340,19 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <dt>Shopping Agent</dt><dd>An autonomous software agent that interprets user intent, discovers offers, builds carts, and serves as root of trust for user intent and reasoning evidence within ATLAS.</dd>
     <dt>Holder</dt><dd>The merchant or credential provider that holds an ATLAS <code>AuditDelegation</code> and may issue a chained <code>AuditSubDelegation</code>. Holder mode only.</dd>
     <dt>Assessor Agent</dt><dd>An accredited software agent that presents an <code>AuditAccessAssertion</code>, receives encrypted evidence, evaluates it, and issues signed <code>AuditResult</code> and <code>CBReportToken</code>.</dd>
-    <dt>Certification Body (CB)</dt><dd>An independent organisation that accredits assessor agents, signs accreditation credentials, stores certified reports, and redeems <code>CBReportToken</code> values.</dd>
-    <dt>Certification Scheme</dt><dd>A governance framework that manages participating CBs and publishes the authoritative assessor roster.</dd>
-    <dt>AuditDelegation (Link 1)</dt><dd>Signed JWT issued by the shopping agent to a merchant/CP (holder mode) or directly to an assessor (direct mode). Root of the ATLAS capability chain.</dd>
-    <dt>AuditSubDelegation (Link 2)</dt><dd>Signed JWT issued by a holder to a specific assessor, chained to Link 1 via <code>parent_jti</code>, binding the assessor's key in <code>cnf</code>. Holder mode only.</dd>
-    <dt>AuditAccessAssertion (Link 3)</dt><dd>Signed JWS issued by the assessor to the shopping agent, embedding the delegation chain and accreditation credential, signed over a fresh nonce. Unlocks the JWE evidence release on successful verification.</dd>
-    <dt>AuditEvidenceResponse</dt><dd>JWE (RFC 7516) issued by the shopping agent to the assessor containing sensitive user intent and agent reasoning. Not forwarded to any other party.</dd>
-    <dt>AuditResult (Link 4)</dt><dd>Signed JWS result envelope issued by the assessor containing the audit verdict, policy referential, evidence hashes, and a <code>cb_report_token</code>.</dd>
+    <dt>Certification Body (CB)</dt><dd>An independent organisation that accredits Assessor agents, signs accreditation credentials, stores certified reports, and redeems <code>CBReportToken</code> values.</dd>
+    <dt>Certification Scheme</dt><dd>A governance framework that manages participating CBs and publishes the authoritative Assessor roster.</dd>
+    <dt>AuditDelegation (Link 1)</dt><dd>Signed JWT issued by the shopping agent to a merchant/CP (holder mode) or directly to an Assessor (direct mode). Root of the ATLAS capability chain.</dd>
+    <dt>AuditSubDelegation (Link 2)</dt><dd>Signed JWT issued by a holder to a specific Assessor, chained to Link 1 via <code>parent_jti</code>, binding the assessor's key in <code>cnf</code>. Holder mode only.</dd>
+    <dt>AuditAccessAssertion (Link 3)</dt><dd>Signed JWS issued by the Assessor to the shopping agent, embedding the delegation chain and accreditation credential, signed over a fresh nonce. Unlocks the JWE evidence release on successful verification.</dd>
+    <dt>AuditEvidenceResponse</dt><dd>JWE (RFC 7516) issued by the shopping agent to the Assessor containing sensitive user intent and agent reasoning. Not forwarded to any other party.</dd>
+    <dt>AuditResult (Link 4)</dt><dd>Signed JWS result envelope issued by the Assessor containing the audit verdict, policy referential, evidence hashes, and a <code>cb_report_token</code>.</dd>
     <dt>CBReportToken (Link 5)</dt><dd>Compact, opaque downstream token providing a redeemable reference to one certified audit report. One token per audit.</dd>
     <dt>redeem_tokens</dt><dd>Payment-rail-only field (ISO 8583 / EMV 3DS / ISO 20022) assembled by the merchant processor from up to three <code>cb_report_token</code> values. Not an ATLAS protocol link.</dd>
     <dt>cnf claim</dt><dd>JSON key confirmation claim (RFC 7800) binding a specific public key via JWK thumbprint (<code>jkt</code>) to a JWT.</dd>
     <dt>audit_mode</dt><dd>Claim on <code>AuditDelegation</code>: <code>holder</code> (Pattern A) or <code>direct</code> (Pattern B).</dd>
-    <dt>policy_referential</dt><dd>Identifier for the audit framework or regulatory standard against which the assessor evaluates evidence.</dd>
-    <dt>Assessor Roster</dt><dd>Machine-readable catalogue published by a certification scheme, listing every currently accredited assessor agent with its public keys, audit types, regions, and owning CB.</dd>
+    <dt>policy_referential</dt><dd>Identifier for the audit framework or regulatory standard against which the Assessor evaluates evidence.</dd>
+    <dt>Assessor Roster</dt><dd>Machine-readable catalogue published by a certification scheme, listing every currently accredited Assessor agent with its public keys, audit types, regions, and owning CB.</dd>
     <dt>Hyperlab</dt><dd>The Innovation Lab within Consult Hyperion responsible for this specification and related ATLAS artefacts as part of the Continuous Certification for Agentic Commerce programme.</dd>
   </dl>
 </section>
@@ -1366,13 +1366,13 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Role</th><th>Purpose within ATLAS</th><th>Existing analogue</th></tr></thead>
       <tbody>
         <tr><td><strong>End User</strong> (out of ATLAS loop)</td><td>Intent and mandates formed upstream (AP2/VI). ATLAS has no human-verifier step.</td><td>User in AP2/VI only</td></tr>
-        <tr><td><strong>Shopping Agent</strong></td><td>Interprets intent, builds cart, serves evidence to assessors. Root issuer of Link 1 tokens.</td><td>Shopping Agent in AP2</td></tr>
+        <tr><td><strong>Shopping Agent</strong></td><td>Interprets intent, builds cart, serves evidence to Assessors. Root issuer of Link 1 tokens.</td><td>Shopping Agent in AP2</td></tr>
         <tr><td><strong>Merchant / Merchant Agent</strong></td><td>Receives checkout artifacts, may issue Link 2, conveys <code>AuditResult</code>.</td><td>Merchant in AP2/UCP</td></tr>
         <tr><td><strong>Credential Provider (CP)</strong></td><td>Verifies payment mandate, may issue Link 2, conveys <code>AuditResult</code>.</td><td>CP in AP2/VI</td></tr>
         <tr><td><strong>Merchant Processor</strong></td><td>Collects conveyed <code>AuditResult</code> values, injects <code>redeem_tokens</code> on payment rails.</td><td>Acquirer / processor</td></tr>
         <tr><td><strong>Assessor Agent</strong></td><td>Requests evidence, evaluates it, issues <code>AuditResult</code> and <code>CBReportToken</code>.</td><td>ATLAS-native role</td></tr>
-        <tr><td><strong>Certification Body (CB)</strong></td><td>Accredits assessors, signs accreditation credentials, stores reports, redeems tokens.</td><td>CB Report API role</td></tr>
-        <tr><td><strong>Certification Scheme</strong></td><td>Governs CBs, publishes the assessor roster.</td><td>Scheme trust registry</td></tr>
+        <tr><td><strong>Certification Body (CB)</strong></td><td>Accredits Assessors, signs accreditation credentials, stores reports, redeems tokens.</td><td>CB Report API role</td></tr>
+        <tr><td><strong>Certification Scheme</strong></td><td>Governs CBs, publishes the Assessor roster.</td><td>Scheme trust registry</td></tr>
         <tr><td><strong>Downstream Relying Party</strong></td><td>Payment network, issuer, or bank redeeming certification output via CB report API.</td><td>Payment network / issuer</td></tr>
       </tbody>
     </table>
@@ -1384,8 +1384,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <h2><span class="secno-heading">5.</span> Assessor Roster<a class="self-link" href="#s5" title="§ 5. Assessor Roster">§</a></h2>
   <p>
     Each <strong>certification scheme</strong> <span class="rfc2119">MUST</span> expose an
-    <strong>assessor roster</strong> — a machine-readable, periodically updated catalogue of every
-    assessor agent currently accredited by any CB associated with that scheme. The roster is the
+    <strong>Assessor roster</strong> — a machine-readable, periodically updated catalogue of every
+    Assessor agent currently accredited by any CB associated with that scheme. The roster is the
     canonical discovery surface for ATLAS participants.
   </p>
   <div class="note">
@@ -1395,7 +1395,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h3 id="s5-1"><span class="secno-heading">5.1</span> Scope<a class="self-link" href="#s5-1" title="§ 5.1 Scope">§</a></h3>
   <p>
-    One scheme roster aggregates assessors from all CBs linked to the scheme. Shopping agents,
+    One scheme roster aggregates Assessors from all CBs linked to the scheme. Shopping agents,
     merchants, and credential providers use a single scheme endpoint to learn who may perform
     which audit types in which regions.
   </p>
@@ -1415,7 +1415,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <tr><td><code>accreditation_issued_at</code></td><td>Datetime</td><td>Date accreditation was granted</td></tr>
         <tr><td><code>accreditation_expires_at</code></td><td>Datetime</td><td>Accreditation validity end</td></tr>
         <tr><td><code>accreditation_status</code></td><td>Enum</td><td><code>active</code> | <code>suspended</code> | <code>revoked</code></td></tr>
-        <tr><td><code>policy_referentials</code></td><td>Array of IDs</td><td>Referentials the assessor is approved to evaluate</td></tr>
+        <tr><td><code>policy_referentials</code></td><td>Array of IDs</td><td>Referentials the Assessor is approved to evaluate</td></tr>
         <tr><td><code>audit_provider_id</code></td><td>String</td><td>Optional operator/lab ID</td></tr>
         <tr><td><code>assessor_endpoint</code></td><td>HTTPS URL</td><td>Optional callback/agent-card URL</td></tr>
       </tbody>
@@ -1434,8 +1434,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <h3 id="s5-4"><span class="secno-heading">5.4</span> Use in ATLAS Flows<a class="self-link" href="#s5-4" title="§ 5.4 Use in ATLAS Flows">§</a></h3>
   <ul>
     <li>Shopping agent <span class="rfc2119">MAY</span> copy <code>jkt</code> values from roster entries into <code>permitted_assessors</code> / <code>permitted_certification_bodies</code> when building Link 1.</li>
-    <li>In holder mode, the merchant or CP selects an assessor from the roster and binds the assessor's <code>jkt</code> in Link 2 <code>cnf</code>.</li>
-    <li>Holders and assessors <span class="rfc2119">SHOULD</span> reject commission if the assessor's keys or accreditation dates do not match the current roster entry.</li>
+    <li>In holder mode, the merchant or CP selects an Assessor from the roster and binds the Assessor's <code>jkt</code> in Link 2 <code>cnf</code>.</li>
+    <li>Holders and Assessors <span class="rfc2119">SHOULD</span> reject commission if the Assessor's keys or accreditation dates do not match the current roster entry.</li>
   </ul>
 </section>
 
@@ -1453,7 +1453,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Artifact</th><th>Link</th><th>Shape</th><th>Issuer</th><th>Subject</th><th>Purpose</th></tr></thead>
       <tbody>
         <tr><td><code>AuditDelegation</code></td><td>1</td><td>Signed JWT</td><td>Shopping Agent</td><td>Merchant / CP / Assessor</td><td>Commission audit; <code>audit_mode: holder | direct</code></td></tr>
-        <tr><td><code>AuditSubDelegation</code></td><td>2</td><td>Signed JWT (chained)</td><td>Merchant or CP</td><td>Specific assessor</td><td>Holder mode only — binds assessor key in <code>cnf</code></td></tr>
+        <tr><td><code>AuditSubDelegation</code></td><td>2</td><td>Signed JWT (chained)</td><td>Merchant or CP</td><td>Specific Assessor</td><td>Holder mode only — binds assessor key in <code>cnf</code></td></tr>
         <tr><td><code>AuditAccessAssertion</code></td><td>3</td><td>Signed JWS envelope</td><td>Assessor</td><td>Shopping Agent</td><td>Embeds chain + accreditation; unlocks JWE</td></tr>
         <tr><td><code>AuditEvidenceResponse</code></td><td>—</td><td>JWE (RFC 7516)</td><td>Shopping Agent</td><td>Assessor only</td><td>Encrypted to assessor key; not forwarded</td></tr>
         <tr><td><code>AuditResult</code></td><td>4</td><td>Signed JWS</td><td>Assessor</td><td>Merchant / CP / SA</td><td>Verdict; carries one <code>cb_report_token</code></td></tr>
@@ -1462,8 +1462,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     </table>
   </div>
   <div class="note">
-    <strong>Holder-mode chain:</strong> SA signs L1 → holder signs L2 bound to assessor key → assessor signs assertion → JWE evidence → <code>AuditResult</code> to holder.<br>
-    <strong>Direct-mode chain:</strong> SA signs L1 bound directly to assessor key → assessor signs assertion (no L2) → JWE evidence → <code>AuditResult</code> to SA.
+    <strong>Holder-mode chain:</strong> SA signs L1 → holder signs L2 bound to assessor key → Assessor signs assertion → JWE evidence → <code>AuditResult</code> to holder.<br>
+    <strong>Direct-mode chain:</strong> SA signs L1 bound directly to assessor key → Assessor signs assertion (no L2) → JWE evidence → <code>AuditResult</code> to SA.
   </div>
 
   <h3 id="s6-2"><span class="secno-heading">6.2</span> JWS/JWT Chain Reference<a class="self-link" href="#s6-2" title="§ 6.2 JWS/JWT Chain Reference">§</a></h3>
@@ -1527,8 +1527,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h4 id="s6-2-2">6.2.2 Direct-Mode Chain (Pattern B)</h4>
   <p>
-    In direct mode there is <strong>no Link 2</strong>: the shopping agent binds the assessor's
-    key directly in Link 1, and the assessor presents only Link 1 in the
+    In direct mode there is <strong>no Link 2</strong>: the shopping agent binds the Assessor's
+    key directly in Link 1, and the Assessor presents only Link 1 in the
     <code>AuditAccessAssertion</code>.
   </p>
   <pre>
@@ -1542,7 +1542,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 │  exp, nbf, jti (root token — NO parent_jti, NO checkout_hash)       │
 └─────────────────────────┬───────────────────────────────────────────┘
                           │ signed by key in Link 1-D cnf
-                          │ (no Link 2 — assessor verified via L1-D cnf)
+                          │ (no Link 2 — Assessor verified via L1-D cnf)
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  LINK 3 — AuditAccessAssertion (signed JWS)   ← NO LINK 2           │
@@ -1603,8 +1603,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <h3 id="s7-1"><span class="secno-heading">7.1</span> Pattern A — Holder Mode<a class="self-link" href="#s7-1" title="§ 7.1 Pattern A — Holder Mode">§</a></h3>
   <p>
     The shopping agent issues <code>AuditDelegation</code> to a merchant or CP during negotiation.
-    The holder selects an eligible assessor and issues a chained <code>AuditSubDelegation</code>.
-    Each delegation is independent — the merchant and CP may each commission different assessors.
+    The holder selects an eligible Assessor and issues a chained <code>AuditSubDelegation</code>.
+    Each delegation is independent — the merchant and CP may each commission different Assessors.
   </p>
 
   <h3 id="s7-2"><span class="secno-heading">7.2</span> Pattern B — Direct Mode<a class="self-link" href="#s7-2" title="§ 7.2 Pattern B — Direct Mode">§</a></h3>
@@ -1614,9 +1614,9 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   </p>
   <div class="warning">
     In direct mode the shopping agent <span class="rfc2119">MUST NOT</span> be the sole source of
-    assessor trust. <code>permitted_assessors</code> / <code>permitted_certification_bodies</code>
+    Assessor trust. <code>permitted_assessors</code> / <code>permitted_certification_bodies</code>
     <span class="rfc2119">MUST</span> be constrained by scheme roster and scheme or enterprise policy
-    to prevent the SA from unilaterally appointing a captive assessor.
+    to prevent the SA from unilaterally appointing a captive Assessor.
   </div>
 </section>
 
@@ -1640,8 +1640,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <table class="data">
       <thead><tr><th>Constraint</th><th>Claim</th><th>Type</th><th>Meaning</th></tr></thead>
       <tbody>
-        <tr><td>Named assessor keys</td><td><code>permitted_assessors</code></td><td>Array of <code>jkt</code></td><td>Explicit list of assessor signing keys allowed as <code>sub</code> of sub-delegation</td></tr>
-        <tr><td>CB trust anchors</td><td><code>permitted_certification_bodies</code></td><td>Array of CB key <code>jkt</code></td><td>Any assessor whose accreditation is signed by a listed CB key is eligible</td></tr>
+        <tr><td>Named Assessor keys</td><td><code>permitted_assessors</code></td><td>Array of <code>jkt</code></td><td>Explicit list of assessor signing keys allowed as <code>sub</code> of sub-delegation</td></tr>
+        <tr><td>CB trust anchors</td><td><code>permitted_certification_bodies</code></td><td>Array of CB key <code>jkt</code></td><td>Any Assessor whose accreditation is signed by a listed CB key is eligible</td></tr>
         <tr><td>Region filter</td><td><code>permitted_regions</code></td><td>Array of codes</td><td>Assessor accreditation <span class="rfc2119">MUST</span> cover at least one listed region</td></tr>
         <tr><td>Provider filter</td><td><code>permitted_audit_providers</code></td><td>Array of IDs</td><td>Assessor <span class="rfc2119">MUST</span> be registered under a listed provider</td></tr>
       </tbody>
@@ -1659,7 +1659,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <h3 id="s8-3"><span class="secno-heading">8.3</span> Step 2 — Sub-Delegation and Audit Commission (Holder Mode Only)<a class="self-link" href="#s8-3" title="§ 8.3 Step 2 — Sub-Delegation and Audit Commission (Holder Mode Only)">§</a></h3>
   <p>
     The holder issues a chained <code>AuditSubDelegation</code>, signed with the holder's key
-    matching the parent <code>cnf</code>, that names the assessor as <code>sub</code>, binds the
+    matching the parent <code>cnf</code>, that names the Assessor as <code>sub</code>, binds the
     assessor's key in <code>cnf</code>, references the parent via <code>parent_jti</code>, and
     narrows or equals the parent <code>scope</code>.
   </p>
@@ -1675,7 +1675,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h3 id="s8-4"><span class="secno-heading">8.4</span> Step 3 — Access Assertion to Shopping Agent<a class="self-link" href="#s8-4" title="§ 8.4 Step 3 — Access Assertion to Shopping Agent">§</a></h3>
   <p>
-    The assessor sends an <code>AuditAccessAssertion</code> — a signed JWS wrapping the delegation
+    the Assessor sends an <code>AuditAccessAssertion</code> — a signed JWS wrapping the delegation
     chain plus accreditation, signed over a fresh nonce from the shopping agent.
   </p>
   <h4>Holder-mode verification checklist</h4>
@@ -1772,7 +1772,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <div class="informative">This section is non-normative.</div>
   <p>
     The shopping agent delegates audit authority to the merchant and CP (<em>holders</em>),
-    who each independently select an eligible assessor from the Scheme Roster and issue Link 2.
+    who each independently select an eligible Assessor from the Scheme Roster and issue Link 2.
     The payment network redeems the <code>CBReportToken</code> from the certification body and
     uses the resulting certified report as an additional trust signal in the authorisation decision.
   </p>
@@ -1796,17 +1796,17 @@ sequenceDiagram
 
     U->>SA: Natural-language intent (constraints, budget, preferences)
 
-    SA->>R: GET /roster — discover eligible assessors + CB trust anchors
+    SA->>R: GET /roster — discover eligible Assessors + CB trust anchors
     R-->>SA: Assessor entries (keys, CB, regions, audit types)
 
     SA->>M: AuditDelegation L1 [audit_mode:holder, cnf = M key]
     SA->>M: AuditDelegation L1 [audit_mode:holder, cnf = CP key]
 
-    M->>R: GET /roster — verify assessor eligibility
-    R-->>M: Eligible assessor entries
+    M->>R: GET /roster — verify Assessor eligibility
+    R-->>M: Eligible Assessor entries
 
     M->>A: AuditSubDelegation L2 [parent_jti=L1, cnf = A key, scope ⊆ L1]
-    note over M,A: Merchant AND CP may each commission different assessors
+    note over M,A: Merchant AND CP may each commission different Assessors
 
     A->>SA: AuditAccessAssertion L3 [chain L1+L2 + accreditation, nonce]
     SA->>A: AuditEvidenceResponse JWE [encrypted intent + reasoning — A only]
@@ -1872,11 +1872,11 @@ sequenceDiagram
 
     U->>SA: Natural-language intent (constraints, budget, preferences)
 
-    SA->>R: GET /roster — direct-mode eligible assessors
-    R-->>SA: Eligible assessor entries (keys, CB, regions)
+    SA->>R: GET /roster — direct-mode eligible Assessors
+    R-->>SA: Eligible Assessor entries (keys, CB, regions)
 
     SA->>A: AuditDelegation L1-D [audit_mode:direct, cnf = A key]
-    note over SA,A: No Link 2 — assessor bound directly in L1-D cnf
+    note over SA,A: No Link 2 — Assessor bound directly in L1-D cnf
 
     A->>SA: AuditAccessAssertion L3 [L1-D only + accreditation, nonce]
     SA->>A: AuditEvidenceResponse JWE [encrypted intent + reasoning — A only]
@@ -1896,7 +1896,7 @@ sequenceDiagram
     <summary>Condensed artifact-flow (text fallback)</summary>
     <pre>
 U   ──intent─────────────────────────────────────────────► SA
-SA  ──GET /roster (direct-mode eligible assessors)────────► Roster
+SA  ──GET /roster (direct-mode eligible Assessors)────────► Roster
 SA  ──AuditDelegation L1-D (audit_mode:direct, cnf=A)────► A
 A   ──AuditAccessAssertion L3 (L1-D only)────────────────► SA
 SA  ──AuditEvidenceResponse JWE (intent + reasoning)─────► A
@@ -1935,7 +1935,7 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
     <li><code>aud</code> and <code>iss</code> <span class="rfc2119">MUST</span> be validated on every presentation.</li>
     <li>Link 2 <code>scope</code> <span class="rfc2119">MUST</span> be a subset of Link 1 <code>scope</code>.</li>
     <li>The SA <span class="rfc2119">MUST</span> issue a fresh, single-use nonce for each <code>AuditAccessAssertion</code> request.</li>
-    <li>Any agent receiving a conveyed <code>AuditResult</code> <span class="rfc2119">MUST</span> verify the assessor signature, <code>transaction_reference</code>, <code>audit_id</code>, and <code>requester_id</code>.</li>
+    <li>Any agent receiving a conveyed <code>AuditResult</code> <span class="rfc2119">MUST</span> verify the Assessor signature, <code>transaction_reference</code>, <code>audit_id</code>, and <code>requester_id</code>.</li>
     <li>The merchant processor <span class="rfc2119">MUST NOT</span> mint tokens or accept results without the signed envelope.</li>
   </ul>
 
@@ -1967,12 +1967,12 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
 
   <h3 id="s11-6"><span class="secno-heading">11.6</span> Threat-Model Checklist (Implementers)<a class="self-link" href="#s11-6" title="§ 11.6 Threat-Model Checklist (Implementers)">§</a></h3>
   <ul>
-    <li>☐ Compromised merchant issues L2 to colluding assessor → contained by SA verification at §8.4 and <code>permitted_*</code> on L1.</li>
-    <li>☐ Compromised assessor requests excessive scope → contained by scope ⊆ parent and SA filter before JWE.</li>
+    <li>☐ Compromised merchant issues L2 to colluding Assessor → contained by SA verification at §8.4 and <code>permitted_*</code> on L1.</li>
+    <li>☐ Compromised Assessor requests excessive scope → contained by scope ⊆ parent and SA filter before JWE.</li>
     <li>☐ Compromised SA over-releases evidence → contained by scope; inner JWS + CB audit trail.</li>
     <li>☐ Replay of assertion or delegation → <code>jti</code>, nonce, short <code>exp</code>.</li>
     <li>☐ Forged conveyed <code>AuditResult</code> → mandatory signature verification at processor and peers.</li>
-    <li>☐ Stale roster / revoked assessor → accreditation credential + optional revocation list.</li>
+    <li>☐ Stale roster / revoked Assessor → accreditation credential + optional revocation list.</li>
   </ul>
 </section>
 
@@ -1997,7 +1997,7 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
     ATLAS attaches to that lifecycle at two points: during negotiation, where an <code>AuditResult</code>
     may influence offer terms, and at completion, where the <code>CBReportToken</code> travels with the
     payment authorisation message.  The FACT implementation has already demonstrated that
-    merchant-to-assessor invocation works within UCP's negotiation phase; ATLAS formalises that
+    merchant-to-Assessor invocation works within UCP's negotiation phase; ATLAS formalises that
     proven pattern into a portable, scheme-agnostic protocol.
   </p>
 </section>
@@ -2011,19 +2011,19 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
     <p>
       ATLAS defines a chained-capability-token audit framework for agentic commerce with two
       initiation patterns. A <strong>certification scheme</strong> publishes an
-      <strong>assessor roster</strong> listing every accredited assessor agent from all CBs under
-      the scheme, including assessor and CB public keys (<code>jkt</code>), audit types, regions,
+      <strong>Assessor roster</strong> listing every accredited Assessor agent from all CBs under
+      the scheme, including Assessor and CB public keys (<code>jkt</code>), audit types, regions,
       accreditation dates, and CB association.
     </p>
     <p>
       In <strong>holder mode</strong>, the shopping agent issues
       <code>AuditDelegation</code> (<code>audit_mode: holder</code>) to the merchant and CP;
-      a holder commissions an audit via <code>AuditSubDelegation</code> to an eligible assessor.
+      a holder commissions an audit via <code>AuditSubDelegation</code> to an eligible Assessor.
       In <strong>direct mode</strong>, the shopping agent issues
-      <code>AuditDelegation</code> (<code>audit_mode: direct</code>) straight to an assessor —
-      no merchant and no Link 2. In both modes the assessor presents an
+      <code>AuditDelegation</code> (<code>audit_mode: direct</code>) straight to an Assessor —
+      no merchant and no Link 2. In both modes the Assessor presents an
       <code>AuditAccessAssertion</code>; the SA verifies the chain and returns
-      <code>AuditEvidenceResponse</code> as JWE. The assessor returns <code>AuditResult</code>
+      <code>AuditEvidenceResponse</code> as JWE. the Assessor returns <code>AuditResult</code>
       with one <code>cb_report_token</code>. Each result is conveyed peer-to-peer until the
       merchant processor collects them, extracts <code>cb_report_token</code> values (up to three),
       and writes <strong><code>redeem_tokens</code></strong> on ISO 8583 and similar rails.
