@@ -886,6 +886,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <li><a href="#s8-1-1"><span class="secno">8.1.1</span> Shopping Agent Identity</a></li>
         <li><a href="#s8-2"><span class="secno">8.2</span> Direct Mode</a></li>
         <li><a href="#s8-3"><span class="secno">8.3</span> Sub-Delegation</a></li>
+        <li><a href="#s8-3-1"><span class="secno">8.3.1</span> Requester Evidence</a></li>
         <li><a href="#s8-4"><span class="secno">8.4</span> Access Assertion</a></li>
         <li><a href="#s8-5"><span class="secno">8.5</span> Evidence Response</a></li>
         <li><a href="#s8-6"><span class="secno">8.6</span> Audit Result</a></li>
@@ -1226,10 +1227,13 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h4 id="s1-4-3">What the Assessor Evaluates: Agent Data vs. Referential</h4>
   <p>
-    an ATLAS Assessor Agent evaluates a structured evidence package produced by the shopping agent
-    against a named <strong>policy referential</strong> (<code>policy_referential</code> claim in
-    <code>AuditDelegation</code>).  The evidence package — transmitted as a private JWE, never
-    forwarded to the merchant or payment network — contains:
+    an ATLAS Assessor Agent evaluates evidence from <strong>two complementary sources</strong>:
+    (1) a structured package produced by the Shopping Agent (<code>AuditEvidenceResponse</code> JWE, §8.5), and (2) optional
+    <strong>requester-supplied artifacts</strong> attached by the merchant or CP when commissioning
+    the audit (Link 2, §8.3.1).  The Assessor compares these sources against a named
+    <strong>policy referential</strong> (<code>policy_referential</code> claim in
+    <code>AuditDelegation</code>).  The Shopping Agent evidence package — transmitted as a private
+    JWE, never forwarded to the merchant or payment network — contains:
   </p>
   <ul>
     <li><strong>User intent data.</strong>  The natural-language expression, intent summary,
@@ -1242,8 +1246,14 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         were invoked), model version, and any retrieved catalogue or RAG context that
         influenced the selection.</li>
     <li><strong>Transaction artifacts.</strong>  References to checkout objects and AP2
-        mandate fields for cross-checking.</li>
+        mandate fields — for cross-checking against requester-supplied artifacts on Link 2.</li>
   </ul>
+  <p>
+    In <strong>holder mode</strong>, the requester (merchant or CP) <span class="rfc2119">MAY</span>
+    attach signed checkout and payment artifacts on Link 2 via <code>requester_evidence</code>
+    (§8.3.1).  The Assessor <span class="rfc2119">SHOULD</span> verify each artifact and compare it
+    to the Shopping Agent evidence before issuing <code>AuditResult</code> (§8.6).
+  </p>
   <p>
     The <strong>policy referential</strong> identifies the framework or rulebook against
     which the evidence is evaluated.  Examples:
@@ -1327,8 +1337,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   </p>
   <dl class="defn">
     <dt>Shopping Agent</dt><dd><span class="rfc2119">MUST</span> implement Link 1 issuance (§8.1/§8.2), Link 3 assertion verification (§8.4), JWE evidence release (§8.5), and result conveyance (§8.6).</dd>
-    <dt>Merchant / Credential Provider (Holder)</dt><dd><span class="rfc2119">MUST</span> implement Link 2 issuance (§8.3) and result conveyance (§8.6).</dd>
-    <dt>Assessor Agent</dt><dd><span class="rfc2119">MUST</span> implement Link 3 assertion issuance (§8.4), evidence decryption, audit evaluation, and Link 4/5 result issuance (§8.6).</dd>
+    <dt>Merchant / Credential Provider (Holder)</dt><dd><span class="rfc2119">MUST</span> implement Link 2 issuance (§8.3) including optional <code>requester_evidence</code> (§8.3.1), and result conveyance (§8.6).</dd>
+    <dt>Assessor Agent</dt><dd><span class="rfc2119">MUST</span> implement Link 3 assertion issuance (§8.4), evidence decryption, requester-artifact verification (§8.3.1), evidence cross-check (§8.6), and Link 4/5 result issuance (§8.6).</dd>
     <dt>Certification Body</dt><dd><span class="rfc2119">MUST</span> issue accreditation credentials, operate a report API, and participate in the scheme roster.</dd>
     <dt>Merchant Processor</dt><dd><span class="rfc2119">MUST</span> verify conveyed <code>AuditResult</code> payloads, extract <code>cb_report_token</code> values, and assemble <code>redeem_tokens</code> for payment rails (§8.7).</dd>
   </dl>
@@ -1345,15 +1355,18 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <dt>Certification Body (CB)</dt><dd>An independent organisation that accredits Assessor agents, signs accreditation credentials, stores certified reports, and redeems <code>CBReportToken</code> values.</dd>
     <dt>Certification Scheme</dt><dd>A governance framework that manages participating CBs and publishes the authoritative Assessor roster.</dd>
     <dt>AuditDelegation (Link 1)</dt><dd>Signed JWT issued by the shopping agent to a merchant/CP (holder mode) or directly to an Assessor (direct mode). Root of the ATLAS capability chain. <span class="rfc2119">MUST</span> carry <code>shopping_agent_identity</code> (§8.1.1).</dd>
-    <dt>AuditSubDelegation (Link 2)</dt><dd>Signed JWT issued by a holder to a specific Assessor, chained to Link 1 via <code>parent_jti</code>, binding the assessor's key in <code>cnf</code>. Holder mode only.</dd>
+    <dt>AuditSubDelegation (Link 2)</dt><dd>Signed JWT issued by a holder to a specific Assessor, chained to Link 1 via <code>parent_jti</code>, binding the assessor's key in <code>cnf</code>. Holder mode only. <span class="rfc2119">MAY</span> carry <code>requester_evidence</code> (§8.3.1).</dd>
     <dt>AuditAccessAssertion (Link 3)</dt><dd>Signed JWS issued by the Assessor to the shopping agent, embedding the delegation chain and accreditation credential, signed over a fresh nonce. Unlocks the JWE evidence release on successful verification.</dd>
     <dt>AuditEvidenceResponse</dt><dd>JWE (RFC 7516) issued by the shopping agent to the Assessor containing sensitive user intent and agent reasoning. Not forwarded to any other party.</dd>
-    <dt>AuditResult (Link 4)</dt><dd>Signed JWS result envelope issued by the Assessor containing the audit verdict, policy referential, evidence hashes, and a <code>cb_report_token</code>.</dd>
+    <dt>AuditResult (Link 4)</dt><dd>Signed JWS result envelope issued by the Assessor containing the audit verdict, policy referential, evidence hashes, optional <code>evidence_cross_check</code> summary (§8.6), and a <code>cb_report_token</code>.</dd>
     <dt>CBReportToken (Link 5)</dt><dd>Compact, opaque downstream token providing a redeemable reference to one certified audit report. One token per audit.</dd>
     <dt>redeem_tokens</dt><dd>Payment-rail-only field (ISO 8583 / EMV 3DS / ISO 20022) assembled by the merchant processor from up to three <code>cb_report_token</code> values. Not an ATLAS protocol link.</dd>
     <dt>cnf claim</dt><dd>JSON key confirmation claim (RFC 7800) binding a specific public key via JWK thumbprint (<code>jkt</code>) to a JWT.</dd>
     <dt>shopping_agent_identity</dt><dd>Scheme-agnostic JSON object on <code>AuditDelegation</code> (Link 1) that names the Shopping Agent instance commissioning the audit, binds the signing key used for Link 1, and optionally carries external identity-framework attestations by reference or by value.</dd>
     <dt>identity scheme</dt><dd>A URI registered in the <code>scheme</code> field of <code>shopping_agent_identity</code> that identifies an external agent-identity framework (e.g. KYA-OS, AP2 agent binding). When absent, implementations use the ATLAS-native profile (identifier + <code>jkt</code> only).</dd>
+    <dt>requester_evidence</dt><dd>Scheme-agnostic JSON object on <code>AuditSubDelegation</code> (Link 2) through which the holder (merchant or CP) attaches one or more signed artifacts — cart objects, payment mandates, or other evidences — for Assessor verification and cross-checking against Shopping Agent evidence.</dd>
+    <dt>evidence artifact</dt><dd>A single signed or attestable object within <code>requester_evidence.artifacts[]</code>, identified by <code>kind</code> URI and carried by reference or by value in an <code>attestation</code> wrapper.</dd>
+    <dt>evidence cross-check</dt><dd>Assessor evaluation step comparing requester-supplied artifacts (Link 2) with Shopping Agent evidence (JWE) under the active <code>policy_referential</code>; recorded in <code>AuditResult.evidence_cross_check</code> (§8.6).</dd>
     <dt>audit_mode</dt><dd>Claim on <code>AuditDelegation</code>: <code>holder</code> (Pattern A) or <code>direct</code> (Pattern B).</dd>
     <dt>policy_referential</dt><dd>Identifier for the audit framework or regulatory standard against which the Assessor evaluates evidence.</dd>
     <dt>Assessor Roster</dt><dd>Machine-readable catalogue published by a certification scheme, listing every currently accredited Assessor agent with its public keys, audit types, regions, and owning CB.</dd>
@@ -1496,6 +1509,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 │  typ: "atlas-audit-subdelegation+jwt"                               │
 │  iss: merchant   sub: assessor_id   aud: shopping_agent             │
 │  parent_jti: &lt;L1 jti&gt;   scope ⊆ L1   cnf.jkt = Assessor PubKey      │
+│  requester_evidence { requester_id, artifacts[] }  (optional)       │
 │  Signed by: Holder private key (MUST match Link 1 cnf)              │
 └─────────────────────────┬───────────────────────────────────────────┘
                           │ signed by key in Link 2 cnf + accreditation
@@ -1801,7 +1815,124 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <li>Verify eligibility under <code>permitted_assessors</code> / <code>permitted_certification_bodies</code> and optional filters.</li>
     <li>Verify sub-delegation <code>scope</code> ⊆ parent <code>scope</code>.</li>
     <li>Verify replay protection on <code>jti</code>.</li>
+    <li>If <code>requester_evidence</code> is present, verify each artifact per §8.3.1 before forwarding Link 2 to the Shopping Agent in the assertion chain.</li>
   </ol>
+
+  <h4 id="s8-3-1">Requester evidence wrapper (<code>requester_evidence</code>)</h4>
+  <p>
+    When a holder commissions an audit, it often holds signed checkout or payment artifacts that
+    the Assessor needs to validate independently of the Shopping Agent's narrative.  Link 2
+    <span class="rfc2119">MAY</span> include a <code>requester_evidence</code> object carrying one or
+    more <strong>evidence artifacts</strong>.  This wrapper is <strong>scheme-agnostic</strong>:
+    ATLAS defines a common envelope; each artifact's <code>kind</code> and <code>scheme</code> URIs
+    identify the semantic type and wire format (AP2 mandate, UCP cart, etc.).
+  </p>
+  <div class="note">
+    <p class="note-title">Holder mode only</p>
+    <p>
+      <code>requester_evidence</code> applies to Link 2 in holder mode.  Direct mode has no holder
+      commission step; cross-checking relies on Shopping Agent evidence alone unless a future
+      profile adds optional counterparty artifacts elsewhere.
+    </p>
+  </div>
+
+  <h5>Core object</h5>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Field</th><th>Type</th><th>Req</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>requester_id</code></td><td>URI</td><td><span class="rfc2119">MUST</span></td><td>Stable identifier of the holder commissioning the audit; <span class="rfc2119">SHOULD</span> equal Link 2 <code>iss</code> and Link 1 <code>sub</code></td></tr>
+        <tr><td><code>requester_role</code></td><td>Enum</td><td><span class="rfc2119">SHOULD</span></td><td><code>merchant</code> | <code>credential_provider</code></td></tr>
+        <tr><td><code>artifacts</code></td><td>Array</td><td><span class="rfc2119">MUST</span></td><td>One or more evidence artifacts (see below)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Evidence artifact (each element of <code>artifacts[]</code>)</h5>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Field</th><th>Type</th><th>Req</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>artifact_id</code></td><td>String</td><td><span class="rfc2119">MUST</span></td><td>Unique id within this Link 2 token (for cross-check references)</td></tr>
+        <tr><td><code>kind</code></td><td>URI</td><td><span class="rfc2119">MUST</span></td><td>Semantic type of the artifact (registered <code>kind</code> URIs below)</td></tr>
+        <tr><td><code>scheme</code></td><td>URI</td><td>OPTIONAL</td><td>Wire-format / protocol profile for verifying the attestation</td></tr>
+        <tr><td><code>description</code></td><td>String</td><td>OPTIONAL</td><td>Human-readable label for logs and reports</td></tr>
+        <tr><td><code>attestation</code></td><td>Object</td><td><span class="rfc2119">MUST</span></td><td>Signed payload — same <code>form</code> vocabulary as §8.1.1 (<code>by-reference</code>, <code>by-value</code>, <code>detached-jws</code>)</td></tr>
+        <tr><td><code>extensions</code></td><td>Object</td><td>OPTIONAL</td><td>Scheme-specific metadata; verifiers <span class="rfc2119">MAY</span> ignore unknown keys</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    The holder <span class="rfc2119">MUST</span> sign Link 2 over the entire JWT payload including
+    <code>requester_evidence</code>.  The Assessor <span class="rfc2119">MUST</span> verify each
+    artifact's cryptographic integrity and issuer according to its <code>kind</code> /
+    <code>scheme</code> before cross-checking against Shopping Agent evidence.
+  </p>
+
+  <h5>Registered artifact kinds (informative)</h5>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th><code>kind</code> URI</th><th>Typical holder</th><th>Example <code>scheme</code></th><th>Cross-check use</th></tr></thead>
+      <tbody>
+        <tr><td><code>https://atlas.hyperlab.dev/evidence/cart/v1</code></td><td>Merchant</td><td>UCP / merchant cart profile</td><td>Line items, prices, merchant signature vs. agent item-selection reasoning</td></tr>
+        <tr><td><code>https://ap2.dev/evidence/payment-mandate/v1</code></td><td>CP</td><td><code>https://ap2.dev/payment-mandate/v1</code></td><td>Payee, amount, scope vs. agent checkout actions</td></tr>
+        <tr><td><code>https://ap2.dev/evidence/checkout-mandate/v1</code></td><td>Merchant or CP</td><td><code>https://ap2.dev/checkout-mandate/v1</code></td><td>Checkout authorisation bounds vs. agent cart/build path</td></tr>
+        <tr><td><code>https://atlas.hyperlab.dev/evidence/signed-artifact/v1</code></td><td>Any holder</td><td>Caller-defined</td><td>Generic extension point for other signed evidences</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Example — merchant cart + CP payment mandate (two holders, two Link 2 tokens)</h5>
+  <pre>{
+  "typ": "atlas-audit-subdelegation+jwt",
+  "iss": "https://merchant.example",
+  "sub": "assessor_42",
+  "aud": "https://agent.shop.example/checkout-v2",
+  "parent_jti": "l1_01HZ...",
+  "cnf": { "jkt": "sha256-AssessorKeyThumbprint..." },
+  "scope": ["intent_fidelity", "regulated_goods"],
+  "requester_evidence": {
+    "requester_id": "https://merchant.example",
+    "requester_role": "merchant",
+    "artifacts": [
+      {
+        "artifact_id": "cart-001",
+        "kind": "https://atlas.hyperlab.dev/evidence/cart/v1",
+        "scheme": "https://ucp.dev/cart/v1",
+        "description": "Merchant-signed cart at commission time",
+        "attestation": {
+          "form": "by-value",
+          "media_type": "application/jose+json",
+          "payload": "eyJ...merchant-signed-cart-jws..."
+        }
+      }
+    ]
+  }
+}</pre>
+  <pre>{
+  "iss": "https://cp.wallet.example",
+  "requester_evidence": {
+    "requester_id": "https://cp.wallet.example",
+    "requester_role": "credential_provider",
+    "artifacts": [
+      {
+        "artifact_id": "mandate-001",
+        "kind": "https://ap2.dev/evidence/payment-mandate/v1",
+        "scheme": "https://ap2.dev/payment-mandate/v1",
+        "attestation": {
+          "form": "by-reference",
+          "media_type": "application/json",
+          "uri": "https://cp.wallet.example/mandates/mand_abc",
+          "digest": {
+            "alg": "sha-256",
+            "value": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+          }
+        },
+        "extensions": { "mandate_id": "mand_abc" }
+      }
+    ]
+  }
+}</pre>
 
   <h3 id="s8-4"><span class="secno-heading">8.4</span> Step 3 — Access Assertion to Shopping Agent<a class="self-link" href="#s8-4" title="§ 8.4 Step 3 — Access Assertion to Shopping Agent">§</a></h3>
   <p>
@@ -1822,6 +1953,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <tr><td>Sub-delegation <code>scope</code> ⊆ parent <code>scope</code></td><td>Scope widened</td></tr>
         <tr><td>Accreditation valid for scope and region</td><td>Untrusted or expired</td></tr>
         <tr><td>Assertion signature over nonce; nonce not previously used</td><td>Replay detected</td></tr>
+        <tr><td>Each <code>requester_evidence</code> artifact: integrity and issuer valid per <code>kind</code>/<code>scheme</code></td><td>Requester artifact invalid</td></tr>
       </tbody>
     </table>
   </div>
@@ -1839,7 +1971,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     Minimum payload: user's natural-language intent + agent reasoning leading to merchant/item selection.
     Additional categories when in scope: <code>intent_summary</code>, <code>constraint_set</code>,
     <code>merchant_selection_reasoning</code>, <code>item_selection_reasoning</code>,
-    <code>policy_evaluation_results</code>, <code>evidence_hashes</code>.
+    <code>policy_evaluation_results</code>, <code>evidence_hashes</code>,
+    <code>transaction_artifact_refs</code> (pointers for cross-checking Link 2 artifacts).
   </p>
 
   <h3 id="s8-6"><span class="secno-heading">8.6</span> Step 5 — Audit Result Issuance<a class="self-link" href="#s8-6" title="§ 8.6 Step 5 — Audit Result Issuance">§</a></h3>
@@ -1848,6 +1981,35 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     shopping agent (<em>direct mode</em>). The requester <span class="rfc2119">MUST</span> convey the
     full signed <code>AuditResult</code> peer-to-peer until the merchant processor holds every result
     for that <code>transaction_reference</code>.
+  </p>
+
+  <h4>Evidence cross-check (holder mode)</h4>
+  <p>
+    When Link 2 carries <code>requester_evidence</code>, the Assessor
+    <span class="rfc2119">SHOULD</span> compare each verified requester artifact against the
+    corresponding fields in the Shopping Agent JWE (e.g. cart lines vs.
+    <code>item_selection_reasoning</code>; AP2 mandate limits vs.
+    <code>transaction_artifact_refs</code>).  The outcome is recorded in
+    <code>evidence_cross_check</code> on <code>AuditResult</code>:
+  </p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>performed</code></td><td>Boolean</td><td><code>true</code> if any requester artifacts were evaluated</td></tr>
+        <tr><td><code>result</code></td><td>Enum</td><td><code>aligned</code> | <code>partial_mismatch</code> | <code>material_mismatch</code> | <code>not_performed</code></td></tr>
+        <tr><td><code>artifact_results</code></td><td>Array</td><td>Per <code>artifact_id</code>: <code>verified</code>, <code>aligned</code>, <code>mismatch</code>, or <code>not_comparable</code></td></tr>
+        <tr><td><code>requester_evidence_digest</code></td><td>String</td><td>Canonical hash over Link 2 <code>requester_evidence</code> (for downstream audit trail)</td></tr>
+        <tr><td><code>agent_evidence_digest</code></td><td>String</td><td>Hash over decrypted Shopping Agent evidence payload</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    A <code>material_mismatch</code> between requester artifacts and Shopping Agent evidence
+    <span class="rfc2119">SHOULD</span> yield an overall verdict of <code>not_compliant</code> or
+    <code>partially_compliant</code> according to the active <code>policy_referential</code>.
+    The Assessor <span class="rfc2119">MUST NOT</span> include raw requester artifact payloads or
+    decrypted agent evidence in <code>AuditResult</code> — only digests and enumerated findings.
   </p>
   <div class="table-wrap">
     <table class="data">
@@ -1879,7 +2041,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Step</th><th>Direction</th><th>Artifact</th><th>Meaning</th></tr></thead>
       <tbody>
         <tr><td>1</td><td>SA → Merchant / CP</td><td><code>AuditDelegation</code> (holder)</td><td>Commission audit; holder issues Link 2</td></tr>
-        <tr><td>2</td><td>Merchant / CP → Assessor</td><td><code>AuditSubDelegation</code></td><td>Bind assessor key; narrow scope</td></tr>
+        <tr><td>2</td><td>Merchant / CP → Assessor</td><td><code>AuditSubDelegation</code></td><td>Bind assessor key; optional <code>requester_evidence</code></td></tr>
         <tr><td>3</td><td>Assessor → SA</td><td><code>AuditAccessAssertion</code></td><td>Chain + accreditation; unlocks JWE</td></tr>
         <tr><td>—</td><td>SA → Assessor</td><td><code>AuditEvidenceResponse</code> JWE</td><td>Encrypted to Link 2 <code>cnf</code></td></tr>
         <tr><td>4</td><td>Assessor → requester</td><td><code>AuditResult</code></td><td>Verdict to merchant, CP, or SA</td></tr>
@@ -2114,7 +2276,10 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
   <p>
     ATLAS is <strong>complementary</strong> to AP2: AP2 defines mandate delegation, action authorisation,
     verifier checks, and receipts; ATLAS adds a standard path for auditing how the shopping agent
-    interpreted and operationalised the user's intent before and during those actions.
+    interpreted and operationalised the user's intent before and during those actions.  In holder mode,
+    the CP or merchant <span class="rfc2119">MAY</span> attach AP2 mandates and signed cart objects on
+    Link 2 (<code>requester_evidence</code>, §8.3.1) so the Assessor can cross-check them against
+    Shopping Agent evidence without exposing private reasoning to the requester.
   </p>
   <p>
     ATLAS borrows the <strong>principles</strong> of Verifiable Intent — key-bound credentials,
