@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>ATLAS: Agent Trust Layer and Assurance Standard — v0.1 Draft</title>
+  <title>ATLAS: Agent Trust Layer and Assurance Standard — v0.2 Draft</title>
   <!--
     ATLAS Protocol Specification — v0.1 Working Draft
     Published by Hyperlab, the innovation lab within Consult Hyperion.
@@ -883,6 +883,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <li><a href="#s8"><span class="secno">8.</span> Protocol Steps</a>
       <ol>
         <li><a href="#s8-1"><span class="secno">8.1</span> Delegation (Holder)</a></li>
+        <li><a href="#s8-1-1"><span class="secno">8.1.1</span> Shopping Agent Identity</a></li>
         <li><a href="#s8-2"><span class="secno">8.2</span> Direct Mode</a></li>
         <li><a href="#s8-3"><span class="secno">8.3</span> Sub-Delegation</a></li>
         <li><a href="#s8-4"><span class="secno">8.4</span> Access Assertion</a></li>
@@ -940,7 +941,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <p id="doc-state">
     <span class="badge">Working Draft</span>
-    8 June 2026
+     July 2026
   </p>
 
   <!-- Metadata DL — exact W3C pattern: dt+dd pairs -->
@@ -1295,6 +1296,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Specification</th><th>Role</th><th>ATLAS relationship</th></tr></thead>
       <tbody>
         <tr><td>AP2</td><td>Mandate delegation, action authorisation, receipts</td><td>ATLAS roots delegation chain in AP2 mandates; adds audit layer above checkout</td></tr>
+        <tr><td>KYA-OS</td><td>Agent DID, delegation VC, signed proofs, revocation</td><td>ATLAS carries Shopping Agent identity in Link 1 via the scheme-agnostic <code>shopping_agent_identity</code> wrapper; KYA-OS is one registered <code>scheme</code> profile (§8.1.1)</td></tr>
         <tr><td>Verifiable Intent (VI)</td><td>Key-bound intent credentials, selective disclosure</td><td>Borrows key binding / audience restriction; uses compact JWS/JWT instead of VC/VP</td></tr>
         <tr><td>UCP</td><td>Commerce lifecycle — negotiation, acquisition, completion</td><td>ATLAS attaches at negotiation and completion points</td></tr>
         <tr><td>RFC 8693 (OAuth Token Exchange)</td><td>Chained delegation pattern</td><td>ATLAS delegation chain aligned with chained sub-delegation</td></tr>
@@ -1342,7 +1344,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <dt>Assessor Agent</dt><dd>An accredited software agent that presents an <code>AuditAccessAssertion</code>, receives encrypted evidence, evaluates it, and issues signed <code>AuditResult</code> and <code>CBReportToken</code>.</dd>
     <dt>Certification Body (CB)</dt><dd>An independent organisation that accredits Assessor agents, signs accreditation credentials, stores certified reports, and redeems <code>CBReportToken</code> values.</dd>
     <dt>Certification Scheme</dt><dd>A governance framework that manages participating CBs and publishes the authoritative Assessor roster.</dd>
-    <dt>AuditDelegation (Link 1)</dt><dd>Signed JWT issued by the shopping agent to a merchant/CP (holder mode) or directly to an Assessor (direct mode). Root of the ATLAS capability chain.</dd>
+    <dt>AuditDelegation (Link 1)</dt><dd>Signed JWT issued by the shopping agent to a merchant/CP (holder mode) or directly to an Assessor (direct mode). Root of the ATLAS capability chain. <span class="rfc2119">MUST</span> carry <code>shopping_agent_identity</code> (§8.1.1).</dd>
     <dt>AuditSubDelegation (Link 2)</dt><dd>Signed JWT issued by a holder to a specific Assessor, chained to Link 1 via <code>parent_jti</code>, binding the assessor's key in <code>cnf</code>. Holder mode only.</dd>
     <dt>AuditAccessAssertion (Link 3)</dt><dd>Signed JWS issued by the Assessor to the shopping agent, embedding the delegation chain and accreditation credential, signed over a fresh nonce. Unlocks the JWE evidence release on successful verification.</dd>
     <dt>AuditEvidenceResponse</dt><dd>JWE (RFC 7516) issued by the shopping agent to the Assessor containing sensitive user intent and agent reasoning. Not forwarded to any other party.</dd>
@@ -1350,6 +1352,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <dt>CBReportToken (Link 5)</dt><dd>Compact, opaque downstream token providing a redeemable reference to one certified audit report. One token per audit.</dd>
     <dt>redeem_tokens</dt><dd>Payment-rail-only field (ISO 8583 / EMV 3DS / ISO 20022) assembled by the merchant processor from up to three <code>cb_report_token</code> values. Not an ATLAS protocol link.</dd>
     <dt>cnf claim</dt><dd>JSON key confirmation claim (RFC 7800) binding a specific public key via JWK thumbprint (<code>jkt</code>) to a JWT.</dd>
+    <dt>shopping_agent_identity</dt><dd>Scheme-agnostic JSON object on <code>AuditDelegation</code> (Link 1) that names the Shopping Agent instance commissioning the audit, binds the signing key used for Link 1, and optionally carries external identity-framework attestations by reference or by value.</dd>
+    <dt>identity scheme</dt><dd>A URI registered in the <code>scheme</code> field of <code>shopping_agent_identity</code> that identifies an external agent-identity framework (e.g. KYA-OS, AP2 agent binding). When absent, implementations use the ATLAS-native profile (identifier + <code>jkt</code> only).</dd>
     <dt>audit_mode</dt><dd>Claim on <code>AuditDelegation</code>: <code>holder</code> (Pattern A) or <code>direct</code> (Pattern B).</dd>
     <dt>policy_referential</dt><dd>Identifier for the audit framework or regulatory standard against which the Assessor evaluates evidence.</dd>
     <dt>Assessor Roster</dt><dd>Machine-readable catalogue published by a certification scheme, listing every currently accredited Assessor agent with its public keys, audit types, regions, and owning CB.</dd>
@@ -1479,6 +1483,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 │  Shopping Agent → Merchant  OR  → CP                                │
 │  typ: "atlas-audit-delegation+jwt"    audit_mode: holder            │
 │  iss: SA   sub: merchant_id|cp_id   cnf.jkt = Holder Public Key     │
+│  shopping_agent_identity { id, signing_key.jkt, scheme?, … }        │
 │  scope, permitted_assessors (jkt[]), permitted_certification_bodies │
 │  transaction_reference, session_id                                  │
 │  exp, nbf, jti (root token — NO parent_jti)                         │
@@ -1537,6 +1542,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 │  Shopping Agent → Assessor  (direct commission — no holder)         │
 │  typ: "atlas-audit-delegation+jwt"    audit_mode: direct            │
 │  iss: SA   sub: assessor_id   cnf.jkt = Assessor Public Key         │
+│  shopping_agent_identity { id, signing_key.jkt, scheme?, … }        │
 │  scope, permitted_assessors (jkt[]), permitted_certification_bodies │
 │  transaction_reference, session_id                                  │
 │  exp, nbf, jti (root token — NO parent_jti, NO checkout_hash)       │
@@ -1648,11 +1654,135 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     </table>
   </div>
 
+  <h4 id="s8-1-1">Shopping Agent identity wrapper (<code>shopping_agent_identity</code>)</h4>
+  <p>
+    Link 1 <span class="rfc2119">MUST</span> include a <code>shopping_agent_identity</code> object naming
+    the Shopping Agent that signed the token.  This wrapper is <strong>scheme-agnostic</strong>: it
+    defines a small ATLAS-native core that every implementation understands, plus optional fields for
+    external identity frameworks (KYA-OS today; AP2 agent binding or others tomorrow) without changing
+    the Link 1 JWT shape or the downstream signing chain.
+  </p>
+  <div class="note">
+    <p class="note-title">Separation from <code>cnf</code></p>
+    <p>
+      On Link 1, <code>cnf</code> binds the <em>holder</em> or <em>Assessor</em> key (the party
+      authorised to receive or continue the chain).  <code>shopping_agent_identity</code> binds the
+      <em>Shopping Agent issuer</em> key.  These <span class="rfc2119">MUST NOT</span> be merged into
+      a single <code>cnf</code> claim.
+    </p>
+  </div>
+
+  <h5>Core object (all profiles)</h5>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Field</th><th>Type</th><th>Req</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>URI</td><td><span class="rfc2119">MUST</span></td><td>Stable Shopping Agent identifier (DID, HTTPS URL, or registered agent URI)</td></tr>
+        <tr><td><code>signing_key</code></td><td>Object</td><td><span class="rfc2119">MUST</span></td><td>Key binding for the Shopping Agent key that signed Link 1</td></tr>
+        <tr><td><code>signing_key.jkt</code></td><td>String</td><td><span class="rfc2119">MUST</span></td><td>JWK thumbprint (RFC 7638) of the Link 1 signing key</td></tr>
+        <tr><td><code>scheme</code></td><td>URI</td><td>OPTIONAL</td><td>Identity-framework profile URI; absent = ATLAS-native (<code>id</code> + <code>jkt</code> only)</td></tr>
+        <tr><td><code>scheme_version</code></td><td>String</td><td>OPTIONAL</td><td>Version of the named <code>scheme</code> profile</td></tr>
+        <tr><td><code>authority</code></td><td>Object</td><td>OPTIONAL</td><td>Accountable operator above the agent instance (organisation, Responsible Party)</td></tr>
+        <tr><td><code>authority.id</code></td><td>URI</td><td>OPTIONAL</td><td>Stable URI for the authority (e.g. KYA-OS Responsible Party DID)</td></tr>
+        <tr><td><code>attestation</code></td><td>Object</td><td>OPTIONAL</td><td>External proof wrapper — by reference or by value (see below)</td></tr>
+        <tr><td><code>extensions</code></td><td>Object</td><td>OPTIONAL</td><td>Scheme-specific claims; verifiers <span class="rfc2119">MAY</span> ignore unknown keys</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    <code>iss</code> on Link 1 <span class="rfc2119">SHOULD</span> equal <code>shopping_agent_identity.id</code>.
+    Verifiers <span class="rfc2119">MUST</span> confirm that the JWS signature on Link 1 was produced by the
+    key identified in <code>shopping_agent_identity.signing_key.jkt</code> before evaluating holder
+    constraints or releasing evidence.
+  </p>
+
+  <h5>Attestation wrapper (optional)</h5>
+  <p>
+    When an external framework supplies richer identity or delegation proof, Link 1 carries it inside
+    <code>attestation</code> without mandating a single credential format:
+  </p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>form</code></td><td>Enum</td><td><code>by-reference</code> | <code>by-value</code> | <code>detached-jws</code></td></tr>
+        <tr><td><code>media_type</code></td><td>String</td><td>MIME type of the attestation payload (e.g. <code>application/vc+json</code>, <code>application/json</code>)</td></tr>
+        <tr><td><code>uri</code></td><td>HTTPS URL</td><td>Resolvable location when <code>form</code> is <code>by-reference</code></td></tr>
+        <tr><td><code>digest</code></td><td>Object</td><td><code>{ "alg": "sha-256", "value": "&lt;base64url&gt;" }</code> — integrity check for referenced payload</td></tr>
+        <tr><td><code>payload</code></td><td>String</td><td>Base64url-encoded attestation when <code>form</code> is <code>by-value</code></td></tr>
+        <tr><td><code>jws</code></td><td>String</td><td>Detached JWS when <code>form</code> is <code>detached-jws</code> (KYA-OS session proof, etc.)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Implementations <span class="rfc2119">MAY</span> defer fetching <code>by-reference</code> attestations
+    until evidence release (§8.5) or Assessor evaluation (§8.6), but <span class="rfc2119">MUST</span>
+    fail closed when a mandated <code>policy_referential</code> requires attestation verification and
+    the attestation is missing, invalid, or revoked.
+  </p>
+
+  <h5>Registered scheme profiles (informative)</h5>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th><code>scheme</code> URI</th><th>Framework</th><th>Typical <code>extensions</code> / <code>attestation</code></th></tr></thead>
+      <tbody>
+        <tr><td><em>(absent)</em></td><td>ATLAS-native</td><td><code>id</code> + <code>signing_key.jkt</code> only</td></tr>
+        <tr><td><code>https://schema.kya-os.org/v1/agent-identity</code></td><td>KYA-OS</td><td><code>authority.id</code> = Responsible Party DID; <code>attestation</code> = delegation VC by reference or detached KYA-OS proof</td></tr>
+        <tr><td><code>https://ap2.dev/agent-identity/v1</code></td><td>AP2 agent binding</td><td><code>extensions.mandate_id</code>, <code>extensions.mandate_jkt</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Example — ATLAS-native profile</h5>
+  <pre>{
+  "typ": "atlas-audit-delegation+jwt",
+  "iss": "https://agent.shop.example/checkout-v2",
+  "sub": "merchant_42",
+  "audit_mode": "holder",
+  "cnf": { "jkt": "sha256-HolderKeyThumbprint..." },
+  "shopping_agent_identity": {
+    "id": "https://agent.shop.example/checkout-v2",
+    "signing_key": { "jkt": "sha256-ShoppingAgentKeyThumbprint..." }
+  },
+  "scope": ["intent_fidelity"],
+  "transaction_reference": "txn_9f3a...",
+  "jti": "l1_01HZ..."
+}</pre>
+
+  <h5>Example — KYA-OS profile (by reference)</h5>
+  <pre>{
+  "iss": "did:web:shop.example/agents/checkout",
+  "sub": "merchant_42",
+  "audit_mode": "holder",
+  "cnf": { "jkt": "sha256-HolderKeyThumbprint..." },
+  "shopping_agent_identity": {
+    "id": "did:web:shop.example/agents/checkout",
+    "signing_key": { "jkt": "sha256-ShoppingAgentKeyThumbprint..." },
+    "scheme": "https://schema.kya-os.org/v1/agent-identity",
+    "scheme_version": "1.0.0",
+    "authority": { "id": "did:web:shop.example" },
+    "attestation": {
+      "form": "by-reference",
+      "media_type": "application/vc+json",
+      "uri": "https://registry.shop.example/vc/urn:uuid:8f14e45f...",
+      "digest": {
+        "alg": "sha-256",
+        "value": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      }
+    },
+    "extensions": {
+      "kya_conformance_level": 2
+    }
+  }
+}</pre>
+
   <h3 id="s8-2"><span class="secno-heading">8.2</span> Step 1b — Direct Mode Commission<a class="self-link" href="#s8-2" title="§ 8.2 Step 1b — Direct Mode Commission">§</a></h3>
   <p>
     <code>audit_mode</code> <span class="rfc2119">MUST</span> be <code>direct</code>;
     <code>sub</code> <span class="rfc2119">MUST</span> be the assessor identifier;
     <code>cnf.jkt</code> <span class="rfc2119">MUST</span> be the assessor's public key.
+    <code>shopping_agent_identity</code> <span class="rfc2119">MUST</span> be present as defined in §8.1.1.
     No merchant <code>cnf</code> and no Link 2.
   </p>
 
@@ -1684,6 +1814,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Check</th><th>Fail closed if</th></tr></thead>
       <tbody>
         <tr><td>Parent <code>AuditDelegation</code>: <code>audit_mode: holder</code>, valid signature, <code>exp</code>/<code>nbf</code>, <code>jti</code></td><td>Invalid, expired, revoked, or wrong mode</td></tr>
+        <tr><td><code>shopping_agent_identity.signing_key.jkt</code> matches Link 1 signature</td><td>Shopping Agent key mismatch</td></tr>
+        <tr><td>Optional <code>attestation</code> valid per <code>scheme</code> when required by <code>policy_referential</code></td><td>Identity or delegation proof failed</td></tr>
         <tr><td><code>AuditSubDelegation</code> signature matches parent <code>cnf</code></td><td>Holder key mismatch</td></tr>
         <tr><td>Sub-delegation <code>sub</code> and <code>cnf</code> match assertion signer</td><td>Wrong subject or key</td></tr>
         <tr><td>Assessor eligible per <code>permitted_assessors</code> / <code>permitted_certification_bodies</code></td><td>Not eligible</td></tr>
