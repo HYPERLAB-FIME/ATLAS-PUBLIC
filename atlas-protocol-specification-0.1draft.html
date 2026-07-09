@@ -890,7 +890,13 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <li><a href="#s8-4"><span class="secno">8.4</span> Assessor Access Assertion</a></li>
         <li><a href="#s8-5"><span class="secno">8.5</span> Assessment Evidence Response</a></li>
         <li><a href="#s8-6"><span class="secno">8.6</span> Assessment Result Issuance</a></li>
-        <li><a href="#s8-7"><span class="secno">8.7</span> Downstream Redemption</a></li>
+        <li><a href="#s8-7"><span class="secno">8.7</span> Downstream Redemption</a>
+          <ol>
+            <li><a href="#s8-7-1"><span class="secno">8.7.1</span> <code>redeem_tokens</code> assembly</a></li>
+            <li><a href="#s8-7-2"><span class="secno">8.7.2</span> ISO 8583 example</a></li>
+            <li><a href="#s8-7-3"><span class="secno">8.7.3</span> ISO 20022 example</a></li>
+          </ol>
+        </li>
       </ol>
     </li>
     <li><a href="#s9"><span class="secno">9.</span> Trust Chain Summary</a></li>
@@ -2103,6 +2109,177 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <code>[redeem_nbf, redeem_exp]</code> and <span class="rfc2119">MAY</span> enforce one-time
     redemption via <code>jti</code> tracking.
   </p>
+  <p>
+    Each <code>report_token</code> is a compact opaque handle (Link 5), typically
+    <code>atlas:1:&lt;ta_id&gt;:&lt;report_id&gt;</code>.  The token carries <strong>no</strong>
+    TA report API endpoint — the payment network resolves <code>ta_id</code> via the scheme
+    Trust Registry (<code>ta_report_api</code>) before calling
+    <code>GET /report/{token}</code>.
+  </p>
+
+  <h4 id="s8-7-1"><code>redeem_tokens</code> assembly (processor)</h4>
+  <div class="informative">The JSON shape below is for processor-side assembly only; ISO 8583 on-wire encoding is in §8.7.2.</div>
+  <p>
+    After verifying each conveyed <code>AssessmentResult</code>, the processor builds
+    <code>redeem_tokens</code> in assessment order (merchant, then CP, then subject-agent
+    direct assessment if present), up to three entries:
+  </p>
+  <pre>{
+  "version": 1,
+  "transaction_reference": "txn_9f3a2b1c",
+  "tokens": [
+    "atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Y",
+    "atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Z"
+  ]
+}</pre>
+  <p>
+    Source <code>AssessmentResult</code> fragments (Link 4) from which the above was extracted:
+  </p>
+  <pre>{
+  "typ": "atlas-assessment-result+jws",
+  "iss": "https://assessor.example/agents/assessor-42",
+  "sub": "https://merchant.example",
+  "result": "compliant",
+  "transaction_reference": "txn_9f3a2b1c",
+  "link2_jti": "l2_01HZXK9Q4M2N8W3Y",
+  "report_token": "atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Y",
+  "redeem_nbf": 1752043200,
+  "redeem_exp": 1752046800,
+  "jti": "l4_01HZXK9Q4M2N8W3Y"
+}</pre>
+
+  <h4 id="s8-7-2">ISO 8583 example (informative)</h4>
+  <p>
+    A compact <code>report_token</code> (Link 5) may be carried on ISO 8583 authorisation
+    messages (e.g. MTI&nbsp;0100) in DE&nbsp;48 or another scheme-defined private-use
+    data element.
+  </p>
+
+  <h5>ISO 8583 compliance</h5>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Constraint</th><th>ISO / network rule</th><th>ATLAS example (2 tokens)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>DE&nbsp;48 outer length</td>
+          <td>LLLVAR — length prefix + value, typically <strong>≤&nbsp;999&nbsp;bytes</strong> total value (scheme may cap
+            lower)</td>
+          <td>~97&nbsp;bytes payload (2×48-char tokens + 1 delimiter)</td>
+
+        </tr>
+        <tr>
+          <td>Inner TLV length</td>
+          <td>Not ISO-standardised; often <strong>1–2&nbsp;byte BCD/hex length per sub-tag</strong> (frequently max&nbsp;99 per
+            subelement in card-network specs), not LLL</td>
+          <td>Single subelement value ≈97&nbsp;bytes</td>
+         </tr>
+        <tr>
+          <td>Field content type</td>
+          <td>ISO catalog lists DE&nbsp;48 as <code>an</code> (letters+digits only); many networks treat content as opaque
+            <code>ans</code> or <strong>binary</strong></td>
+          <td>Tokens use <code>:</code>, <code>.</code>, <code>_</code>, <code>|</code></td>
+        
+        <tr>
+          <td>Tag namespace</td>
+          <td>DE&nbsp;48 structure is <strong>private to each scheme</strong> </td>
+          <td>Example tag <code>ATL</code> / scheme PDS</td>
+         
+        </tr>
+        <tr>
+          <td>Character set on wire</td>
+          <td>ASCII or EBCDIC per interface; length counted in <strong>bytes</strong></td>
+          <td>US-ASCII subset</td>
+       
+        </tr>
+        <tr>
+          <td>Token count</td>
+          <td>Scheme private</td>
+          <td>Max 3 per ATLAS</td>
+       
+        </tr>
+        </tbody>
+    </table>
+  </div>
+  <p>
+    Recommended ATLAS wire profile for 8583: a <strong>delimiter-separated list</strong> of
+    one to three tokens inside <strong>one scheme-registered subelement</strong>, or
+    <strong>one subelement per token</strong> when the network caps subelement length at 99&nbsp;bytes.
+    Order matches §8.7.1 (merchant assessment, CP assessment, subject-agent direct assessment if present).
+    Scheme profiles <span class="rfc2119">SHOULD</span> cap each <code>report_token</code> at
+    <strong>64&nbsp;characters</strong> and <code>ta_id</code> at <strong>32&nbsp;characters</strong>
+    so three tokens remain comfortably inside DE&nbsp;48 even on strict networks.
+  </p>
+  <pre>MTI 0100 — Authorisation Request (acquirer → network)
+
+DE 003  Processing Code     : 000000
+DE 004  Amount, Transaction : 000000001250        (12.50 EUR)
+DE 011  STAN                : 004821
+DE 037  Retrieval Ref Nbr   : 923041004821
+DE 041  Card Acceptor Term  : TERM0001
+DE 042  Card Acceptor ID    : MERCHANT42
+DE 048  Additional Data — Private (LLLVAR, max 999 bytes value):
+        LLL = 097
+        Value = [scheme subelement chain]
+          SE/PDS ATLAS (scheme-assigned id, NOT EMV 9Fxx):
+            Len = 097
+            Data = atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Y|atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Z
+DE 049  Currency Code       : 978
+
+Alternative when subelement length is capped at 99 bytes (use one SE per token):
+          SE ATLAS.01  Len = 048  Data = atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Y
+          SE ATLAS.02  Len = 048  Data = atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Z
+
+Notes:
+- LLL is the 3-digit (or 2-byte BCD) length of the entire DE 048 value — not repeated per sub-tag.
+- Inner Len encoding (1, 2, or 3 digits; BCD vs ASCII) is scheme-defined.
+- Delimiter | is scheme-defined; forbidden if profile uses strict an-only — then use per-token subelements with no separator.
+- version and transaction_reference stay in Link 4 / processor context unless another DE carries them.
+- Networks on strict an-only DE 048 may use DE 062/063 (often ans ...999) or binary-encode the TLV value.</pre>
+
+  <h4 id="s8-7-3">ISO 20022 example (informative)</h4>
+  <p>
+    For account-to-account and modern card-authorisation messages, schemes typically embed
+    ATLAS tokens in <code>SplmtryData</code> (supplementary data) using a registered place-and-name
+    and a scheme-defined envelope.  Below: fragment of
+    <code>pacs.008.001.08</code> (FI to FI Customer Credit Transfer) with an ATLAS extension;
+    the same pattern applies to <code>auth.001</code> / <code>camt</code> authorisation profiles
+    where the scheme carries checkout metadata.
+  </p>
+  <pre>&lt;FIToFICstmrCdtTrf&gt;
+  ...
+  &lt;SplmtryData&gt;
+    &lt;PlcAndNm&gt;ATLAS.RedeemTokens&lt;/PlcAndNm&gt;
+    &lt;Envlp&gt;
+      &lt;Document xmlns="https://atlas.hyperlab.dev/rail/redeem/v1"&gt;
+        &lt;RedeemTokens version="1"&gt;
+          &lt;TransactionReference&gt;txn_9f3a2b1c&lt;/TransactionReference&gt;
+          &lt;Token&gt;atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Y&lt;/Token&gt;
+          &lt;Token&gt;atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Z&lt;/Token&gt;
+        &lt;/RedeemTokens&gt;
+      &lt;/Document&gt;
+    &lt;/Envlp&gt;
+  &lt;/SplmtryData&gt;
+&lt;/FIToFICstmrCdtTrf&gt;</pre>
+  <p>
+    Equivalent JSON-in-<code>Envlp</code> (when the scheme profile uses JSON supplementary payloads):
+  </p>
+  <pre>{
+  "version": 1,
+  "transaction_reference": "txn_9f3a2b1c",
+  "tokens": [
+    "atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Y",
+    "atlas:1:ta.hyperlab.example:rpt_01HZXK9Q4M2N8W3Z"
+  ]
+}</pre>
+  <div class="note">
+    <p class="note-title">Scheme binding</p>
+    <p>
+      Exact message type (<code>pacs.008</code>, <code>auth.001</code>, EMV 3DS extension, etc.),
+      supplementary place-and-name, and maximum token count are defined by the payment scheme —
+      not by ATLAS.  Processors <span class="rfc2119">MUST</span> follow the active scheme profile;
+      the examples above show the <em>semantic</em> content only.
+    </p>
+  </div>
 </section>
 
 <!-- ===== SECTION 9 ===== -->
