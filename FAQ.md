@@ -7,8 +7,6 @@
 
 AI agents are starting to shop and pay for us. **ATLAS** is about making that trustworthy: an open way for an **independent inspector** (an Assessor) to check how an agent behaved — did it follow the user’s intent? stay within rules and network policies? stay in good standing under Know-Your-Agent (KYA)? — and to share a compact trust signal with banks and networks **without** broadcasting the user’s private conversation.
 
-This FAQ is written for the **FIDO** community: same substance as the protocol story, without vendor implementation brands — so the working group can evaluate ATLAS on its merits as a **portable standard**.
-
 ---
 
 
