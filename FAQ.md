@@ -17,7 +17,7 @@ AI agents are starting to shop and pay for us. **ATLAS** is about making that tr
 | #   | Question                                                                                                                                                                       |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1   | [What is ATLAS?](#1-what-is-atlas)                                                                                                                                             |
-| 2   | [Why propose ATLAS as a FIDO standard?](#2-why-propose-atlas-as-a-fido-standard)                                                                                               |
+| 2   | [What does ATLAS standardise?](#2-what-does-atlas-standardise)                                                                                                                |
 | 3   | [Why trust the Assessor if it is also AI (“LLM as a judge”)? Isn’t that circular?](#3-why-trust-the-assessor-if-it-is-also-ai-llm-as-a-judge-isnt-that-circular)               |
 | 4   | [Why would a shopping agent share personal data (PII) with the Assessor?](#4-why-would-a-shopping-agent-share-personal-data-pii-with-the-assessor)                             |
 | 5   | [Why is ATLAS open?](#5-why-is-atlas-open)                                                                                                                                     |
@@ -50,23 +50,22 @@ ATLAS describes how **entity types** work together: the agent being checked (the
 
 
 
-## 2. Why propose ATLAS as a FIDO standard?
+## 2. What does ATLAS standardise?
 
-**FIDO** already anchors industry work on strong authentication, credentials, and related trust infrastructure. Agentic commerce adds a new gap: protocols such as [AP2](https://ap2-protocol.org/ap2/specification/) and [VI](https://verifiableintent.dev/spec/) secure **authorization at checkout**, and [KYA-OS](https://github.com/decentralized-identity/kya-os-mcp) helps establish **who** an agent is — but none of them alone standardise **independent runtime assessment** of what the agent did *before* those artefacts are bound.
+As an **open standard**, ATLAS defines a shared rulebook for **independent runtime assessment** of agent behaviour in commerce — not a product, and not a replacement for identity or checkout protocols.
 
-Bringing ATLAS into a **FIDO** standardisation track aims to:
-
-
-| Goal                                       | Why it matters for FIDO                                                                                                                                       |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **One interoperable assessment language**  | Avoid proprietary “observability islands” (SDK-only, host-only, proxy-only) that cannot travel with the payment                                               |
-| **Complement, not replace, existing work** | Sit **beside** AP2/VI (transaction binding) and KYA (identity) as the **pre-transaction / behaviour** signal leg                                              |
-| **Neutral Assessor model**                 | Align with FIDO’s culture of independent, cryptographically verifiable trust — Assessors licensed by Trust Authorities, methods certified, evidence encrypted |
-| **Rail-ready trust signals**               | Compact report tokens that can ride existing payment messaging — useful to networks, issuers, and processors                                                  |
-| **Open governance**                        | A FIDO home gives the industry a venue to review threats, profiles, and conformance together                                                                  |
+Existing work already covers neighbouring jobs: [AP2](https://ap2-protocol.org/ap2/specification/) and [VI](https://verifiableintent.dev/spec/) secure **authorization at checkout**; [KYA-OS](https://github.com/decentralized-identity/kya-os-mcp) helps establish **who** an agent is. None of them alone standardise **what the agent did** before those artefacts are bound. That is the ATLAS layer.
 
 
-**One-liner for the WG:** ATLAS is proposed so FIDO can standardise **how the ecosystem independently observes agent behaviour** — with the same care FIDO has brought to authentication and credentials.
+| What ATLAS standardises                    | What that means in practice                                                                                                      |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Assessment language & messages**         | Common evidence packages, verdicts, and report tokens that any conforming party can produce or consume                           |
+| **Assessor / Trust Authority roles**       | How independent Assessors are authorized, how methods are certified, and how evidence stays encrypted to the Assessor            |
+| **Pre-transaction behaviour signal**       | A portable trust leg **beside** KYA (identity) and AP2/VI (transaction binding) — not a substitute for either                    |
+| **Rail-ready outputs**                     | Compact signed signals that can travel with payment messaging without shipping the user’s private conversation                   |
+
+
+**One-liner:** ATLAS is the open standard for **how the ecosystem independently observes agent behaviour** and turns that into a verifiable trust signal.
 
 ---
 
@@ -115,18 +114,9 @@ In ATLAS:
 
 ## 5. Why is ATLAS open?
 
-Agentic commerce involves many vendors — shopping agents, merchants, wallets, schemes, issuers, labs. A closed, vendor-only trust check creates lock-in and incompatible “trust islands.”
+Agentic commerce spans many vendors — shopping agents, merchants, wallets, schemes, issuers, labs. A **closed, vendor-only** trust check creates lock-in and incompatible “trust islands.” ATLAS is open so assessment can travel with the transaction across that mix, instead of staying trapped inside one product.
 
-ATLAS is open to **foster interoperability** across the ecosystem — and to **avoid a fragmented landscape** of private, local, limited observability tools that cannot talk to each other or travel with the transaction.
-
-An open (and, proposed, **FIDO-governed**) standard lets the industry:
-
-- interoperate across vendors and networks,
-- review threats together,
-- align with other protocols ([AP2](https://ap2-protocol.org/ap2/specification/), [VI](https://verifiableintent.dev/spec/), [KYA-OS](https://github.com/decentralized-identity/kya-os-mcp)),
-- avoid reinventing assessment ten different ways.
-
-Without ATLAS, common ways to watch agents are:
+Without an open protocol, common ways to watch agents are:
 
 
 | Approach without ATLAS                  | Limit                                     |
@@ -136,7 +126,9 @@ Without ATLAS, common ways to watch agents are:
 | **Proxy / firewall in the path**        | Fragile and hard to apply everywhere      |
 
 
-None of these scale across today’s mix — commercial cloud agents (e.g. Gemini), on-device agents (e.g. Apple), or custom agents (e.g. Hermes). An **open protocol** lets diverse agents emit the same kind of assessable trust signals without forcing one host or one vendor kit.
+None of these scale across today’s agents — commercial cloud (e.g. Gemini), on-device (e.g. Apple), or custom (e.g. Hermes). Openness is what lets diverse agents emit the **same kind of assessable trust signals** without forcing one host or one vendor kit.
+
+*(What ATLAS actually specifies as that shared rulebook is covered in [§2](#2-what-does-atlas-standardise).)*
 
 ---
 
@@ -198,7 +190,7 @@ ATLAS closes the **runtime behaviour gap** and feeds portable signals back into 
 | **[KYA-OS](https://github.com/decentralized-identity/kya-os-mcp)** ([DIF](https://identity.foundation/)) | Who is this agent? Identity and delegation       | The Assessor can **work with the KYA-OS layer** and **feed runtime behaviour signals** back into KYA monitoring. Spec: [SPEC.md](https://github.com/decentralized-identity/kya-os-mcp/blob/main/SPEC.md); overview: [KYA-OS introduction](https://modelcontextprotocol-identity.io/mcp/introduction) |
 | **[AP2](https://ap2-protocol.org/ap2/specification/)**                                                   | Permission to check out / pay (mandates)         | ATLAS sits **before and around** checkout: how intent was interpreted while discovering, evaluating, and building the cart                                                                                                                                                                           |
 | **[VI](https://verifiableintent.dev/spec/)** (Verifiable Intent)                                         | Cryptographic proof of user intent / constraints | Complementary at payment boundaries; ATLAS does not replace VI                                                                                                                                                                                                                                       |
-| **[ATLAS](https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html)**     | Independent runtime assessment                   | Complements the protocols above; proposed for FIDO standardisation                                                                                                                                                                                                                                   |
+| **[ATLAS](https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html)**     | Independent runtime assessment                   | Complements the protocols above as an open standard for behaviour assessment                                                                                                                                                                                                                          |
 
 
 **Two signal legs:**
@@ -388,7 +380,7 @@ Each party gets a different slice of value from the same independent assessment 
 9. **Discoverable, opt-in Assessors** — roster with ongoing evaluation (score, referential, cost, region, accepting agents).
 10. **Several Assessors per transaction** — merchant, wallet, or different rulebooks can each commission a check; multiple report tokens can travel with the payment.
 11. **Value per segment** — merchant, wallet, shopping agent, network, issuer, processor, and user.
-12. **Open protocol fit for FIDO** — a shared, vendor-neutral assessment layer the working group can refine into a FIDO standard.
+12. **Open standard** — a shared, vendor-neutral assessment layer the industry can implement, profile, and evolve together.
 
 ---
 
@@ -399,9 +391,8 @@ Each party gets a different slice of value from the same independent assessment 
 [↑ Back to glossary of questions](#glossary-of-questions)
 
 - [ATLAS: Agent Trust Layer and Assurance Standard — working draft](https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html)
-- [FIDO Alliance](https://fidoalliance.org/) — proposed home for ATLAS standardisation discussion
 - [KYA-OS (DIF)](https://github.com/decentralized-identity/kya-os-mcp) — [SPEC.md](https://github.com/decentralized-identity/kya-os-mcp/blob/main/SPEC.md); [introduction](https://modelcontextprotocol-identity.io/mcp/introduction)
 - [AP2 — Agent Payments Protocol](https://ap2-protocol.org/ap2/specification/) ([home](https://ap2-protocol.org/))
 - [Verifiable Intent (VI)](https://verifiableintent.dev/spec/) ([home](https://verifiableintent.dev/))
-- Combined ATLAS + AP2/VI signal framework (pre-transaction vs transaction & post-purchase) — briefing input for WG discussion
+- Combined ATLAS + AP2/VI signal framework (pre-transaction vs transaction & post-purchase)
 
