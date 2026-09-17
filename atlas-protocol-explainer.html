@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>ATLAS Explainer — why assessment, and how schemes may use it</title>
+  <style>
+:root {
+  color-scheme: light;
+  --ch-navy: #123940;
+  --ch-dark: #123940;
+  --ch-mid: #416166;
+  --ch-teal: #00e4c5;
+  --ch-teal-lt: #c7f9ed;
+  --ch-teal-bg: #edfcf8;
+  --ch-grey: #8f8f8f;
+  --text: #262626;
+  --bg: #ffffff;
+  --tocsidebar-bg: #123940;
+  --tocsidebar-text: #c7f9ed;
+  --tocsidebar-heading-text: #00e4c5;
+  --toclink-text: #c7f9ed;
+  --a-normal-text: #416166;
+  --a-normal-underline: #8f8f8f;
+  --note-bg: #edfcf8;
+  --noteheading-text: #416166;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 15px; background: var(--tocsidebar-bg); }
+body {
+  margin: 0 0 4em;
+  padding: 1.6em 2em 0 1.5em;
+  font-family: "Segoe UI", Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+}
+@media screen and (min-width: 78em) {
+  nav#toc {
+    position: fixed; top: 0; bottom: 0; left: 0; width: 23.5em;
+    overflow-y: auto; padding: 0 1em 2em 1.2em;
+    color: var(--tocsidebar-text); background: var(--tocsidebar-bg);
+    z-index: 10; box-shadow: .15em 0 .4em rgba(0,0,0,.35);
+  }
+  body { padding-left: 27em; padding-right: 3em; }
+}
+@media screen and (max-width: 78em) {
+  nav#toc {
+    background: var(--tocsidebar-bg); color: var(--tocsidebar-text);
+    padding: 1em 1.2em 1.2em; margin: 0 0 1.5em; border-radius: 4px;
+  }
+}
+nav#toc h2 {
+  margin: 1rem 0 .6rem; font-size: .78rem; font-variant: all-small-caps;
+  text-transform: lowercase; font-weight: 700; letter-spacing: .05em;
+  color: var(--tocsidebar-heading-text);
+  border-bottom: 1px solid rgba(0,196,176,.4); padding-bottom: .3rem;
+}
+nav#toc ol { list-style: none; padding: 0; margin: 0; }
+nav#toc a {
+  display: block; padding: .25em .4em .25em .5em; font-size: .8rem;
+  color: var(--toclink-text); text-decoration: none;
+  border-left: 3px solid transparent; border-radius: 0 3px 3px 0;
+}
+nav#toc a:hover { background: rgba(0,228,197,.10); border-left-color: var(--ch-teal); }
+.secno { color: var(--ch-teal); font-weight: 600; margin-right: .25em; }
+
+.doc-switcher {
+  display: flex; flex-wrap: wrap; gap: .35em;
+  margin: .9rem 0 1rem; padding: .35em;
+  background: rgba(0,228,197,.08); border-radius: 4px;
+}
+.doc-switcher a {
+  display: inline-block !important; padding: .35em .7em !important;
+  font-size: .75rem !important; font-weight: 700 !important;
+  letter-spacing: .04em; text-transform: uppercase;
+  border: 1px solid rgba(0,228,197,.45) !important;
+  border-left: 1px solid rgba(0,228,197,.45) !important;
+  border-radius: 3px !important; color: var(--ch-teal-lt) !important;
+}
+.doc-switcher a.current {
+  background: var(--ch-teal); color: var(--ch-navy) !important;
+  border-color: var(--ch-teal) !important;
+}
+
+div.head {
+  margin-bottom: 1.5em; padding-bottom: 1em;
+  border-bottom: 3px solid var(--ch-teal);
+}
+div.head h1 {
+  font-weight: 700; margin: 0 0 .1em; font-size: 200%;
+  line-height: 1.2; color: var(--ch-dark);
+}
+#doc-state { margin: 0 0 1.2em; font: 130% "Segoe UI", Arial, sans-serif; color: var(--ch-mid); }
+.badge {
+  display: inline-block; background: var(--ch-dark); color: var(--ch-teal);
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; padding: 3px 8px; border-radius: 2px; margin-right: .5em;
+}
+div.head dl {
+  font-size: .9rem; margin: 0 0 1em; border: 1px solid var(--ch-teal-lt);
+  border-radius: 4px; padding: .75em 1em; background: var(--ch-teal-bg); max-width: 44em;
+}
+div.head dt { font-weight: 700; color: var(--ch-dark); margin-top: .5em; float: left; clear: left; min-width: 11em; }
+div.head dt:first-child { margin-top: 0; }
+div.head dd { margin-left: 11.5em; margin-top: .5em; }
+div.head dd:first-of-type { margin-top: 0; }
+
+h2 {
+  font-size: 130%; font-weight: 700; color: var(--ch-dark);
+  border-bottom: 2px solid var(--ch-teal); padding-bottom: .3em; margin: 2.5em 0 .8em;
+}
+h3 { font-size: 115%; font-weight: 700; color: var(--ch-navy); margin: 2em 0 .6em; }
+h4 { font-size: 100%; font-weight: 700; color: var(--ch-mid); margin: 1.5em 0 .4em; }
+p { margin: 0 0 .8em; }
+ul, ol { margin: .4em 0 .8em 1.4em; }
+li { margin-bottom: .3em; }
+a[href] { color: var(--a-normal-text); text-decoration: underline; text-decoration-color: var(--a-normal-underline); }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .87em;
+  background: #f4f7f8; padding: .1em .3em; border-radius: 3px; border: 1px solid #d5e0e2;
+}
+.note {
+  background: var(--note-bg); border-left: 5px solid var(--ch-teal);
+  padding: .75em 1em; margin: 1em 0; font-size: .92rem; border-radius: 0 4px 4px 0;
+}
+.note::before {
+  display: block; content: "ILLUSTRATION ONLY"; font-size: .68rem; font-weight: 800;
+  letter-spacing: .12em; color: var(--noteheading-text); margin-bottom: .35em;
+}
+.informative {
+  background: #F7F7F7; border: 1px solid #DDD; border-left: 5px solid #AAA;
+  padding: .7em 1em; margin: 1em 0; font-size: .88rem; color: #555; border-radius: 0 4px 4px 0;
+}
+.informative::before {
+  display: block; content: "NOT PART OF THE PROTOCOL"; font-size: .68rem; font-weight: 800;
+  letter-spacing: .12em; color: #666; margin-bottom: .35em;
+}
+.table-wrap { overflow-x: auto; margin: 1em 0; }
+table.data { border-collapse: collapse; width: 100%; font-size: .87rem; }
+table.data thead { background: var(--ch-dark); color: #fff; }
+table.data thead th { padding: .5em .8em; text-align: left; }
+table.data tbody td { padding: .45em .8em; border: 1px solid #dde6e8; vertical-align: top; }
+table.data tbody tr:nth-child(even) { background: var(--ch-teal-bg); }
+section#abstract > p {
+  background: var(--ch-teal-bg); border-left: 4px solid var(--ch-teal);
+  padding: .8em 1em; border-radius: 0 4px 4px 0;
+}
+footer {
+  margin-top: 3em; border-top: 2px solid var(--ch-teal); background: var(--ch-dark);
+  color: rgba(255,255,255,.75); padding: 1.2em 1.5em; font-size: .78rem; text-align: center;
+}
+footer a { color: var(--ch-teal); }
+@media print {
+  nav#toc { display: none !important; }
+  html { background: white !important; }
+  body { padding: 0 !important; }
+}
+  </style>
+</head>
+<body>
+
+<nav id="toc" aria-label="Table of Contents">
+  <h2>Documents</h2>
+  <p class="doc-switcher">
+    <a href="atlas-protocol-specification-draft.html">Protocol</a>
+    <a href="atlas-protocol-explainer.html" class="current" aria-current="page">Explainer</a>
+    <a href="atlas-faq.html">FAQ</a>
+  </p>
+  <h2 id="toc-heading">On this page</h2>
+  <ol class="toc">
+    <li><a href="#abstract"><span class="secno">—</span> Abstract</a></li>
+    <li><a href="#e1"><span class="secno">1.</span> What this document is</a></li>
+    <li><a href="#e2"><span class="secno">2.</span> Why independent assessment exists</a></li>
+    <li><a href="#e3"><span class="secno">3.</span> Illustrative drift (intent)</a></li>
+    <li><a href="#e4"><span class="secno">4.</span> How a scheme may consume a result</a></li>
+    <li><a href="#e5"><span class="secno">5.</span> Example method packs</a></li>
+    <li><a href="#e6"><span class="secno">6.</span> KYA complementarity</a></li>
+    <li><a href="#e7"><span class="secno">7.</span> Background reading</a></li>
+  </ol>
+</nav>
+
+<div class="head" id="top">
+  <h1>ATLAS Explainer</h1>
+  <p id="doc-state">
+    <span class="badge">Informative</span>
+    Companion to Protocol Specification v0.2 · September 2026
+  </p>
+  <dl>
+    <dt>Normative document:</dt>
+    <dd><a href="atlas-protocol-specification-draft.html">ATLAS Protocol Specification v0.2 Working Draft</a></dd>
+    <dt>Status:</dt>
+    <dd>This page is <strong>not</strong> a protocol specification. It does not define messages, claims, or conformance.</dd>
+    <dt>Published by:</dt>
+    <dd><strong>Hyperlab</strong> — Consult Hyperion (consulting by fime)</dd>
+  </dl>
+</div>
+
+<section id="abstract">
+  <h2>Abstract</h2>
+  <p>
+    ATLAS the <em>protocol</em> moves scoped evidence to an authorized Assessor and returns a signed
+    result handle. This explainer is the place for <em>why that is useful</em> and for
+    <em>how a deploying scheme might interpret or consume</em> a verdict — including intent
+    faithfulness, fairness or steering checks, and regulatory programmes.
+    None of that is standardised by ATLAS itself.
+  </p>
+</section>
+
+<section id="e1">
+  <h2>1. What this document is</h2>
+  <div class="informative">
+    Treat every example below as illustration. A regulatory-compliance pack, intent-matching
+    verification, a card network, or a national
+    supervisor might consume ATLAS results in very different ways.
+    A programme <em>may</em> bind roster <code>assessment_types</code> and
+    <code>policy_referential</code> to certified methods. ATLAS only requires that the Assessor
+    decrypt in-scope evidence, apply the method its authorization names, and issue Link&nbsp;4 / Link&nbsp;5.
+  </div>
+  <p>
+    Keep this split in mind:
+  </p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>In the protocol spec</th><th>In this explainer (and scheme profiles)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Who talks to whom; token chain; evidence <code>scope</code> as a release ceiling; JWE confidentiality; verdict <em>syntax</em>; <code>redeem_tokens</code> on rails</td>
+          <td>What an Assessor concludes from evidence; pass/fail criteria; fairness or intent methods; how issuers, networks, merchants, or courts <em>use</em> a verdict</td>
+        </tr>
+        <tr>
+          <td><code>compliant</code> / <code>partially_compliant</code> / <code>not_compliant</code> / <code>not_assessed</code> as enumerated strings</td>
+          <td>What those strings mean for liability, authorisation policy, dispute, or regulation</td>
+        </tr>
+        <tr>
+          <td>Optional <code>evidence_cross_check</code> object on Link&nbsp;4</td>
+          <td>Whether to compare a cart to agent narrative, and whether a mismatch is material</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="e2">
+  <h2>2. Why independent assessment exists</h2>
+  <p>
+    Agentic commerce converts natural-language user intent into checkout artifacts through an
+    autonomous subject agent. Neighbouring protocols (AP2, Verifiable Intent, UCP, KYA-OS) secure
+    identity, mandate, and checkout. They do not, by themselves, give merchants, processors,
+    networks, or issuers a standard way to <em>observe</em> pre-checkout behaviour.
+  </p>
+  <p>
+    The operational gap is opacity: between the user’s instruction and the payment action the
+    agent’s decisions are probabilistic and can drift without any change to static credentials.
+    ATLAS exists so an independent Assessor can obtain bounded, encrypted evidence and emit a
+    compact signed signal. What that signal is <em>for</em> is a scheme choice.
+  </p>
+</section>
+
+<section id="e3">
+  <h2>3. Illustrative drift (intent)</h2>
+  <p>
+    One common story — not a required ATLAS method — is <em>intent drift</em>: the agent’s
+    interpretation of constraints (budget, allergens, ethical preferences, medical limitations)
+    diverges from what the user actually asked, across interpretation, tool serialisation, and
+    safety-filter layers.
+  </p>
+  <dl>
+    <dt><strong>Interpretation.</strong></dt>
+    <dd>An LLM maps free text to an internal representation. Rare or medically nuanced constraints may be under-weighted.</dd>
+    <dt><strong>Structuring.</strong></dt>
+    <dd>Tool calls (MCP or similar) force a schema. Fields that do not map cleanly can be dropped.</dd>
+    <dt><strong>Filtering and presentation.</strong></dt>
+    <dd>PII or safety filters can redact the very constraints that mattered; the confirmation screen still “looks right.”</dd>
+  </dl>
+  <div class="note">
+    <p>
+      A user says: <em>“Order a pizza. I am severely allergic to peanuts, I am on a particular
+      heart medication, and my budget is 40&nbsp;€.”</em>
+      The agent may encode <code>"max_price": 40</code> cleanly while the allergy and
+      drug-interaction constraint survive only as vague text — or are stripped — before
+      <code>add_to_cart</code>. The screen shows <em>“vegetarian pizza, 40&nbsp;€”</em>.
+      If harm follows, no party holds an assessable record of what the agent understood unless
+      evidence was released under ATLAS <code>scope</code> and a <em>scheme method</em> actually
+      checks those constraints.
+    </p>
+  </div>
+  <p>
+    ATLAS can carry dialogue, traces, or structured slots so such a method <em>can</em> run.
+    It does not require a health-constraint check, and it does not define “intent accuracy.”
+  </p>
+</section>
+
+<section id="e4">
+  <h2>4. How a scheme may consume a result</h2>
+  <p>
+    After Link&nbsp;4 exists, relying parties decide what to do with <code>verdict</code>,
+    digests, and optional <code>report_token</code>. The protocol stops at verification of
+    signatures and assembly of <code>redeem_tokens</code>. The following uses are
+    <strong>examples of programme policy</strong>, not ATLAS requirements:
+  </p>
+  <ul>
+    <li><strong>Authorisation policy.</strong> A network or issuer may treat
+        <code>not_compliant</code> or <code>not_assessed</code> differently from
+        <code>compliant</code> when deciding to approve, step-up, or decline.</li>
+    <li><strong>Chargeback and dispute files.</strong> A signed, time-stamped result can be
+        stored as a common reference. Whether it shifts liability, or is even admissible, is
+        rulebook and law — not ATLAS.</li>
+    <li><strong>Fraud operations.</strong> Verdicts over time for one <code>agent.id</code> may
+        feed monitoring. Thresholds, suspension, and re-attestation are operator policy.</li>
+    <li><strong>Offer terms (UCP-style).</strong> A merchant <em>might</em> change price or
+        acceptance during negotiation when a result is present. ATLAS does not require that.</li>
+    <li><strong>Regulatory demonstration.</strong> A programme might map a named
+        <code>policy_referential</code> to obligations under instruments such as the EU AI Act,
+        PSD2/PSD3, DORA, or the Interchange Fee Regulation. ATLAS does not implement those
+        laws and does not certify compliance with them.</li>
+  </ul>
+  <p>
+    Empty <code>scope</code> yields protocol <code>not_assessed</code> so rails can see that
+    no agent-behaviour method ran. Whether a scheme then declines the transaction is again
+    consumption policy.
+  </p>
+</section>
+
+<section id="e5">
+  <h2>5. Example method packs</h2>
+  <p>
+    Roster <code>assessment_types</code> are opaque codes. A scheme profile might
+    publish packs such as:
+  </p>
+  <ul>
+    <li><strong>Intent-matching verification</strong> — compare released dialogue / slots / traces to the cart or mandate.</li>
+    <li><strong>Fairness / steering</strong> — look at consideration sets, affiliate identifiers, or ranking traces if those classes were released.</li>
+    <li><strong>Regulatory compliance</strong> — apply a certified checklist the scheme names; ATLAS does not author the checklist.</li>
+  </ul>
+  <p>
+    An Assessor <em>may</em> record an optional <code>evidence_cross_check</code> on Link&nbsp;4
+    (cart lines vs <code>item_selection_reasoning</code>, mandate limits vs checkout). Whether
+    a <code>material_mismatch</code> becomes <code>not_compliant</code> is defined by the active
+    referential, not by ATLAS. Preferring a <code>holder_commissioned</code> copy of the same
+    <code>artifact_id</code> over an <code>agent_observed</code> copy is likewise a method
+    choice (often used when a later dispute file should cite the holder’s attestation).
+  </p>
+</section>
+
+<section id="e6">
+  <h2>6. KYA complementarity</h2>
+  <p>
+    Know Your Agent frameworks typically bind identity and keys <em>before</em> runtime.
+    The same agent often has a different id and status in each network’s KYA store.
+    The protocol field <code>registered_identities[]</code> is how the Assessor is told which
+    stores to query for the requester; whether a scheme then shares only a minimal “lower trust”
+    signal is programme policy.
+    ATLAS evidence is otherwise about what happened in a session. A scheme may feed
+    <code>AssessmentResult</code> hashes into KYA monitoring so drift that never appears in
+    static credentials becomes visible. That closed loop — scores, re-attestation, suspension —
+    is operations on top of ATLAS, not a protocol step.
+  </p>
+</section>
+
+<section id="e7">
+  <h2>7. Background reading</h2>
+  <p>
+    Companion articles (editor’s narrative, not specification text):
+  </p>
+  <ul>
+    <li>
+      <a href="https://www.fime.com/blog/blog-15/post/kya-is-not-enough-introducing-fact-the-runtime-trust-layer-for-agentic-commerce-697" rel="noopener">KYA is not enough: introducing FACT</a>
+      — Fime Blog. Positions runtime assessment beside KYA; discusses risk, regulation, and dispute as <em>programme</em> functions.
+    </li>
+    <li>
+      <a href="https://www.linkedin.com/pulse/when-ai-buys-your-behalf-understanding-stack-risks-jean-luc-di-manno-cms9e/" rel="noopener">When AI buys on your behalf</a>
+      — stack layers through which intent can drift.
+    </li>
+    <li>
+      <a href="https://www.linkedin.com/pulse/from-kya-continuous-trust-fact-governing-agentic-jean-luc-di-manno-1ocne/" rel="noopener">From KYA to Continuous Trust with FACT</a>
+      — limits of static KYA; runtime behavioural verification as a complement.
+    </li>
+  </ul>
+  <p>
+    Questions and answers: <a href="atlas-faq.html">ATLAS FAQ</a>
+    (also included in the protocol document <a href="atlas-protocol-specification-draft.html#s14">§14</a>).
+    Wire formats and conformance: <a href="atlas-protocol-specification-draft.html">Protocol specification</a>.
+  </p>
+</section>
+
+<footer>
+  <p>
+    ATLAS Explainer — informative companion to Working Draft v0.2 · September 2026<br>
+    Produced by <strong>Hyperlab</strong>, Consult Hyperion (consulting by fime).<br>
+    © 2026 Consult Hyperion / Fime Group. All Rights Reserved.
+  </p>
+</footer>
+</body>
+</html>

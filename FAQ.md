@@ -1,7 +1,7 @@
 # ATLAS — FAQ
 
 **Version:** 1.6
-**Related:** [ATLAS Protocol Specification v0.2 working draft](https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html) · [Glossary of questions](#glossary-of-questions)
+**Related:** [Protocol specification (HTML)](atlas-protocol-specification-draft.html) · [Explainer](atlas-protocol-explainer.html) · [FAQ (HTML)](atlas-faq.html) · [Glossary of questions](#glossary-of-questions)
 
 ---
 
@@ -234,15 +234,15 @@ How cloud vs on-device subjects actually start that intake is [§8a](#8a-how-doe
 
 **Two models, four modes.** The JWE, Link 4 verdict, and `ReportToken` do not change. What changes is who selects the Assessor, whether the subject can accept inbound HTTPS, and **when** Link 4 is issued.
 
-The Assessor’s HTTPS URL is **on the TA-partner roster**, not in any ATLAS token. How an on-device agent authenticates that roster endpoint (TLS only vs certificate pinning) is **out of scope** of ATLAS. There is **no** TA-mediated intake — the TA does not pick the Assessor.
+The Assessor’s delivery address is on the TA-partner roster (see the protocol spec §5.3). There is **no** TA-mediated intake — the TA does not pick the Assessor.
 
 
 | Model | Mode | Who selects the Assessor | How it starts | When Link 4 is issued |
 | ----- | ---- | ------------------------ | ------------- | --------------------- |
 | **Cloud-based agent** (SaaS or hosted) | **Holder** | Merchant/wallet from the roster **before Link 2** | Agent issues Link 1 (`permitted_trust_authorities`). Holder GETs the roster, selects, then Link 2. | Holder receives the verdict after Link 3 + JWE. |
-| **Cloud-based agent** | **Direct** | The shopping agent from the roster **before Link 1-D** | Link 1-D **SA → Assessor** (`permitted_assessors` = roster id/jkt, no URL, no `permitted_trust_authorities`). Assessor sends Link 3 inbound. | The **agent** receives Link 4 after the JWE. |
-| **On-device agent (deposit)** | **Deposit-direct** | The shopping agent from the roster **before Link 1-D** | Same Link 1-D; agent **pushes** the JWE to the roster URL (or the TA forwards ciphertext). Assessor **stores** it. | The agent later asks for Link 4. |
-| **On-device agent (deposit)** | **Deposit-holder** | Agent selects for the deposit; merchant/wallet confirms via the roster **before Link 2** | Same outbound deposit; then holder Link 1 with `deposited_assessors[]`. | Merchant/wallet later asks (Link 2, optional cart / AP2 / VI). |
+| **Cloud-based agent** | **Direct** | The shopping agent from the roster **before Link 1-D** | Link 1-D **SA → Assessor** (`permitted_assessors` + `permitted_trust_authorities`). Assessor sends Link 3 inbound. | The **agent** receives Link 4 after the JWE. |
+| **On-device agent (deposit)** | **Deposit-direct** | The shopping agent from the roster **before Link 1-D** | Same Link 1-D claims. Agent POSTs Link 1-D, receives Link 3 on the outbound response, then POSTs the JWE. Assessor **MUST NOT** call the device. | The agent receives Link 4 / Link 5 on the JWE response. |
+| **On-device agent (deposit)** | **Deposit-holder** | Agent selects for the deposit; merchant/wallet confirms via the roster **before Link 2** | Same outbound Link 1-D → Link 3 → JWE; Assessor returns `DepositAcknowledgement`. Then holder Link 1 with `deposited_assessors[]` and related TAs. | Merchant/wallet later asks (Link 2, optional `holder_commissioned` artifacts); Assessor returns Link 4 to the holder. |
 
 
 There is no Assessor SDK inside the shopping agent, and no Assessor consumer app on the phone.
@@ -259,7 +259,7 @@ There is no Assessor SDK inside the shopping agent, and no Assessor consumer app
 
 `scope` is a **release ceiling**, not a verdict type. The shopping agent lists **classes** it is willing to export. It must not include a class that is not listed. The Assessor must not treat a **missing** class as “we checked that and it passed.”
 
-ATLAS does **not** require the full chat or the model’s chain-of-thought. Those are two optional classes. What a scheme (for example FACT) *needs* for a given method is named by opaque `assessment_types` on the roster — outside this protocol.
+ATLAS does **not** require the full chat or the model’s chain-of-thought. Those are two optional classes. What a scheme (for example regulatory compliance or intent-matching verification) *needs* for a given method is named by opaque `assessment_types` on the roster — outside this protocol.
 
 
 | Group | Examples of classes | Typical on |
@@ -291,8 +291,8 @@ ATLAS does **not** require the full chat or the model’s chain-of-thought. Thos
 | Mode                        | When                    | Who typically asks                     | What happens                                                                                                                                                                                |
 | --------------------------- | ----------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Direct (cloud)**          | Before the next step    | The shopping agent                     | Agent selects from the roster, Link 1-D → Link 3 → JWE → Link 4; checkout can wait                                                                                                          |
-| **Deposit-direct (on-device)** | At checkout, then later | The shopping agent                     | Same roster selection; JWE stored; agent later asks for Link 4                                                                                                                              |
-| **Deposit-holder (on-device)** | At checkout, then later | Merchant or wallet                     | Same deposit; holder Link 2 (optional cart / AP2 / VI) requests Link 4                                                                                                                      |
+| **Deposit-direct (on-device)** | At checkout | The shopping agent | Same roster selection; L1-D → Link 3 → JWE → Link 4 on the JWE response |
+| **Deposit-holder (on-device)** | At checkout, then later | Merchant or wallet | Same L1-D → Link 3 → JWE → acknowledgement; holder Link 2 (optional `holder_commissioned` artifacts) receives Link 4 |
 | **Holder (cloud)**          | During negotiation      | Merchant or wallet                     | Agent issues Link 1; holder GETs the roster, selects the Assessor, then Link 2; holder receives Link 4                                                                                      |
 | **Post-transaction**        | After payment           | e.g. issuer, payment network, acquirer | Redeem an existing `ReportToken`, or — if a sealed JWE was stored — request Link 4 later. A TA cannot pull evidence from a phone that never deposited.                                      |
 
@@ -317,9 +317,9 @@ In ATLAS language, what people often call an **“authority scheme”** is essen
 **How they connect (simplified):**
 
 1. The scheme publishes which Assessors are accredited (**roster** — see next question).
-2. **Cloud direct / deposit:** the shopping agent **selects** an Assessor from that TA-partner roster and names it in `permitted_assessors` on Link 1-D (id / public key — not the URL). **Cloud holder / deposit-holder:** the merchant/wallet GETs the roster and selects before Link 2.
-3. The Assessor proves live authorization; the agent releases **encrypted**, **in-scope** evidence (on-device: pushed to the roster-listed URL, or TA-forwarded ciphertext).
-4. The Assessor issues a signed result + report token when asked (immediately in cloud direct; later on deposit-direct or deposit-holder).
+2. **Cloud direct / deposit:** the shopping agent **selects** an Assessor from that TA-partner roster and names it in `permitted_assessors` plus `permitted_trust_authorities` on Link 1-D. **Cloud holder / deposit-holder:** the merchant/wallet GETs the roster and selects before Link 2.
+3. The Assessor proves live authorization; the agent releases **encrypted**, **in-scope** evidence (on-device: after Link 3, outbound JWE).
+4. The Assessor issues a signed result + report token (immediately in cloud direct and deposit-direct; after holder Link 2 in deposit-holder).
 5. The payment network can later **redeem** the report from the Trust Authority.
 
 ---
@@ -344,7 +344,7 @@ A roster entry for a qualified Assessor is meant to support informed choice. In 
 | Field (plain language)                        | Why it matters                                                                                                                  |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | **Qualification / quality score**             | Result of ongoing evaluation and benchmarks — helps compare Assessors, not only “listed vs not listed”                          |
-| **Assessment referential(s)**                 | Which **scheme rulebooks** this Assessor is allowed to apply (opaque codes — e.g. a FACT profile). ATLAS does not define the methods. |
+| **Assessment referential(s)**                 | Which **scheme rulebooks** this Assessor is allowed to apply (opaque codes — e.g. regulatory compliance, intent-matching verification). ATLAS does not define the methods. |
 | **Cost**                                      | Pricing or fee model so merchants/wallets/agents can choose affordably and predictably                                          |
 | **Region**                                    | Where the Assessor is authorized to operate (e.g. EU, US)                                                                       |
 | **Owning Trust Authority**                    | The TA that signs this Assessor’s live authorization                                                                            |
@@ -357,7 +357,7 @@ A roster entry for a qualified Assessor is meant to support informed choice. In 
 
 1. Look up the TA-partner roster.
 2. Filter by region, referential, score, cost, and live authorization.
-3. **Cloud direct / deposit:** the shopping agent selects an Assessor and puts that roster id / public key in `permitted_assessors` (not the URL). **Cloud holder / deposit-holder:** the merchant/wallet GETs the roster and selects before Link 2.
+3. **Cloud direct / deposit:** the shopping agent selects an Assessor and puts that roster id / public key in `permitted_assessors` plus the authorizing TAs in `permitted_trust_authorities`. **Cloud holder / deposit-holder:** the merchant/wallet GETs the roster and selects before Link 2.
 
 
 
@@ -365,9 +365,8 @@ A roster entry for a qualified Assessor is meant to support informed choice. In 
 
 Assessment is not a free-for-all.
 
-- **Cloud direct and deposit:** the agent **selects** from the published roster and records that choice in `permitted_assessors`. Trust still depends on **live roster authorization**, not on the agent inventing an Assessor.
+- **Cloud direct and deposit:** the agent **selects** from the published roster and records that choice in `permitted_assessors` and `permitted_trust_authorities`. Trust still depends on **live roster authorization**, not on the agent inventing an Assessor.
 - **Cloud holder / deposit-holder:** the agent lists Trust Authorities (`permitted_trust_authorities`) or `deposited_assessors`; the merchant or wallet GETs the roster and picks before Link 2.
-- The Assessor URL is read from the roster. It is **not** an ATLAS claim. How a device authenticates the roster endpoint (TLS vs pinning) is out of scope of ATLAS.
 - `scope` still limits **what** is released, regardless of who was selected.
 
 **Beginner takeaway:** Think of the roster as a **yellow pages of inspected inspectors**. In cloud direct and deposit the shopping agent **picks a name from that list**. In cloud holder (and before deposit-holder Link 2) the merchant/wallet does.

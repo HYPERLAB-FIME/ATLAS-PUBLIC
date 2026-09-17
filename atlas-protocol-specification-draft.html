@@ -311,6 +311,48 @@ div.head .copyright {
 .hyperlab-info strong { color: var(--ch-teal); }
 .hyperlab-info a { color: var(--ch-teal); }
 
+/* Protocol / Explainer / FAQ switcher */
+.doc-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35em;
+  margin: .9rem 0 1rem;
+  padding: .35em;
+  background: rgba(0,228,197,.08);
+  border-radius: 4px;
+}
+.doc-switcher a {
+  display: inline-block !important;
+  padding: .35em .7em !important;
+  font-size: .75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  border: 1px solid rgba(0,228,197,.45) !important;
+  border-left: 1px solid rgba(0,228,197,.45) !important;
+  border-radius: 3px !important;
+  color: var(--ch-teal-lt) !important;
+}
+.doc-switcher a.current {
+  background: var(--ch-teal);
+  color: var(--ch-navy) !important;
+  border-color: var(--ch-teal) !important;
+}
+div.head .doc-switcher {
+  background: var(--ch-teal-bg);
+  max-width: 44em;
+  clear: both;
+}
+div.head .doc-switcher a {
+  color: var(--ch-navy) !important;
+  border-color: var(--ch-teal) !important;
+  border-left-color: var(--ch-teal) !important;
+}
+div.head .doc-switcher a.current {
+  background: var(--ch-navy);
+  color: var(--ch-teal) !important;
+}
+
 /* ============================================================
    CONTENT SECTIONS
    ============================================================ */
@@ -839,6 +881,12 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   ===================================================================
 -->
 <nav id="toc" aria-label="Table of Contents">
+  <h2>Documents</h2>
+  <p class="doc-switcher">
+    <a href="atlas-protocol-specification-draft.html" class="current" aria-current="page">Protocol</a>
+    <a href="atlas-protocol-explainer.html">Explainer</a>
+    <a href="atlas-faq.html">FAQ</a>
+  </p>
   <h2 id="toc-heading">Table of Contents</h2>
   <ol class="toc">
     <li><a href="#abstract"><span class="secno">—</span> Abstract</a></li>
@@ -848,7 +896,6 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <li><a href="#s1-1"><span class="secno">1.1</span> Problem Statement</a></li>
         <li><a href="#s1-2"><span class="secno">1.2</span> Design Goals</a></li>
         <li><a href="#s1-3"><span class="secno">1.3</span> Relationship to Other Specs</a></li>
-        <li><a href="#s1-4"><span class="secno">1.4</span> Why Assessment? The Trust Problem</a></li>
       </ol>
     </li>
     <li><a href="#s2"><span class="secno">2.</span> Conformance</a></li>
@@ -984,6 +1031,12 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <span class="hyperlab-tag">Hyperlab</span>
   </a>
 
+  <p class="doc-switcher">
+    <a href="atlas-protocol-specification-draft.html" class="current" aria-current="page">Protocol</a>
+    <a href="atlas-protocol-explainer.html">Explainer</a>
+    <a href="atlas-faq.html">FAQ</a>
+  </p>
+
   <h1 id="title">ATLAS: Agent Trust Layer and Assurance Standard</h1>
 
   <p id="doc-state">
@@ -1028,14 +1081,17 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <p>
     ATLAS is <strong>scheme-agnostic</strong>. What an Assessor <em>concludes</em> from evidence
     (method, referential, verdict semantics) is defined by the deploying scheme or programme
-    (for example a FACT profile), not by this document. This specification defines evidence
+    (for example regulatory compliance or intent-matching verification), not by this document.
+    This specification defines evidence
     <code>scope</code> classes, initiation patterns, and the token/JWE chain.
     Two deployment models: a <strong>cloud-based</strong> subject uses <strong>holder</strong>
     or <strong>direct</strong>; an <strong>on-device</strong> subject uses <strong>deposit</strong>,
     which itself has <strong>direct</strong> and <strong>holder</strong> result paths.
-    Assessor HTTPS URLs come from the roster, not from ATLAS tokens.
     Downstream payment-rail integration uses <code>redeem_tokens</code> on ISO 8583, EMV 3-D Secure,
     and ISO 20022.
+    Why assessment is useful, and how a scheme might interpret a verdict (intent, fairness,
+    regulation, dispute), is described in the companion
+    <a href="atlas-protocol-explainer.html">ATLAS Explainer</a> — not in this specification.
   </p>
 
  
@@ -1055,6 +1111,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     represent a final standard. It has not been reviewed or endorsed by any external standards body.
   </p>
   <p>
+    Motive, method packs, and consumption of results are documented separately in the
+    <a href="atlas-protocol-explainer.html">ATLAS Explainer</a> (informative).
     All terminology, artifact definitions, claim sets, and normative requirements are design intent
     for a forthcoming base specification rather than binding requirements at this stage.
     If you wish to make comments regarding this document please use the
@@ -1068,260 +1126,84 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 <section id="s1">
   <h2><span class="secno-heading">1.</span> Introduction<a class="self-link" href="#s1" title="§ 1. Introduction">§</a></h2>
   <p>
-    Agentic commerce introduces a new class of trust problem: natural-language user intent passes
-    through autonomous subject agents, merchant agents, and credential providers before it is
+    Agentic commerce introduces a new class of observability problem: natural-language user intent
+    passes through autonomous subject agents, merchant agents, and credential providers before it is
     expressed as cryptographic payment artifacts. Existing protocols — AP2, Verifiable Intent (VI),
     and UCP — secure the lower layers (mandate delegation, checkout authorisation, and payment
-    completion) but do not define a standard protocol for an independent Assessor to retrieve and
-    assess the <em>pre-checkout</em> intent interpretation and agent reasoning that produced those
-    artifacts.
+    completion) but do not define a standard protocol for an independent Assessor to retrieve
+    scoped <em>pre-checkout</em> evidence that produced those artifacts.
   </p>
   <p>
     ATLAS fills this gap. It defines a portable, cryptographically verifiable protocol through which
     <em>Assessor agents</em> authorized by a <em>trust authority (TA)</em> may obtain scoped,
     encrypted evidence from a <em>subject agent</em> — without requiring trust in any individual
-    intermediary and without revealing sensitive user intent to parties with no legitimate need.
+    intermediary and without revealing sensitive user data to parties with no legitimate need.
+    What the Assessor concludes from that evidence, and how relying parties use the verdict, is
+    scheme-defined; see the <a href="atlas-protocol-explainer.html">Explainer</a>.
   </p>
 
   <h3 id="s1-1"><span class="secno-heading">1.1</span> Problem Statement<a class="self-link" href="#s1-1" title="§ 1.1 Problem Statement">§</a></h3>
   <p>
-    Autonomous AI agents are increasingly authorised to act on behalf of human principals in
-    commerce, finance, and regulated industries — selecting goods, negotiating terms, and
-    initiating payments without per-transaction human approval.  This autonomy introduces a
-    systemic oversight gap: the agent's chain of decisions between the user's original
-    instruction and the final payment action is opaque, probabilistic, and subject to silent
-    drift.  No party in the value chain — merchant, credential provider, payment network,
-    issuer, or regulator — currently holds a standardised, independently verifiable record
-    of what the agent understood and acted upon.
+    Autonomous AI agents are increasingly authorised to act on behalf of human principals —
+    selecting goods, negotiating terms, and initiating payments without per-transaction human
+    approval. The agent's chain of decisions between the original instruction and the payment
+    action is not visible in a standardised, independently verifiable form.
+    No party in the value chain currently holds that record by default.
   </p>
   <p>
-    For the payment industry this gap is acute.  Schemes and issuers require trust signals
-    that travel with the authorisation message and can be used to:
-  </p>
-  <ul>
-    <li><strong>Mitigate chargeback risk.</strong> Distinguish legitimate agent-initiated
-        purchases from fraudulent ones, and provide an assessable record of authorised user
-        intent that survives a "I did not authorise this" dispute.</li>
-    <li><strong>Manage fraud liability.</strong> Determine whether liability shifts to the
-        agent provider, merchant, or issuer when an agent-initiated transaction is later
-        disputed, based on independent evidence of what the agent was instructed to do
-        versus what it actually did.</li>
-    <li><strong>Ensure compliance.</strong> Demonstrate that agent-initiated transactions
-        comply with applicable regulations — including the EU AI Act (transparency and
-        explainability obligations for high-risk AI systems), PSD2 / PSD3 (strong customer
-        authentication and transaction monitoring), DORA (operational resilience and
-        assessability of third-party AI systems), and the
-        <strong>Interchange Fee Regulation (IFR, EU 2015/751)</strong> (cost justification
-        and routing transparency for card-based transactions where agent-selected routing
-        may affect interchange) — as well as network rulebooks, at the time of authorisation
-        and not only at onboarding.</li>
-    <li><strong>Protect data privacy.</strong> Enable assessability of agent reasoning
-        without exposing raw user data to payment networks, merchants, or processors:
-        the trust signal must be verifiable without being a surveillance instrument.</li>
-    <li><strong>Avoid disputes.</strong> Give merchants and consumers a common reference
-        record — signed and time-stamped by a neutral party — that can be consulted
-        before a chargeback is filed and used to resolve disputes without litigation.</li>
-    <li><strong>Extend and continuously feed KYA monitoring.</strong>
-        Know Your Agent (KYA) frameworks perform pre-runtime identity verification — confirming who built the
-        agent, which cryptographic keys it holds, and what scopes it claims at registration.
-        ATLAS extends this static identity layer with runtime behavioural evidence: every
-        <code>AssessmentResult</code> and associated evidence hash constitutes a machine-readable
-        behavioural signal that can be fed back into KYA monitoring pipelines.  Over time,
-        a series of <code>AssessmentResult</code> verdicts for a given agent identifier reveals
-        drift patterns — scope creep, intent distortion, or policy violations — that are
-        invisible to static KYA checks but detectable through continuous assessment.  Payment
-        networks and issuers can therefore use ATLAS-derived signals to update agent trust
-        scores, trigger re-attestation requirements, or suspend agent credentials when
-        behavioural deviations cross a defined threshold, creating a closed loop between
-        initial agent identity verification and ongoing runtime trustworthiness assessment.
-    </li>
-  </ul>
-  <p>
-    Existing protocols address complementary problems.  AP2 and Verifiable Intent (VI) provide
-    strong cryptographic controls once the flow is expressed as mandates and payment artifacts,
-    but do not define a standard protocol for an independent Assessor to assess how the agent
-    interpreted user intent, propagated constraints, and selected merchants before those
-    artifacts were created.  Know Your Agent (KYA) frameworks establish pre-runtime identity — who built the agent and which keys
-    it holds — but cannot guarantee what the agent actually did during a live transaction.
+    Existing protocols address complementary problems. AP2 and Verifiable Intent (VI) provide
+    cryptographic controls once the flow is expressed as mandates and payment artifacts, but do
+    not standardise how an independent Assessor obtains evidence of what the agent did beforehand.
+    Know Your Agent (KYA) frameworks establish pre-runtime identity — who built the agent and
+    which keys it holds — but do not describe live-session behaviour.
   </p>
   <p>
-    <em>Intent drift</em> is the primary and most operationally significant instance of this
-    broader oversight gap.  It occurs when the agent's interpretation of natural-language user
-    constraints (budget, allergens, ethical preferences, risk appetite, medical limitations)
-    diverges from the user's actual intent across the interpretation, structuring, and
-    presentation layers of an agentic commerce stack (see §<a href="#s1-4">1.4</a>).
-    In the payment context, intent drift translates directly into wrong purchases, misallocated
-    liability, and undetected fraud — with no independent record to adjudicate the outcome.
+    KYA itself is also fragmented. The <em>same</em> subject agent commonly has
+    <strong>several identifiers and statuses</strong> across KYA repositories (one registration
+    per payment network or scheme: active here, suspended there, unknown elsewhere). Those
+    identifiers do not join by default, so risk on Network A is invisible to Network B, and a
+    merchant cannot reasonably query every store — especially before a rail is chosen.
+    Link 1 therefore carries optional <code>agent.registered_identities[]</code> (§8.1.1): a
+    join list so the Assessor can look up <strong>all listed identities on behalf of the
+    requester</strong> (merchant, wallet, or subject) and form a cross-repository view.
+    Only <code>agent_cnf</code> is the signing key; registered identities are lookup handles,
+    not extra keys.
   </p>
   <p>
-    ATLAS standardises how authorized <em>Assessor agents</em>, operating as neutral third
-    parties, obtain bounded and encrypted evidence from the subject agent, evaluate it
-    against a named policy referential, and produce a compact cryptographic trust signal
-    (<code>ReportToken</code>) that can be carried in ISO 8583, EMV 3DS, and ISO 20022
-    messages.
+    ATLAS standardises how authorized <em>Assessor agents</em> obtain bounded and encrypted
+    evidence from the subject agent and produce a compact cryptographic trust signal
+    (<code>ReportToken</code>) that can be carried in ISO 8583, EMV 3DS, and ISO 20022 messages.
+    Evaluation against a named <code>policy_referential</code> is performed by the Assessor under
+    scheme rules; this specification does not define those methods.
   </p>
+  <div class="note">
+    <p class="note-title">Where the rest of the problem is written</p>
+    <p>
+      Expanded problem narrative (intent drift, IFR/rail choice, chargebacks, fairness,
+      “confirm is not 3DS”) is in the
+      <a href="atlas-faq.html#6-what-problems-is-this-trying-to-solve">FAQ — What problems is this trying to solve?</a>
+      and portable KYA checks in
+      <a href="atlas-faq.html#18-does-an-agent-carry-a-portable-credential-proving-its-authority-from-merchant-to-merchant">FAQ — portable credentials</a>.
+      The same FAQ is included as HTML in
+      <a href="#s14">§14</a>.
+      Chargeback, liability, and regulatory <em>use</em> of a verdict are programme policy —
+      see the <a href="atlas-protocol-explainer.html">Explainer</a>.
+    </p>
+  </div>
 
   <h3 id="s1-2"><span class="secno-heading">1.2</span> Design Goals<a class="self-link" href="#s1-2" title="§ 1.2 Design Goals">§</a></h3>
   <ol>
     <li><strong>Observability without lock-in.</strong> A portable evidence-release protocol — not an Assessor SDK, not a requirement to host the subject, and not a readable proxy on the path.</li>
     <li><strong>Privacy by default.</strong> Release only classes listed in <code>scope</code>; encrypt the JWE so only the designated Assessor can decrypt it. The Trust Authority <span class="rfc2119">MUST NOT</span> obtain plaintext evidence.</li>
-    <li><strong>Scheme-agnostic assessment types.</strong> Roster <code>assessment_types</code> are opaque codes defined by the scheme (e.g. a FACT profile). This specification does not define intent, fairness, or regulatory methods.</li>
+    <li><strong>Scheme-agnostic assessment types.</strong> Roster <code>assessment_types</code> are opaque codes defined by the scheme (for example regulatory compliance or intent-matching verification). This specification does not define those methods.</li>
     <li><strong>Complementarity with AP2/VI/UCP.</strong> Align with mandate delegation and checkout objects — do not replace them. Merchant/wallet artefacts arrive on holder Link 2 when they exist.</li>
     <li><strong>Durable redeemable output.</strong> Compact <code>ReportToken</code> for rails and later retrieval from the TA.</li>
     <li><strong>Deployment-appropriate initiation.</strong> Two models: cloud-based agent (holder and direct); on-device agent via deposit (deposit-direct and deposit-holder).</li>
-    <li><strong>Registry-level Assessor roster.</strong> The subject agent (cloud direct / deposit) or the holder (cloud holder, and before deposit-holder Link 2) selects an Assessor from the TA-partner roster. ATLAS tokens <span class="rfc2119">MUST NOT</span> carry the Assessor URL — clients read <code>assessor_endpoint</code> from the live roster. How a device authenticates the roster endpoint (TLS only vs certificate pinning) is out of scope.</li>
+    <li><strong>Registry-level Assessor roster.</strong> The subject agent (cloud direct / deposit) or the holder (cloud holder, and before deposit-holder Link 2) selects an Assessor from the TA-partner roster. Delivery addresses are discovered from that roster (§5.3).</li>
     <li><strong>Separation of authority.</strong> Separate authority to request a result / decrypt evidence / redeem reports.</li>
     <li><strong>Rail-compatible token.</strong> Downstream token fits in ISO 8583 / EMV 3DS / ISO 20022.</li>
     <li><strong>Chained signed-token model.</strong> JWS/JWT + JWE over TLS; <code>cnf</code> per RFC 7800.</li>
   </ol>
-
-  <h3 id="s1-4"><span class="secno-heading">1.4</span> Why Assessment? The Agentic Commerce Trust Problem<a class="self-link" href="#s1-4" title="§ 1.4 Why Assessment? The Agentic Commerce Trust Problem">§</a></h3>
-
-  <div class="note">
-    <p class="note-title">Background reading</p>
-    <p>This section draws on the following companion articles and blog posts published by the ATLAS editor:</p>
-    <ul>
-      <li>
-        <a href="https://www.fime.com/blog/blog-15/post/kya-is-not-enough-introducing-fact-the-runtime-trust-layer-for-agentic-commerce-697"
-           rel="noopener">KYA is not enough: introducing FACT, the runtime trust layer for agentic commerce</a>
-        — Fime Blog (June 2026).
-        Introduces ATLAS as a neutral, real-time trust infrastructure sitting above payment rails, explains the KYA/ATLAS complementarity model, and describes ATLAS's three core functions (risk, regulation, dispute).
-      </li>
-      <li>
-        <a href="https://www.linkedin.com/pulse/when-ai-buys-your-behalf-understanding-stack-risks-jean-luc-di-manno-cms9e/"
-           rel="noopener">When AI buys on your behalf: understanding the stack and the risks</a>
-        — LinkedIn Pulse (May 2026).
-        Walks through the LLM/token/embedding/RAG/MCP stack and the three risk layers through which user intent can silently drift.
-      </li>
-      <li>
-        <a href="https://www.linkedin.com/pulse/from-kya-continuous-trust-fact-governing-agentic-jean-luc-di-manno-1ocne/"
-           rel="noopener">From KYA to Continuous Trust with FACT: Governing Agentic Commerce in Production</a>
-        —  LinkedIn Pulse (May 2026).
-        Examines the limits of static KYA frameworks, defines intent drift, and positions ATLAS as the runtime behavioural verification layer that complements KYA.
-      </li>
-    </ul>
-  </div>
-
-  <h4 id="s1-4-1">The Three Risk Layers in Agentic Commerce</h4>
-  <p>
-    An agentic commerce flow converts a human's natural-language expression into a structured
-    payment action — choosing merchants, building carts, and initiating checkout — without the
-    human reviewing every intermediate step.  That conversion passes through three consecutive
-    layers, each of which can silently distort the user's original intent:
-  </p>
-  <dl>
-    <dt><strong>Interpretation layer.</strong></dt>
-    <dd>
-      The large language model (LLM) maps the user's free text to an internal representation
-      using the probability distributions encoded in its weights.  Constraints that are rare,
-      ambiguous, or medically nuanced (e.g. a specific allergen interaction with a prescribed
-      drug) may be approximated, under-weighted, or collapsed into a generic label.
-    </dd>
-    <dt><strong>Structuring layer.</strong></dt>
-    <dd>
-      To invoke tools via MCP or a comparable protocol the LLM must serialise its interpretation
-      into a typed, schema-constrained JSON object.  Fields that do not map cleanly to the target
-      schema are compressed or silently dropped.  A constraint that survived the interpretation
-      layer may not survive serialisation.
-    </dd>
-    <dt><strong>Filtering and presentation layer.</strong></dt>
-    <dd>
-      Privacy and safety filters (PII scrubbing, safety classifiers, content moderation) operate
-      between the LLM and downstream systems.  These layers are necessary but can unintentionally
-      redact or generalise critical constraints — for example, a medical allergy note — before the
-      tool call or the confirmation screen is rendered.  The user then sees a simplified summary
-      that <em>looks</em> correct while missing nuances that matter for safety or compliance.
-    </dd>
-  </dl>
-
-  <div class="note">
-    <p class="note-title">Primary illustrative example — intent with health constraints</p>
-    <p>
-      A user says: <em>"I want to order a pizza. I am severely allergic to peanuts,
-      I am on a particular heart medication, and my budget is 40&nbsp;€."</em>
-    </p>
-    <p>
-      The agent may encode the budget constraint very cleanly
-      (<code>"max_price": 40</code>) because it fits neatly into every commerce
-      schema it has seen during training.  The allergy and the drug-interaction
-      constraint, however, may only survive as a vague free-text annotation —
-      or be stripped entirely by a PII filter — before the
-      <code>restaurant_search</code> or <code>add_to_cart</code> MCP call is
-      issued.  The confirmation screen then presents <em>"vegetarian pizza, 40&nbsp;€"</em>:
-      visually reasonable, yet missing the critical safety constraints the user expressed.
-      If the agent places an order that causes harm, no party in the value chain holds
-      an assessable record of what the agent actually understood and acted upon.
-    </p>
-  </div>
-
-  <h4 id="s1-4-2">From KYA to Continuous Runtime Assessment</h4>
-  <p>
-    Payment networks have responded to agentic commerce by introducing
-    <em>Know Your Agent</em> (KYA) frameworks — agent registration, cryptographic key binding,
-    and verifiable credentials that attest to an agent's identity before any token is issued.
-    KYA is a necessary foundation, but it is <em>pre-runtime</em>: it establishes who built
-    the agent and which keys it holds, not what the agent actually does during a live transaction.
-  </p>
-  <p>
-    Agents placed under ATLAS assessment are typically non-deterministic systems subject to prompt injection, memory
-    poisoning, supply-chain compromise, and non-deterministic drift: identical prompts can produce
-    different outputs across runs, and the agent's effective behaviour can change after a model
-    update or tool swap without any visible modification to its KYA credentials.
-    A clean cryptographic handshake at checkout does not reveal whether the agent silently
-    dropped a medical constraint five steps earlier.
-  </p>
-  <p>
-    ATLAS addresses this gap by providing a <strong>neutral runtime trust layer</strong>
-    that continuously verifies what agents actually do, sitting above payment rails and below
-    agents, independently of any single network or agent provider.
-  </p>
-
-  <h4 id="s1-4-3">What the Assessor Evaluates: Agent Data vs. Referential</h4>
-  <p>
-    an ATLAS Assessor Agent evaluates evidence from <strong>complementary sources</strong>,
-    unified under the evidence-artifact model (§8.3.1):
-  </p>
-  <ul>
-    <li><strong>Subject Agent package</strong> (<code>AssessmentEvidenceResponse</code> JWE, §8.5) —
-        intent, reasoning, supply-chain provenance, and optional
-        <code>evidence_artifacts[]</code> with <code>provenance: agent_observed</code>.</li>
-    <li><strong>Holder-commissioned artifacts</strong> (Link 2 <code>requester_evidence</code>, holder mode only) —
-        <code>provenance: holder_commissioned</code>; independent merchant/CP attestation when
-        commissioning the assessment.</li>
-  </ul>
-  <p>
-    The Assessor compares these sources against the active
-    <strong>policy referential</strong> (<code>policy_referential</code> on Link 1).
-    The JWE is encrypted to the Assessor only and never forwarded to merchants, CPs, or payment networks.
-    Narrative fields include user intent, reasoning chain, supply-chain provenance, and — when required —
-    <code>agent_observed</code> counterparty artifacts (merchant carts, AP2 mandates) relayed by the
-    Subject Agent.
-  </p>
-  <p>
-    In <strong>holder mode</strong> and on deposit-holder result request, merchants and CPs
-    <span class="rfc2119">MAY</span> attach <code>holder_commissioned</code> artifacts on Link 2
-    (carts, AP2/VI). Carts and mandates are not required on Link 1-D. In
-    <code>browser-context</code> the Subject Agent <span class="rfc2119">MAY</span> include an
-    observed cart in the JWE. The Assessor <span class="rfc2119">SHOULD</span> perform
-    <code>evidence_cross_check</code> (§8.6) before issuing <code>AssessmentResult</code>.
-  </p>
-  <p>
-    The <strong>policy referential</strong> and roster <code>assessment_types</code> are
-    <strong>opaque scheme identifiers</strong>. This protocol does not define what an Assessor
-    must conclude (intent accuracy, fairness, regulation, or otherwise). A scheme or programme
-    such as FACT <span class="rfc2119">MAY</span> bind those codes to certified methods.
-    ATLAS only requires that the Assessor decrypt in-scope evidence, apply the method its
-    authorization names, and issue Link 4 / Link 5.
-  </p>
-  <p>
-    the Assessor produces an <code>AssessmentResult</code> (Link 4) containing a binary or graded
-    <code>verdict</code>, a hash of the evidence reviewed, the <code>policy_referential</code>
-    applied, and — when the trust authority so requires — a <code>report_token</code>
-    that can be redeemed by the payment network or issuer for a stored trust-assurance report.
-    This is the mechanism by which a payment authorisation decision can incorporate independent
-    runtime evidence about agent behaviour, complementing the static KYA signals already present
-    in the authorisation message.
-  </p>
 
   <h3 id="s1-3"><span class="secno-heading">1.3</span> Relationship to Other Specifications<a class="self-link" href="#s1-3" title="§ 1.3 Relationship to Other Specifications">§</a></h3>
   <div class="table-wrap">
@@ -1361,7 +1243,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <dl class="defn">
     <dt>Subject Agent</dt><dd><span class="rfc2119">MUST</span> implement holder Link 1 issuance (§8.1) and/or Link 1-D issuance (§8.2), roster selection of the Assessor, Link 3 verification, JWE evidence release (§8.5), and <code>AssessmentResult</code> conveyance when it is the requester (§8.6).</dd>
     <dt>Merchant / Credential Provider (Holder)</dt><dd><span class="rfc2119">MUST</span> implement Link 2 issuance (§8.3) including optional <code>requester_evidence</code> (§8.3.1), and <code>AssessmentResult</code> conveyance (§8.6). On deposit-holder, Link 2 is the result request against a stored JWE.</dd>
-    <dt>Assessor Agent</dt><dd><span class="rfc2119">MUST</span> implement Link 3 issuance, evidence decryption, requester-artifact verification (§8.3.1), evidence cross-check (§8.6), and <code>AssessmentResult</code> / <code>ReportToken</code> issuance (§8.6). On deposit, it <span class="rfc2119">MUST</span> store the JWE and issue Link 4 only when the deposit result path asks (SA for deposit-direct; holder for deposit-holder).</dd>
+    <dt>Assessor Agent</dt><dd><span class="rfc2119">MUST</span> implement Link 3 issuance, evidence decryption, requester-artifact signature verification (§8.3.1), and <code>AssessmentResult</code> / <code>ReportToken</code> issuance (§8.6). The Assessor <span class="rfc2119">MAY</span> populate <code>evidence_cross_check</code> when the named method requires it (method semantics are scheme-defined; see the <a href="atlas-protocol-explainer.html">Explainer</a>). On deposit it <span class="rfc2119">MUST</span> return Link 3 on the outbound Link 1-D response and <span class="rfc2119">MUST NOT</span> call the on-device subject. Deposit-direct: Link 4 / Link 5 on the JWE response. Deposit-holder: <code>DepositAcknowledgement</code> on the JWE response; Link 4 / Link 5 to the holder after Link 2.</dd>
     <dt>Trust Authority</dt><dd><span class="rfc2119">MUST</span> issue authorization credentials, operate a report API, and participate in the trust registry roster. When the subject cannot reach the roster <code>assessor_endpoint</code>, the TA <span class="rfc2119">MAY</span> forward the JWE opaquely without decrypting. The TA does <span class="rfc2119">not</span> select the Assessor.</dd>
     <dt>Merchant Processor</dt><dd><span class="rfc2119">MUST</span> verify conveyed <code>AssessmentResult</code> payloads, extract <code>report_token</code> values, and assemble <code>redeem_tokens</code> for payment rails (§8.7).</dd>
   </dl>
@@ -1378,11 +1260,12 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <dt>Trust Authority (TA)</dt><dd>An independent organisation that authorizes Assessor agents, signs authorization credentials, publishes them on the TA-partner roster, optionally forwards opaque JWE when the subject cannot reach the Assessor URL, stores reports, and redeems <code>ReportToken</code> values. The TA does not select the Assessor for a transaction.</dd>
     <dt>Trust Registry</dt><dd>A governance framework that manages participating TAs and publishes the authoritative Assessor roster.</dd>
     <dt>AssessmentDelegation (Link 1)</dt><dd>Signed JWT/JWS issued by the subject agent to a merchant or CP (holder mode). <span class="rfc2119">MUST</span> carry <code>agent_cnf</code> and <code>agent</code> (§8.1.1).</dd>
-    <dt>AssessmentDelegation (Link 1-D)</dt><dd>Signed JWT issued by the subject agent straight to a roster-selected Assessor (<code>assessment_mode: direct</code> or <code>deposit</code>). <code>cnf</code> binds the Assessor key. <code>permitted_assessors</code> <span class="rfc2119">MUST</span> name that Assessor’s roster identifier and/or public-key <code>jkt</code>. Link 1-D <span class="rfc2119">MUST NOT</span> carry <code>permitted_trust_authorities</code> or <code>assessor_endpoint</code>.</dd>
-    <dt>deposit_result</dt><dd>Claim on deposit Link 1-D: <code>direct</code> (the SA later requests Link 4) or <code>holder</code> (a merchant/CP later requests Link 4 against the stored JWE).</dd>
+    <dt>AssessmentDelegation (Link 1-D)</dt><dd>Signed JWT issued by the subject agent straight to a roster-selected Assessor (<code>assessment_mode: direct</code> or <code>deposit</code>). <code>cnf</code> binds the Assessor key. <code>permitted_assessors</code> <span class="rfc2119">MUST</span> name that Assessor’s roster identifier and/or public-key <code>jkt</code>. <code>permitted_trust_authorities</code> <span class="rfc2119">MUST</span> name TA <code>jkt</code> values so verifiers can check that the selected Assessor’s live roster authorization is signed by a listed TA. Link 1-D <span class="rfc2119">MUST NOT</span> carry <code>assessor_endpoint</code> (§5.3).</dd>
+    <dt>deposit_result</dt><dd>Claim on deposit Link 1-D: <code>direct</code> (the Assessor returns Link 4 / Link 5 on the JWE response) or <code>holder</code> (the Assessor returns <code>DepositAcknowledgement</code> on the JWE response; Link 4 later goes to the holder after Link 2).</dd>
     <dt>AssessmentSubDelegation (Link 2)</dt><dd>Signed JWT issued by a holder to a specific Assessor, chained to Link 1 via <code>parent_jti</code>, binding the assessor's key in <code>cnf</code>. Used in cloud holder and as the deposit-holder result request. The holder <span class="rfc2119">MUST</span> select that Assessor from the live roster before issuing Link 2. <span class="rfc2119">MAY</span> carry <code>requester_evidence</code> (§8.3.1).</dd>
-    <dt>AssessorAccessAssertion (Link 3)</dt><dd>Signed JWS issued by the Assessor to the subject agent, embedding the delegation chain and authorization, signed over a fresh nonce. In deposit mode it is returned on the outbound deposit response (the device has no inbound URL).</dd>
-    <dt>AssessmentEvidenceResponse</dt><dd>JWE (RFC 7516) issued by the subject agent to the Assessor containing scoped evidence classes (§8.0). Encrypted to the Assessor <code>cnf</code> only.</dd>
+    <dt>AssessorAccessAssertion (Link 3)</dt><dd>Signed JWS issued by the Assessor to the subject agent, embedding the delegation chain and authorization, signed over a fresh nonce. In deposit mode it is returned on the outbound Link 1-D response (the device has no inbound URL). Link 3 authorises the subsequent JWE POST; it is not bundled with the JWE.</dd>
+    <dt>DepositAcknowledgement</dt><dd>Signed JWS issued by the Assessor to the subject agent on the deposit-holder JWE response, confirming that the JWE is stored bound to Link 1-D. It <span class="rfc2119">MUST NOT</span> carry a verdict. Link 4 / Link 5 are issued later to the holder after Link 2.</dd>
+    <dt>AssessmentEvidenceResponse</dt><dd>JWE (RFC 7516) issued by the subject agent to the Assessor containing only in-scope (scope-related) data classes (§8.0). Encrypted to the Assessor <code>cnf</code> only.</dd>
     <dt>AssessmentResult (Link 4)</dt><dd>Signed JWS result envelope issued by the Assessor containing the assessment verdict, policy referential, evidence hashes, optional <code>evidence_cross_check</code> summary (§8.6), and a <code>report_token</code>. When the subject releases no evidence classes, Link 4 <span class="rfc2119">MUST</span> still be issued with <code>verdict: not_assessed</code> (§8.6). Link 4 <span class="rfc2119">MUST NOT</span> embed Link 2; it references evaluated artifacts via <code>link2_jti</code>, <code>requester_evidence_digest</code>, and <code>observed_artifacts_digest</code>.</dd>
     <dt>ReportToken (Link 5)</dt><dd>Compact, opaque downstream token providing a redeemable reference to one stored assessment report. One token per assessment.</dd>
     <dt>redeem_tokens</dt><dd>Payment-rail-only field (ISO 8583 / EMV 3DS / ISO 20022) assembled by the merchant processor from up to three <code>report_token</code> values. Not an ATLAS protocol link.</dd>
@@ -1393,13 +1276,13 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <dt>requester_evidence</dt><dd>Link 2 wrapper (holder mode) carrying <code>artifacts[]</code> with <code>provenance: holder_commissioned</code> (§8.3.1).</dd>
     <dt>evidence artifact</dt><dd>Unified signed-object envelope (<code>artifact_id</code>, <code>provenance</code>, <code>source_id</code>, <code>kind</code>, <code>attestation</code>) carried on Link 2 or in the JWE (§8.3.1).</dd>
     <dt>evidence_artifacts</dt><dd>Array on the JWE inner payload of <code>agent_observed</code> artifacts relayed by the Subject Agent (§8.5.1).</dd>
-    <dt>evidence cross-check</dt><dd>Assessor step comparing verified artifacts (Link 2 and/or JWE) against Subject Agent narrative under the active <code>policy_referential</code>; recorded in <code>AssessmentResult.evidence_cross_check</code> (§8.6).</dd>
+    <dt>evidence cross-check</dt><dd>Optional Link 4 object recording that verified artifacts were compared under the active <code>policy_referential</code>. Comparison rules and verdict mapping are scheme-defined (see the <a href="atlas-protocol-explainer.html">Explainer</a>), not this specification. Field shape is in §8.6.</dd>
     <dt>assessment_mode</dt><dd>Claim on Link 1 / Link 1-D: <code>holder</code> (cloud holder), <code>direct</code> (cloud direct), or <code>deposit</code> (on-device). Deposit then uses <code>deposit_result</code> <code>direct</code> or <code>holder</code>.</dd>
-    <dt>permitted_assessors</dt><dd>Array on Link 1-D of the roster Assessor(s) the subject selected: each entry is an <code>assessor_id</code> and/or signing-key <code>jkt</code> from the TA-partner roster. The Assessor bound in <code>cnf</code> <span class="rfc2119">MUST</span> appear in this array.</dd>
+    <dt>permitted_assessors</dt><dd>Array on Link 1-D of the roster Assessor(s) the subject selected: each entry is an <code>assessor_id</code> and/or signing-key <code>jkt</code> from the TA-partner roster. The Assessor bound in <code>cnf</code> <span class="rfc2119">MUST</span> appear in this array, and that Assessor’s live roster authorization <span class="rfc2119">MUST</span> be signed by a TA in <code>permitted_trust_authorities</code>.</dd>
     <dt>scope</dt><dd>Array of evidence-class identifiers the subject is willing to release (§8.0). A ceiling, not a verdict type.</dd>
     <dt>subject_channel</dt><dd>Optional Link 1 / Link 1-D claim: <code>browser-context</code> or <code>agent-protocol</code>.</dd>
     <dt>deposited_assessors</dt><dd>Optional array on holder Link 1 listing Assessor (and TA) identifiers that already hold a JWE for this session.</dd>
-    <dt>policy_referential</dt><dd>Opaque scheme identifier naming the method pack the Assessor is authorized to apply. Semantics are scheme-defined (e.g. FACT), not ATLAS-defined.</dd>
+    <dt>policy_referential</dt><dd>Opaque scheme identifier naming the method pack the Assessor is authorized to apply. Semantics are scheme-defined (for example regulatory compliance or intent-matching verification), not ATLAS-defined.</dd>
     <dt>Assessor Roster</dt><dd>Machine-readable catalogue published by a trust registry, listing every currently authorized Assessor agent with its public keys, assessment types, regions, and owning TA.</dd>
     <dt>Hyperlab</dt><dd>The Innovation Lab within Consult Hyperion responsible for this specification and related ATLAS artefacts as part of the agentic commerce trust and assurance programme.</dd>
   </dl>
@@ -1436,17 +1319,10 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Model</th><th>Where the subject runs</th><th>Modes</th><th>Who selects the Assessor</th></tr></thead>
       <tbody>
         <tr><td><strong>Cloud-based agent</strong></td><td>SaaS or operator-hosted subject (inbound HTTPS typical)</td><td><strong>Holder</strong> and <strong>direct</strong></td><td>Holder: merchant/CP from the TA-partner roster before Link 2. Direct: the subject from the same roster before Link 1-D.</td></tr>
-        <tr><td><strong>On-device agent (deposit)</strong></td><td>Phone or laptop (outbound only)</td><td><strong>Deposit-direct</strong> and <strong>deposit-holder</strong></td><td>The subject from the TA-partner roster before Link 1-D. URL is read from the roster, not from an ATLAS claim.</td></tr>
+        <tr><td><strong>On-device agent (deposit)</strong></td><td>Phone or laptop (outbound only)</td><td><strong>Deposit-direct</strong> and <strong>deposit-holder</strong></td><td>The subject from the TA-partner roster before Link 1-D (§5.3).</td></tr>
       </tbody>
     </table>
   </div>
-  <p>
-    ATLAS artifacts <span class="rfc2119">MUST NOT</span> convey the Assessor HTTPS URL.
-    Clients <span class="rfc2119">MUST</span> take <code>assessor_endpoint</code> from the
-    live roster entry of the selected Assessor. How the device authenticates the
-    <strong>roster</strong> endpoint (TLS only, certificate pinning, or otherwise) is
-    <strong>out of scope</strong> of this specification.
-  </p>
   <p>
     Link 1 and Link 1-D <span class="rfc2119">SHOULD</span> carry <code>subject_channel</code>:
     <code>browser-context</code> (human web / DOM / WebMCP) or
@@ -1488,14 +1364,14 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <tr><td><code>assessor_signing_keys</code></td><td>JWK thumbprints (<code>jkt</code>)</td><td>Public keys for Link 1-D <code>cnf</code> / <code>permitted_assessors</code>, Link 2/3, and <code>AssessmentResult</code></td></tr>
         <tr><td><code>trust_authority_id</code></td><td>URI</td><td>Owning TA for this authorization</td></tr>
         <tr><td><code>trust_authority_signing_keys</code></td><td>JWK thumbprints</td><td>TA keys signing authorization credentials</td></tr>
-        <tr><td><code>assessment_types</code></td><td>Array of opaque codes</td><td>Scheme-defined method identifiers (not defined by ATLAS; e.g. a FACT profile)</td></tr>
+        <tr><td><code>assessment_types</code></td><td>Array of opaque codes</td><td>Scheme-defined method identifiers (not defined by ATLAS; e.g. regulatory compliance, intent-matching verification)</td></tr>
         <tr><td><code>regions</code></td><td>Array of codes</td><td>Geographic coverage (e.g. <code>EU</code>, <code>US-CA</code>)</td></tr>
         <tr><td><code>authorization_issued_at</code></td><td>Datetime</td><td>Date authorization was granted</td></tr>
         <tr><td><code>authorization_expires_at</code></td><td>Datetime</td><td>Authorization validity end</td></tr>
         <tr><td><code>authorization_status</code></td><td>Enum</td><td><code>active</code> | <code>suspended</code> | <code>revoked</code></td></tr>
         <tr><td><code>policy_referentials</code></td><td>Array of IDs</td><td>Referentials the Assessor is approved to evaluate</td></tr>
         <tr><td><code>assessor_provider_id</code></td><td>String</td><td>Optional operator/lab ID</td></tr>
-        <tr><td><code>assessor_endpoint</code></td><td>HTTPS URL</td><td>Where the Assessor accepts Link 1-D / JWE. Clients <span class="rfc2119">MUST</span> read this from the live roster. ATLAS tokens <span class="rfc2119">MUST NOT</span> carry this URL.</td></tr>
+        <tr><td><code>assessor_endpoint</code></td><td>HTTPS URL</td><td>Where the Assessor accepts Link 1-D, Link 3 on the outbound response, and the evidence JWE. Discovery only — see §5.3.</td></tr>
       </tbody>
     </table>
   </div>
@@ -1507,14 +1383,21 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     (<code>roster_version</code>, <code>updated_at</code>) and revocation.
     Implementations <span class="rfc2119">MAY</span> expose the roster as a JSON document, REST
     collection, or signed JWT bundle.
-    How a client authenticates the roster HTTPS endpoint (TLS validation only, certificate
-    pinning, or otherwise) is <strong>out of scope</strong> of this specification.
+  </p>
+  <p>
+    Clients <span class="rfc2119">MUST</span> take <code>assessor_endpoint</code> from the live
+    roster entry of the selected Assessor. ATLAS artifacts <span class="rfc2119">MUST NOT</span>
+    convey the Assessor HTTPS URL. If the subject cannot reach that URL, the TA
+    <span class="rfc2119">MAY</span> forward the JWE ciphertext without decrypting. The TA does
+    not select the Assessor. How a client authenticates the roster HTTPS endpoint (TLS
+    validation only, certificate pinning, or otherwise) is <strong>out of scope</strong> of
+    this specification.
   </p>
 
   <h3 id="s5-4"><span class="secno-heading">5.4</span> Use in ATLAS Flows<a class="self-link" href="#s5-4" title="§ 5.4 Use in ATLAS Flows">§</a></h3>
   <ul>
-    <li>Subject agent <span class="rfc2119">MUST</span> copy the selected Assessor’s roster <code>assessor_id</code> and/or <code>jkt</code> into <code>permitted_assessors</code> when building Link 1-D. Holder-mode Link 1 <span class="rfc2119">MAY</span> copy TA <code>jkt</code> values into <code>permitted_trust_authorities</code>.</li>
-    <li>In cloud holder and before deposit-holder Link 2, the merchant or CP <span class="rfc2119">MUST</span> GET the live roster and select the Assessor from it, then bind that Assessor’s <code>jkt</code> in Link 2 <code>cnf</code>. ATLAS tokens <span class="rfc2119">MUST NOT</span> include <code>assessor_endpoint</code>.</li>
+    <li>Subject agent <span class="rfc2119">MUST</span> copy the selected Assessor’s roster <code>assessor_id</code> and/or <code>jkt</code> into <code>permitted_assessors</code> when building Link 1-D, and <span class="rfc2119">MUST</span> copy the authorizing TA <code>jkt</code> values into <code>permitted_trust_authorities</code>. Verifiers <span class="rfc2119">MUST</span> reject Link 1-D if the selected Assessor’s live roster authorization is not signed by a listed TA. Holder-mode Link 1 <span class="rfc2119">MUST</span> carry <code>permitted_trust_authorities</code>; deposit-holder Link 1 <span class="rfc2119">MUST</span> also carry <code>deposited_assessors[]</code>.</li>
+    <li>In cloud holder and before deposit-holder Link 2, the merchant or CP <span class="rfc2119">MUST</span> GET the live roster and select the Assessor from it, then bind that Assessor’s <code>jkt</code> in Link 2 <code>cnf</code>. Deposit-holder: that Assessor <span class="rfc2119">MUST</span> already appear in <code>deposited_assessors</code> (it holds the JWE). Delivery address: §5.3.</li>
     <li>Holders and Assessors <span class="rfc2119">SHOULD</span> reject commission if the Assessor's keys or authorization dates do not match the current roster entry.</li>
   </ul>
 </section>
@@ -1533,10 +1416,11 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Artifact</th><th>Link</th><th>Shape</th><th>Issuer</th><th>Subject</th><th>Purpose</th></tr></thead>
       <tbody>
         <tr><td><code>AssessmentDelegation</code></td><td>1</td><td>Signed JWT</td><td>Subject Agent</td><td>Merchant / CP</td><td>Holder commission; <code>assessment_mode: holder</code></td></tr>
-        <tr><td><code>AssessmentDelegation</code></td><td>1-D</td><td>Signed JWT</td><td>Subject Agent</td><td>Roster-selected Assessor</td><td><code>direct</code> or <code>deposit</code>; <code>cnf</code> + <code>permitted_assessors</code></td></tr>
+        <tr><td><code>AssessmentDelegation</code></td><td>1-D</td><td>Signed JWT</td><td>Subject Agent</td><td>Roster-selected Assessor</td><td><code>direct</code> or <code>deposit</code>; <code>cnf</code> + <code>permitted_assessors</code> + <code>permitted_trust_authorities</code></td></tr>
         <tr><td><code>AssessmentSubDelegation</code></td><td>2</td><td>Signed JWT (chained)</td><td>Merchant or CP</td><td>Specific Assessor</td><td>Holder / deposit-holder — binds assessor key; optional <code>requester_evidence</code></td></tr>
-        <tr><td><code>AssessorAccessAssertion</code></td><td>3</td><td>Signed JWS envelope</td><td>Assessor</td><td>Subject Agent</td><td>Embeds chain + authorization; unlocks JWE (deposit: on the outbound response)</td></tr>
-        <tr><td><code>AssessmentEvidenceResponse</code></td><td>—</td><td>JWE (RFC 7516)</td><td>Subject Agent</td><td>Assessor only</td><td>Encrypted to assessor key; not forwarded</td></tr>
+        <tr><td><code>AssessorAccessAssertion</code></td><td>3</td><td>Signed JWS envelope</td><td>Assessor</td><td>Subject Agent</td><td>Embeds chain + authorization; unlocks the subsequent JWE POST (deposit: on the outbound Link 1-D response)</td></tr>
+        <tr><td><code>AssessmentEvidenceResponse</code></td><td>—</td><td>JWE (RFC 7516)</td><td>Subject Agent</td><td>Assessor only</td><td>Encrypted to assessor key; in-scope classes only; not forwarded</td></tr>
+        <tr><td><code>DepositAcknowledgement</code></td><td>—</td><td>Signed JWS</td><td>Assessor</td><td>Subject Agent</td><td>Deposit-holder only — confirms JWE stored; no verdict</td></tr>
         <tr><td><code>AssessmentResult</code></td><td>4</td><td>Signed JWS</td><td>Assessor</td><td>Merchant / CP / SA</td><td>Verdict; carries one <code>report_token</code></td></tr>
         <tr><td><code>ReportToken</code></td><td>5</td><td>Compact opaque token</td><td>Assessor / TA</td><td>Downstream party</td><td>One opaque handle per assessment</td></tr>
       </tbody>
@@ -1552,8 +1436,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <h3 id="s6-2"><span class="secno-heading">6.2</span> JWS/JWT Chain Reference<a class="self-link" href="#s6-2" title="§ 6.2 JWS/JWT Chain Reference">§</a></h3>
   <p>
     Each link <span class="rfc2119">MUST</span> be signed by the private key named in the previous
-    link's <code>cnf</code> claim. Assessor HTTPS URLs are read from the roster, not from
-    ATLAS tokens.
+    link's <code>cnf</code> claim. Assessor delivery addresses: §5.3.
   </p>
 
   <h3 id="s6-2-1"><span class="secno-heading">6.2.1</span> Cloud-based agent<a class="self-link" href="#s6-2-1" title="§ 6.2.1 Cloud-based agent">§</a></h3>
@@ -1577,7 +1460,6 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 │  exp, nbf, jti (root — NO parent_jti)                               │
 └─────────────────────────┬───────────────────────────────────────────┘
                           │ holder GET /roster — select Assessor
-                          │ (URL from roster, not from tokens)
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  LINK 2 — AssessmentSubDelegation (signed JWT)                      │
@@ -1605,7 +1487,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 │  AssessmentEvidenceResponse (JWE) — SA → Assessor ONLY              │
 │  typ: "atlas-assessment-evidence+jwe"                               │
 │  Encrypted to: Assessor key in Link 2 cnf (A256GCM)                 │
-│  Payload: intent, reasoning, evidence_artifacts[] opt               │
+│  Payload: in-scope classes only (scope-related data);               │
+│  evidence_artifacts[] opt                                           │
 │  agent_observed provenance (§8.5.1); NOT forwarded                  │
 └─────────────────────────┬───────────────────────────────────────────┘
                           │ after evaluation
@@ -1640,8 +1523,9 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 │  agent_cnf.jkt = Subject Agent key                                  │
 │  agent_cnf.key_protection: software | hardware (opt; §8.1.1)        │
 │  cnf.jkt = Assessor key (MUST appear in permitted_assessors)        │
-│  permitted_assessors[]  (roster id and/or jkt — NOT the URL)        │
-│  MUST NOT include permitted_trust_authorities                       │
+│  permitted_assessors[]  (roster id and/or jkt)                      │
+│  permitted_trust_authorities[]  (TA jkt; selected Assessor MUST     │
+│    have live roster authorization signed by one of these TAs)       │
 │  scope[] (empty = refuse all), subject_channel, session_id          │
 │  exp, nbf, jti (root — NO parent_jti)                               │
 └─────────────────────────┬───────────────────────────────────────────┘
@@ -1657,7 +1541,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  AssessmentEvidenceResponse (JWE) — SA → Assessor ONLY              │
-│  Encrypted to L1-D cnf. In-scope classes only (may be empty).       │
+│  Encrypted to L1-D cnf. In-scope classes only (scope-related data). │
 └─────────────────────────┬───────────────────────────────────────────┘
                           │ SA may request result
           ┌───────────────┴──────────────────┐
@@ -1674,45 +1558,61 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h3 id="s6-2-2"><span class="secno-heading">6.2.2</span> On-device agent (deposit)<a class="self-link" href="#s6-2-2" title="§ 6.2.2 On-device agent (deposit)">§</a></h3>
   <p>
-    The subject selects the Assessor from the roster before Link 1-D and POSTs Link 1-D
-    plus the JWE to the roster <code>assessor_endpoint</code> (or the TA forwards ciphertext).
-    Link 3 returns on that outbound response. The Assessor stores the JWE.
+    The subject has no inbound URL. It selects the Assessor from the roster, POSTs Link 1-D
+    to the roster <code>assessor_endpoint</code> (§5.3), and receives Link 3 on that outbound
+    response. Link 3 authorises a second outbound POST of the JWE. The Assessor
+    <span class="rfc2119">MUST NOT</span> call the on-device subject.
   </p>
 
   <h4 id="s6-2-2-d">6.2.2.1 Deposit-direct</h4>
   <p>
-    After the store, the subject later requests Link 4 (<code>deposit_result: direct</code>).
+    After the JWE, the Assessor returns Link 4 / Link 5 on that same outbound response
+    (<code>deposit_result: direct</code>).
   </p>
   <pre>
 ┌─────────────────────────────────────────────────────────────────────┐
 │  Prerequisite — roster selection                                    │
 │  SA GET /roster (TA-partner list)                                   │
-│  SA selects Assessor (id + jkt; endpoint from roster, not a claim)  │
+│  SA selects Assessor (id + jkt; endpoint from roster, §5.3)         │
 └─────────────────────────┬───────────────────────────────────────────┘
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  LINK 1-D — AssessmentDelegation (signed JWT)                       │
 │  Subject Agent → selected Assessor                                  │
-│  assessment_mode: deposit    deposit_result: direct                 │
-│  cnf.jkt = Assessor key; permitted_assessors[] (id/jkt, not URL)    │
-│  MUST NOT include permitted_trust_authorities                       │
-│  agent_cnf.key_protection: software | hardware (opt)                │
-│  scope[]  (empty = subject refuses all agent evidence)              │
+│  typ: "atlas-assessment-delegation+jwt"  assessment_mode: deposit   │
+│  iss: SA   sub: assessor_id                                         │
+│  agent_cnf.jkt = Subject Agent key                                  │
+│  agent_cnf.key_protection: software | hardware (opt; §8.1.1)        │
+│  cnf.jkt = Assessor key (MUST appear in permitted_assessors)        │
+│  permitted_assessors[]  (roster id and/or jkt)                      │
+│  permitted_trust_authorities[]  (TA jkt; selected Assessor MUST     │
+│    have live roster authorization signed by one of these TAs)       │
+│  deposit_result: direct                                             │
+│  scope[] (empty = refuse all), subject_channel, session_id          │
+│  exp, nbf, jti (root — NO parent_jti)                               │
 └─────────────────────────┬───────────────────────────────────────────┘
-                          │ POST L1-D + JWE to roster endpoint
+                          │ POST L1-D to roster assessor_endpoint
                           │ (or TA opaque forward if unreachable)
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  LINK 3 — on outbound response                                      │
-│  AssessmentEvidenceResponse JWE stored (no Link 4 yet)              │
-│  Encrypted to L1-D cnf. TA MUST NOT decrypt.                        │
+│  LINK 3 — AssessorAccessAssertion (signed JWS)                      │
+│  Assessor → Subject Agent (on outbound response; no inbound URL)    │
+│  nonce; embedded L1-D; assessor_authorization                       │
+│  Signed by: Assessor key (MUST match L1-D cnf)                      │
 └─────────────────────────┬───────────────────────────────────────────┘
-                          │ SA later requests result
+                          │ chain verified → SA POSTs JWE
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  AssessmentEvidenceResponse (JWE) — SA → Assessor ONLY              │
+│  Encrypted to L1-D cnf. In-scope classes only (scope-related data). │
+│  evidence_artifacts[] opt. TA MUST NOT decrypt.                     │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          │ on the JWE response
           ┌───────────────┴──────────────────┐
           ▼                                  ▼
 ┌─────────────────────┐   ┌───────────────────────────────────────────┐
 │ LINK 4 Result       │   │ LINK 5 ReportToken                        │
-│ Assessor → SA       │   │ atlas:1:<ta_id>:<report_id>               │
+│ Assessor → SA       │   │ atlas:1:&lt;ta_id&gt;:&lt;report_id&gt;               │
 │ compliant /         │   │ One token per assessment                  │
 │ partially_compliant │   │                                           │
 │ not_compliant /     │   │                                           │
@@ -1722,42 +1622,84 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h4 id="s6-2-2-h">6.2.2.2 Deposit-holder</h4>
   <p>
-    After the same store, the subject issues holder Link 1 with
-    <code>deposited_assessors[]</code>. The holder GETs the roster, selects or confirms,
-    then issues Link 2 and receives Link 4 (<code>deposit_result: holder</code>).
+    Link 1-D uses the same claim set as deposit-direct, with
+    <code>deposit_result: holder</code>. After the JWE the Assessor returns
+    <code>DepositAcknowledgement</code> (stores the JWE; no verdict yet). The subject then
+    issues holder Link 1 listing the used Assessors and related TAs. The holder GETs the
+    roster for the endpoint, issues Link 2 (optional <code>holder_commissioned</code>
+    artifacts), and receives Link 4 / Link 5. The Assessor <span class="rfc2119">MUST NOT</span>
+    call the on-device subject.
   </p>
   <pre>
 ┌─────────────────────────────────────────────────────────────────────┐
 │  Prerequisite — roster selection                                    │
-│  SA GET /roster; SA selects Assessor (id + jkt; URL from roster)    │
+│  SA GET /roster (TA-partner list)                                   │
+│  SA selects Assessor (id + jkt; endpoint from roster, §5.3)         │
 └─────────────────────────┬───────────────────────────────────────────┘
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  LINK 1-D + JWE (deposit)                                           │
-│  assessment_mode: deposit    deposit_result: holder                 │
-│  POST to roster assessor_endpoint (or TA opaque forward)            │
-│  L3 on outbound response. Assessor stores JWE.                      │
-│  scope[] may be empty (subject refuses all agent evidence)          │
+│  LINK 1-D — AssessmentDelegation (signed JWT)                       │
+│  Subject Agent → selected Assessor                                  │
+│  typ: "atlas-assessment-delegation+jwt"  assessment_mode: deposit   │
+│  iss: SA   sub: assessor_id                                         │
+│  agent_cnf.jkt = Subject Agent key                                  │
+│  agent_cnf.key_protection: software | hardware (opt; §8.1.1)        │
+│  cnf.jkt = Assessor key (MUST appear in permitted_assessors)        │
+│  permitted_assessors[]  (roster id and/or jkt)                      │
+│  permitted_trust_authorities[]  (TA jkt; selected Assessor MUST     │
+│    have live roster authorization signed by one of these TAs)       │
+│  deposit_result: holder                                             │
+│  scope[] (empty = refuse all), subject_channel, session_id          │
+│  exp, nbf, jti (root — NO parent_jti)                               │
 └─────────────────────────┬───────────────────────────────────────────┘
-                          │ later: result request via holder
+                          │ POST L1-D to roster assessor_endpoint
+                          │ (or TA opaque forward if unreachable)
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  LINK 1 — AssessmentDelegation (holder)                             │
+│  LINK 3 — AssessorAccessAssertion (signed JWS)                      │
+│  Assessor → Subject Agent (on outbound response; no inbound URL)    │
+│  nonce; embedded L1-D; assessor_authorization                       │
+│  Signed by: Assessor key (MUST match L1-D cnf)                      │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          │ chain verified → SA POSTs JWE
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  AssessmentEvidenceResponse (JWE) — SA → Assessor ONLY              │
+│  Encrypted to L1-D cnf. In-scope classes only (scope-related data). │
+│  evidence_artifacts[] opt. TA MUST NOT decrypt.                     │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          │ on the JWE response: acknowledgement
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  DepositAcknowledgement (signed JWS)                                │
+│  Assessor → SA  (stores JWE; MUST NOT issue Link 4 yet)             │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          │ later: SA → holder
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LINK 1 — AssessmentDelegation (signed JWT)                         │
 │  SA → Merchant / CP                                                 │
+│  assessment_mode: holder                                            │
 │  deposited_assessors[] = Assessors that already hold the JWE        │
+│  permitted_trust_authorities[]  (TAs that authorized those)         │
 └─────────────────────────┬───────────────────────────────────────────┘
-                          │ holder GET /roster — select / confirm
+                          │ holder GET /roster — endpoint + confirm
+                          │ Assessor MUST be in deposited_assessors
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  LINK 2 — AssessmentSubDelegation                                   │
+│  LINK 2 — AssessmentSubDelegation (signed JWT)                      │
 │  Holder → Assessor (one of deposited_assessors)                     │
-│  parent_jti:<L1>  optional requester_evidence (cart / AP2 / VI)     │
+│  parent_jti:&lt;L1&gt;  cnf.jkt = Assessor key                            │
+│  requester_evidence { holder_commissioned artifacts[] } opt         │
+│  Assessor MUST NOT call the on-device SA                            │
 └─────────────────────────┬───────────────────────────────────────────┘
+                          │ Assessor evaluates stored JWE +
+                          │ holder_commissioned artifacts
           ┌───────────────┴──────────────────┐
           ▼                                  ▼
 ┌─────────────────────┐   ┌───────────────────────────────────────────┐
 │ LINK 4 Result       │   │ LINK 5 ReportToken                        │
-│ Assessor → holder   │   │ atlas:1:<ta_id>:<report_id>               │
+│ Assessor → holder   │   │ atlas:1:&lt;ta_id&gt;:&lt;report_id&gt;               │
 │ compliant /         │   │ One token per assessment                  │
 │ partially_compliant │   │                                           │
 │ not_compliant /     │   │                                           │
@@ -1776,11 +1718,12 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       </thead>
       <tbody>
         <tr><td>1 <code>AssessmentDelegation</code></td><td>Cloud holder; deposit-holder</td><td>Subject agent</td><td>Merchant / CP</td><td><code>cnf</code> → holder key</td></tr>
-        <tr><td>1-D <code>AssessmentDelegation</code></td><td>Cloud direct; deposit</td><td>Subject agent</td><td>Selected Assessor</td><td><code>cnf</code> + <code>permitted_assessors</code></td></tr>
+        <tr><td>1-D <code>AssessmentDelegation</code></td><td>Cloud direct; deposit</td><td>Subject agent</td><td>Selected Assessor</td><td><code>cnf</code> + <code>permitted_assessors</code> + <code>permitted_trust_authorities</code></td></tr>
         <tr><td>2 <code>AssessmentSubDelegation</code></td><td>Cloud holder; deposit-holder</td><td>Holder (Link 1 <code>cnf</code>)</td><td>Assessor</td><td><code>cnf</code> → assessor key</td></tr>
-        <tr><td>3 <code>AssessorAccessAssertion</code></td><td>All four modes</td><td>Assessor (L2 or L1-D <code>cnf</code>)</td><td>Subject agent</td><td>unlocks JWE if not already deposited</td></tr>
+        <tr><td>3 <code>AssessorAccessAssertion</code></td><td>All four modes</td><td>Assessor (L2 or L1-D <code>cnf</code>)</td><td>Subject agent</td><td>unlocks subsequent JWE POST (deposit: on outbound L1-D response)</td></tr>
         <tr><td>— JWE</td><td>All four modes</td><td>SA (encrypt)</td><td>Assessor (decrypt)</td><td>Encrypted to L2 or L1-D <code>cnf</code></td></tr>
-        <tr><td>4 / 5</td><td>All four modes</td><td>Assessor / TA</td><td>Requester / TA report API</td><td>Deposit-holder: after holder Link 2</td></tr>
+        <tr><td>— <code>DepositAcknowledgement</code></td><td>Deposit-holder</td><td>Assessor</td><td>Subject agent</td><td>Confirms JWE stored; no verdict</td></tr>
+        <tr><td>4 / 5</td><td>All four modes</td><td>Assessor / TA</td><td>Requester / TA report API</td><td>Deposit-direct: on JWE response. Deposit-holder: after holder Link 2</td></tr>
       </tbody>
     </table>
   </div>
@@ -1793,8 +1736,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     ATLAS has two models. A <strong>cloud-based</strong> subject uses <strong>holder</strong>
     or <strong>direct</strong>. An <strong>on-device</strong> subject uses <strong>deposit</strong>,
     then <strong>deposit-direct</strong> or <strong>deposit-holder</strong> for Link 4.
-    There is no TA-mediated intake. ATLAS artifacts <span class="rfc2119">MUST NOT</span>
-    convey the Assessor HTTPS URL; clients take <code>assessor_endpoint</code> from the live roster.
+    There is no TA-mediated intake. Assessor delivery addresses: §5.3.
   </p>
 
   <h3 id="s7-1"><span class="secno-heading">7.1</span> Cloud-based agent — holder and direct<a class="self-link" href="#s7-1" title="§ 7.1 Cloud-based agent">§</a></h3>
@@ -1821,8 +1763,10 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     (<code>assessment_mode: direct</code>, <code>cnf</code> = Assessor key).
     Link 1-D <span class="rfc2119">MUST</span> carry <code>permitted_assessors</code> with
     that Assessor’s roster public key and/or identifier and
-    <span class="rfc2119">MUST NOT</span> carry <code>permitted_trust_authorities</code>
-    or <code>assessor_endpoint</code>.
+    <span class="rfc2119">MUST</span> carry <code>permitted_trust_authorities</code>
+    so verifiers can check that the selected Assessor’s live roster authorization is signed
+    by a listed TA. Link 1-D <span class="rfc2119">MUST NOT</span> carry
+    <code>assessor_endpoint</code> (§5.3).
     The Assessor presents Link 3 inbound; the SA returns the JWE; the SA
     <span class="rfc2119">MAY</span> then receive Link 4 / Link 5.
   </p>
@@ -1835,26 +1779,29 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <p>
     Required for phone or laptop subjects that have no inbound URL.
     The agent picks the Assessor from the TA-partner roster and issues Link 1-D
-    (<code>assessment_mode: deposit</code>, <code>permitted_assessors</code>, no
-    <code>permitted_trust_authorities</code>, no URL claim).
-    Delivery uses the roster <code>assessor_endpoint</code>
-    (or the TA forwards ciphertext if that URL is unreachable).
-    How the device authenticates the roster HTTPS endpoint (TLS only vs certificate pinning)
-    is <strong>out of scope</strong>.
-    The Assessor stores the JWE. Link 3 is returned on that outbound response.
+    (<code>assessment_mode: deposit</code>, same claim set as cloud-direct Link 1-D plus
+    <code>deposit_result</code>). Delivery: §5.3.
+    The Assessor returns Link 3 on that outbound response. After verifying Link 3, the
+    subject POSTs the JWE. The Assessor <span class="rfc2119">MUST NOT</span> call the
+    on-device subject.
   </p>
 
   <h4 id="s7-3-d"><span class="secno-heading">7.2.1</span> Deposit-direct<a class="self-link" href="#s7-3-d" title="§ 7.2.1 Deposit-direct">§</a></h4>
   <p>
-    <code>deposit_result: direct</code> — the subject agent later requests Link 4 / Link 5.
+    <code>deposit_result: direct</code> — the Assessor returns Link 4 / Link 5 on the JWE
+    response.
   </p>
 
   <h4 id="s7-3-h"><span class="secno-heading">7.2.2</span> Deposit-holder<a class="self-link" href="#s7-3-h" title="§ 7.2.2 Deposit-holder">§</a></h4>
   <p>
-    <code>deposit_result: holder</code> — the agent issues holder Link 1 with
-    <code>deposited_assessors[]</code>. Before Link 2 the merchant or wallet
-    <span class="rfc2119">MUST</span> GET the roster and select (or confirm) an Assessor
-    in that list, then issue Link 2 (optional cart / AP2 / VI) and receive Link 4 / Link 5.
+    <code>deposit_result: holder</code> — the Assessor returns
+    <code>DepositAcknowledgement</code> on the JWE response and stores the JWE.
+    The agent then issues holder Link 1 with <code>deposited_assessors[]</code> (Assessors
+    that hold the JWE) and <code>permitted_trust_authorities[]</code> (related TAs).
+    Before Link 2 the merchant or wallet <span class="rfc2119">MUST</span> GET the roster,
+    confirm an Assessor in that list, then issue Link 2 (optional
+    <code>holder_commissioned</code> artifacts). The Assessor evaluates the stored JWE plus
+    those artifacts and returns Link 4 / Link 5 to the holder.
   </p>
   <p>
     In <code>browser-context</code>, the JWE <span class="rfc2119">MAY</span> include an
@@ -1867,7 +1814,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <h2><span class="secno-heading">8.</span> Protocol Steps<a class="self-link" href="#s8" title="§ 8. Protocol Steps">§</a></h2>
   <p>
     Application trust is entirely in the signed-token chain. Cloud subjects typically use
-    HTTPS server endpoints. On-device subjects use outbound TLS only (roster <code>assessor_endpoint</code> or TA forward).
+    HTTPS server endpoints. On-device subjects use outbound TLS only (§5.3).
     There is no human in the ATLAS protocol loop.
   </p>
 
@@ -1931,8 +1878,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <table class="data">
       <thead><tr><th>Constraint</th><th>Claim</th><th>Type</th><th>Meaning</th></tr></thead>
       <tbody>
-        <tr><td>TA trust anchors (holder Link 1 only)</td><td><code>permitted_trust_authorities</code></td><td>Array of TA key <code>jkt</code></td><td>Cloud holder: any Assessor whose live roster authorization is signed by a listed TA is eligible.</td></tr>
-        <tr><td>Selected Assessor (Link 1-D only)</td><td><code>permitted_assessors</code></td><td>Array of roster <code>assessor_id</code> and/or <code>jkt</code></td><td>Cloud direct and deposit: the agent-selected Assessor. Link 1-D <span class="rfc2119">MUST NOT</span> include <code>permitted_trust_authorities</code> or the Assessor URL.</td></tr>
+        <tr><td>TA trust anchors (holder Link 1 and Link 1-D)</td><td><code>permitted_trust_authorities</code></td><td>Array of TA key <code>jkt</code></td><td>Cloud holder: any Assessor whose live roster authorization is signed by a listed TA is eligible. Link 1-D: the selected Assessor’s live roster authorization <span class="rfc2119">MUST</span> be signed by a listed TA.</td></tr>
+        <tr><td>Selected Assessor (Link 1-D only)</td><td><code>permitted_assessors</code></td><td>Array of roster <code>assessor_id</code> and/or <code>jkt</code></td><td>Cloud direct and deposit: the agent-selected Assessor. Link 1-D <span class="rfc2119">MUST</span> also include <code>permitted_trust_authorities</code>. Link 1-D <span class="rfc2119">MUST NOT</span> include the Assessor URL (§5.3).</td></tr>
         <tr><td>Region filter</td><td><code>permitted_regions</code></td><td>Array of codes</td><td>Assessor authorization <span class="rfc2119">MUST</span> cover at least one listed region</td></tr>
         <tr><td>Provider filter</td><td><code>permitted_assessor_providers</code></td><td>Array of IDs</td><td>Assessor <span class="rfc2119">MUST</span> be registered under a listed provider</td></tr>
       </tbody>
@@ -2022,7 +1969,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Field</th><th>Type</th><th>Req</th><th>Meaning</th></tr></thead>
       <tbody>
         <tr><td><code>id</code></td><td>URI</td><td><span class="rfc2119">MUST</span></td><td>Stable Subject Agent identifier (DID, HTTPS URL, or registered agent URI)</td></tr>
-        <tr><td><code>registered_identities</code></td><td>Array</td><td>OPTIONAL</td><td>Network- or scheme-scoped registrations for policy lookup (see below); not additional signing keys</td></tr>
+        <tr><td><code>registered_identities</code></td><td>Array</td><td>OPTIONAL</td><td>Network- or scheme-scoped registrations so the Assessor can look up every listed KYA/scheme id on behalf of the requester; not additional signing keys</td></tr>
         <tr><td><code>scheme</code></td><td>URI</td><td>OPTIONAL</td><td>Primary identity-framework profile URI; absent = ATLAS-native (<code>id</code> only)</td></tr>
         <tr><td><code>scheme_version</code></td><td>String</td><td>OPTIONAL</td><td>Version of the named <code>scheme</code> profile</td></tr>
         <tr><td><code>authority</code></td><td>Object</td><td>OPTIONAL</td><td>Accountable operator above the agent instance (organisation, Responsible Party)</td></tr>
@@ -2036,8 +1983,10 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <h5><code>registered_identities[]</code> entry</h5>
   <p>
     Each element names how the same Subject Agent is registered in a payment network, scheme, or
-    external directory.  Only <code>agent_cnf</code> is the signing key; registered identities are
-    for lookup, routing, and policy evaluation only.
+    external directory. Only <code>agent_cnf</code> is the signing key; registered identities are
+    for lookup, routing, and policy evaluation only — they let the Assessor query
+    <strong>every listed KYA (or scheme) repository on behalf of the requester</strong>
+    without that requester implementing a full mesh of KYA clients (§1.1).
   </p>
   <div class="table-wrap">
     <table class="data">
@@ -2131,6 +2080,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   },
   "cnf": { "jkt": "sha256-AssessorKeyThumbprint..." },
   "permitted_assessors": ["sha256-AssessorKeyThumbprint..."],
+  "permitted_trust_authorities": ["sha256-TAKeyThumbprint..."],
   "agent": { "id": "did:example:on-device-shop-agent" },
   "scope": ["tool_trace", "rail_choices", "session_binding"],
   "subject_channel": "browser-context",
@@ -2177,32 +2127,37 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <li>SA issues Link 1-D (<code>AssessmentDelegation</code>) to that Assessor:
         <code>cnf</code> = Assessor key; <code>permitted_assessors</code> contains that
         Assessor’s roster <code>assessor_id</code> and/or <code>jkt</code>;
+        <code>permitted_trust_authorities</code> contains TA <code>jkt</code> values;
         <code>scope</code>; optional <code>subject_channel</code>;
         <code>agent_cnf</code> / <code>agent</code> as §8.1.1.
         Link 1-D <span class="rfc2119">MUST NOT</span> include
-        <code>permitted_trust_authorities</code> or <code>assessor_endpoint</code>.
+        <code>assessor_endpoint</code> (§5.3).
         Deposit Link 1-D <span class="rfc2119">MUST</span> include
         <code>deposit_result</code> = <code>direct</code> or <code>holder</code>.</li>
     <li><strong>Cloud direct:</strong> Assessor presents Link 3 inbound over HTTPS.
         SA verifies Link 3 (signature matches L1-D <code>cnf</code>, nonce, live roster
-        authorization, <code>permitted_assessors</code>) and POSTs the JWE encrypted to
-        L1-D <code>cnf</code>. The SA <span class="rfc2119">MAY</span> then request
+        authorization signed by a TA in <code>permitted_trust_authorities</code>,
+        signer in <code>permitted_assessors</code>) and POSTs the JWE encrypted to
+        L1-D <code>cnf</code>. The SA <span class="rfc2119">MAY</span> then receive
         Link 4 / Link 5.</li>
-    <li><strong>On-device deposit:</strong> SA POSTs Link 1-D and the JWE to the roster
-        <code>assessor_endpoint</code> (URL from the roster, not from the token).
-        Link 3 is returned on that response.
-        If the device cannot reach that URL, the SA <span class="rfc2119">MAY</span> POST
-        the same JWE to the TA, which <span class="rfc2119">MUST</span> forward it opaquely
-        and <span class="rfc2119">MUST NOT</span> decrypt.
-        How the device authenticates the roster endpoint is out of scope.</li>
+    <li><strong>On-device deposit:</strong> SA POSTs Link 1-D to the roster
+        <code>assessor_endpoint</code> (§5.3). Link 3 is returned on that response.
+        The Assessor <span class="rfc2119">MUST NOT</span> call the on-device subject.
+        SA verifies Link 3 as above, then POSTs the JWE encrypted to L1-D
+        <code>cnf</code>.</li>
     <li>On deposit the Assessor <span class="rfc2119">MUST</span> store the JWE bound to
         Link 1-D <code>jti</code> / <code>assessment_id</code>, encrypted at rest, with a
         hard <code>exp</code>. It <span class="rfc2119">MUST NOT</span> reuse the JWE on
         another transaction. It <span class="rfc2119">MUST</span> delete the JWE on expiry,
         after Link 4 issuance, or on SA revoke.</li>
-    <li>Deposit-direct: the SA <span class="rfc2119">MAY</span> later request Link 4 / Link 5.
-        Deposit-holder: Link 4 / Link 5 <span class="rfc2119">MUST NOT</span> be issued until
-        a merchant or wallet presents holder Link 2 (optional <code>requester_evidence</code>).</li>
+    <li>Deposit-direct: the Assessor <span class="rfc2119">MUST</span> return Link 4 / Link 5
+        on the JWE response.
+        Deposit-holder: the Assessor <span class="rfc2119">MUST</span> return
+        <code>DepositAcknowledgement</code> on the JWE response and
+        <span class="rfc2119">MUST NOT</span> issue Link 4 / Link 5 until a merchant or
+        wallet presents holder Link 2 (optional <code>holder_commissioned</code>
+        artifacts). The Assessor then evaluates the stored JWE plus those artifacts and
+        returns Link 4 / Link 5 to the holder.</li>
   </ol>
 
   <h3 id="s8-3"><span class="secno-heading">8.3</span> Step 2 — Sub-Delegation and Assessment Commission (Holder / Deposit-Holder)<a class="self-link" href="#s8-3" title="§ 8.3 Step 2 — Sub-Delegation and Assessment Commission (Holder / Deposit-Holder)">§</a></h3>
@@ -2214,14 +2169,14 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     Before issuing Link 2 the holder <span class="rfc2119">MUST</span> GET the live
     TA-partner roster and select the Assessor from it (cloud holder: any Assessor
     under <code>permitted_trust_authorities</code>; deposit-holder: one of
-    <code>deposited_assessors</code>).
+    <code>deposited_assessors</code>, whose live authorization is signed by a listed TA).
   </p>
   <ol class="algorithm">
     <li>Verify subject-agent signature on parent token (<code>iss</code>, <code>exp</code>, <code>nbf</code>, <code>jti</code>).</li>
     <li>Verify holder signature on sub-delegation matches parent <code>cnf</code>.</li>
     <li>Verify merchant identity matches parent <code>sub</code>.</li>
     <li>Verify own signing key matches sub-delegation <code>cnf</code>.</li>
-    <li>Verify eligibility under <code>permitted_trust_authorities</code> (holder Link 1) or <code>permitted_assessors</code> / <code>deposited_assessors</code> (deposit-holder) and the live roster.</li>
+    <li>Verify eligibility under <code>permitted_trust_authorities</code> (holder Link 1) or <code>deposited_assessors</code> plus <code>permitted_trust_authorities</code> (deposit-holder) and the live roster.</li>
     <li>Verify sub-delegation <code>scope</code> ⊆ parent <code>scope</code>.</li>
     <li>Verify replay protection on <code>jti</code>.</li>
     <li>If <code>requester_evidence</code> is present, verify each artifact per §8.3.1 before forwarding Link 2 to the Subject Agent in the assertion chain.</li>
@@ -2244,9 +2199,11 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   </div>
   <p>
     The same <code>kind</code>, <code>scheme</code>, and <code>attestation</code> vocabulary applies
-    in both carriages.  In <strong>holder mode</strong>, dispute-grade cross-check
-    <span class="rfc2119">SHOULD</span> prefer <code>holder_commissioned</code> artifacts on Link 2
-    when present. In <strong>direct</strong> and <strong>deposit-direct</strong> there is no
+    in both carriages. When the same <code>artifact_id</code> appears in both, Link 4
+    <span class="rfc2119">SHOULD</span> identify which copy was evaluated (digests in §8.6).
+    How a method prefers one copy over the other is scheme-defined
+    (see the <a href="atlas-protocol-explainer.html">Explainer</a>).
+    In <strong>direct</strong> and <strong>deposit-direct</strong> there is no
     Link 2. Counterparty carts and AP2/VI objects typically arrive on deposit-holder Link 2.
     In <code>browser-context</code> the SA <span class="rfc2119">MAY</span> include an
     <code>agent_observed</code> cart in the JWE.
@@ -2383,7 +2340,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <tr><td>Optional <code>attestation</code> valid per <code>scheme</code> when required by <code>policy_referential</code></td><td>Identity or delegation proof failed</td></tr>
         <tr><td><code>AssessmentSubDelegation</code> signature matches parent <code>cnf</code></td><td>Holder key mismatch</td></tr>
         <tr><td>Sub-delegation <code>sub</code> and <code>cnf</code> match assertion signer</td><td>Wrong subject or key</td></tr>
-        <tr><td>Assessor eligible per <code>permitted_trust_authorities</code> or <code>deposited_assessors</code> / <code>permitted_assessors</code> and live roster</td><td>Not eligible</td></tr>
+        <tr><td>Assessor eligible per <code>permitted_trust_authorities</code>; deposit-holder also in <code>deposited_assessors</code>; live roster</td><td>Not eligible</td></tr>
         <tr><td>Sub-delegation <code>scope</code> ⊆ parent <code>scope</code></td><td>Scope widened</td></tr>
         <tr><td>Authorization valid for scope and region</td><td>Untrusted or expired</td></tr>
         <tr><td>Assertion signature over nonce; nonce not previously used</td><td>Replay detected</td></tr>
@@ -2402,7 +2359,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <tr><td>If <code>policy_referential</code> requires hardware binding: <code>key_protection</code> is <code>hardware</code> and attestation verifies</td><td>Software key where hardware is required</td></tr>
         <tr><td>Link 3 signer matches Link 1-D <code>cnf</code></td><td>Wrong Assessor key</td></tr>
         <tr><td>Signer appears in <code>permitted_assessors</code> and on the live TA-partner roster</td><td>Not the selected / rostered Assessor</td></tr>
-        <tr><td>Link 1-D has no <code>permitted_trust_authorities</code></td><td>Wrong claim set for Link 1-D</td></tr>
+        <tr><td>Link 1-D <code>permitted_trust_authorities</code> present; selected Assessor’s live roster authorization signed by a listed TA</td><td>Selected Assessor not from a permitted TA</td></tr>
         <tr><td>Authorization valid for scope and region</td><td>Untrusted or expired</td></tr>
         <tr><td>Link 3 signature over nonce; nonce not previously used</td><td>Replay detected</td></tr>
       </tbody>
@@ -2416,12 +2373,13 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <li>Encrypt to assessor public key in Link 2 <code>cnf</code> (holder) or Link 1-D <code>cnf</code> (direct and deposit).</li>
     <li>Algorithms: ECDH-ES or RSA-OAEP for key encryption; <strong>A256GCM</strong> for content encryption.</li>
     <li>Nest a Subject-Agent-signed inner JWS inside the JWE (<span class="rfc2119">MUST</span>); signature key <span class="rfc2119">MUST</span> match <code>agent_cnf.jkt</code> on Link 1 or Link 1-D.</li>
-    <li>No other party receives the plaintext — not the merchant, CP, network, or TA. The TA <span class="rfc2119">MAY</span> forward the ciphertext when the subject cannot reach the roster <code>assessor_endpoint</code>.</li>
+    <li>No other party receives the plaintext — not the merchant, CP, network, or TA. Opaque TA forward of ciphertext: §5.3.</li>
   </ol>
   <p>
     The inner payload <span class="rfc2119">MUST</span> contain only classes listed in the
     governing <code>scope</code> (§8.0). There is no mandatory natural-language or CoT field.
-    When listed, the package <span class="rfc2119">MAY</span> include <code>intent_summary</code>, <code>constraint_set</code>,
+    When listed, the package <span class="rfc2119">MAY</span> include those in-scope
+    (scope-related) classes — for example <code>intent_summary</code>, <code>constraint_set</code>,
     <code>merchant_selection_reasoning</code>, <code>item_selection_reasoning</code>,
     <code>policy_evaluation_results</code>, <code>evidence_hashes</code>,
     <code>evidence_artifacts[]</code> for counterparty material the Subject Agent observed
@@ -2445,7 +2403,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <tr><td><code>constraint_set</code></td><td>Object</td><td>OPTIONAL</td><td>Structured constraints evaluated during the session</td></tr>
         <tr><td><code>merchant_selection_reasoning</code></td><td>String / Array</td><td>OPTIONAL</td><td>Reasoning that led to merchant selection</td></tr>
         <tr><td><code>item_selection_reasoning</code></td><td>String / Array</td><td>OPTIONAL</td><td>Reasoning that led to line-item / SKU selection</td></tr>
-        <tr><td><code>policy_evaluation_results</code></td><td>Array</td><td>OPTIONAL</td><td>Per-rule outcomes under the active policy referential</td></tr>
+        <tr><td><code>policy_evaluation_results</code></td><td>Array</td><td>OPTIONAL</td><td>Opaque per-rule outcomes if the subject already evaluated the named referential locally. Semantics are scheme-defined, not ATLAS-defined.</td></tr>
         <tr><td><code>supply_chain_provenance</code></td><td>Object</td><td>OPTIONAL</td><td>Tool, model, and catalogue/RAG context that influenced selection</td></tr>
         <tr><td><code>evidence_artifacts</code></td><td>Array</td><td>OPTIONAL</td><td>Counterparty-signed artifacts observed by the SA (each <code>provenance: agent_observed</code>)</td></tr>
       </tbody>
@@ -2455,12 +2413,11 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     Carts and AP2/VI mandates are typically <code>holder_commissioned</code> on Link 2 when
     a holder requests Link 4. In <code>browser-context</code> the SA
     <span class="rfc2119">MAY</span> include an observed cart as
-    <code>agent_observed</code> in the JWE. The Assessor <span class="rfc2119">MUST</span>
-    verify each <code>source_id</code> signature and <span class="rfc2119">SHOULD</span>
-    perform <code>evidence_cross_check</code> (§8.6). When the same
-    <code>artifact_id</code> appears on Link 2 as <code>holder_commissioned</code>, the
-    Assessor <span class="rfc2119">SHOULD</span> treat the Link 2 copy as authoritative
-    for dispute-grade cross-check.
+    <code>agent_observed</code> in the JWE. The     Assessor <span class="rfc2119">MUST</span>
+    verify each <code>source_id</code> signature. When the same
+    <code>artifact_id</code> appears on Link 2 as <code>holder_commissioned</code>, Link 4
+    digests <span class="rfc2119">SHOULD</span> distinguish the two copies.
+    Comparison methods are scheme-defined (see the <a href="atlas-protocol-explainer.html">Explainer</a>).
   </p>
   <p>
   Prefer <code>attestation.form: by-reference</code> with <code>digest</code> for large carts and
@@ -2542,7 +2499,9 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <code>scope_released</code> is empty. A scheme <span class="rfc2119">MAY</span>
     still attach holder-artifact findings under a separate scheme claim; those
     artifacts do not change <code>verdict</code> for agent behaviour. ATLAS
-    records <code>not_assessed</code> on Link 4 so rails and later disputes can see it.
+    records <code>not_assessed</code> on Link 4 so verifiers can distinguish
+    “no method ran” from a pass or fail. How a scheme treats that outcome is
+    outside this specification (see the <a href="atlas-protocol-explainer.html">Explainer</a>).
   </p>
 
   <h4>Link 4 structure and evidence digests</h4>
@@ -2577,15 +2536,14 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <code>agent_evidence_digest</code>.
   </p>
 
-  <h4>Evidence cross-check (both patterns)</h4>
+  <h4>Evidence cross-check (optional field)</h4>
   <p>
-    When verified artifacts exist — <code>holder_commissioned</code> on Link 2 and/or
-    <code>agent_observed</code> in the JWE — the Assessor <span class="rfc2119">SHOULD</span>
-    compare each artifact against the Subject Agent narrative (e.g. cart lines vs.
-    <code>item_selection_reasoning</code>; mandate limits vs. checkout actions).
-    In holder mode, when the same <code>artifact_id</code> appears in both carriages, the
-    <code>holder_commissioned</code> copy <span class="rfc2119">SHOULD</span> take precedence for
-    dispute-grade findings.  The outcome is recorded in <code>evidence_cross_check</code>:
+    Link 4 <span class="rfc2119">MAY</span> carry <code>evidence_cross_check</code> when the
+    named method recorded a comparison. This specification defines only the field shape.
+    Whether to compare artifacts to narrative, which copy of a duplicated
+    <code>artifact_id</code> is authoritative, and how mismatch maps to
+    <code>verdict</code> are scheme-defined (see the
+    <a href="atlas-protocol-explainer.html">Explainer</a>).
   </p>
   <div class="table-wrap">
     <table class="data">
@@ -2602,9 +2560,6 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     only the enumerated evaluation outcome.
   </p>
   <p>
-    A <code>material_mismatch</code> <span class="rfc2119">SHOULD</span> yield
-    <code>not_compliant</code> or <code>partially_compliant</code> per the active
-    <code>policy_referential</code>.
     The Assessor <span class="rfc2119">MUST NOT</span> include raw artifact payloads or decrypted
     agent evidence in <code>AssessmentResult</code>.
   </p>
@@ -2675,7 +2630,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     data element.
   </p>
 
-  <h5>ISO 8583 compliance</h5>
+  <h5>ISO 8583 wire encoding</h5>
   <div class="table-wrap">
     <table class="data">
       <thead><tr><th>Constraint</th><th>ISO / network rule</th><th>ATLAS example (2 tokens)</th></tr></thead>
@@ -2810,10 +2765,11 @@ Notes:
       <thead><tr><th>Step</th><th>Direction</th><th>Artifact</th><th>Meaning</th></tr></thead>
       <tbody>
         <tr><td>1</td><td>SA → Merchant / CP</td><td><code>AssessmentDelegation</code> (holder)</td><td>Cloud holder; deposit-holder after JWE store</td></tr>
-        <tr><td>1-D</td><td>SA → selected Assessor</td><td><code>AssessmentDelegation</code></td><td>Cloud direct and deposit; <code>permitted_assessors</code> from TA-partner roster (no URL)</td></tr>
-        <tr><td>2</td><td>Merchant / CP → Assessor</td><td><code>AssessmentSubDelegation</code></td><td>Cloud holder (after roster select); deposit-holder result request</td></tr>
-        <tr><td>3</td><td>Assessor → SA</td><td><code>AssessorAccessAssertion</code></td><td>Chain + authorization; deposit: on outbound response</td></tr>
-        <tr><td>—</td><td>SA → Assessor (or TA mailbox)</td><td><code>AssessmentEvidenceResponse</code> JWE</td><td>Encrypted to Link 2 or Link 1-D <code>cnf</code></td></tr>
+        <tr><td>1-D</td><td>SA → selected Assessor</td><td><code>AssessmentDelegation</code></td><td>Cloud direct and deposit; <code>permitted_assessors</code> + <code>permitted_trust_authorities</code> from TA-partner roster</td></tr>
+        <tr><td>2</td><td>Merchant / CP → Assessor</td><td><code>AssessmentSubDelegation</code></td><td>Cloud holder (after roster select); deposit-holder result request with optional <code>holder_commissioned</code> artifacts</td></tr>
+        <tr><td>3</td><td>Assessor → SA</td><td><code>AssessorAccessAssertion</code></td><td>Chain + authorization; deposit: on outbound Link 1-D response; unlocks JWE POST</td></tr>
+        <tr><td>—</td><td>SA → Assessor (or TA mailbox)</td><td><code>AssessmentEvidenceResponse</code> JWE</td><td>Encrypted to Link 2 or Link 1-D <code>cnf</code>; in-scope classes only</td></tr>
+        <tr><td>—</td><td>Assessor → SA</td><td><code>DepositAcknowledgement</code></td><td>Deposit-holder: confirms JWE stored; no verdict</td></tr>
         <tr><td>4</td><td>Assessor → requester</td><td><code>AssessmentResult</code></td><td>Verdict to merchant, CP, or SA</td></tr>
         <tr><td>5</td><td>Assessor / TA</td><td><code>ReportToken</code></td><td>One opaque handle per assessment</td></tr>
         <tr><td>—</td><td>SA/M/CP → Processor</td><td>Conveyed <code>AssessmentResult</code></td><td>Peer-to-peer propagation</td></tr>
@@ -2829,11 +2785,7 @@ Notes:
   <p>
     Four sequences. Cloud-based agent: <strong>holder</strong> and <strong>direct</strong>.
     On-device agent (deposit): <strong>deposit-direct</strong> and <strong>deposit-holder</strong>.
-    Assessor HTTPS URLs come from the roster, not from ATLAS tokens.
-    If the device cannot reach the roster <code>assessor_endpoint</code>, the TA may
-    forward ciphertext. The TA does not select the Assessor.
-    How a device authenticates the roster endpoint (TLS only vs certificate pinning)
-    is out of scope.
+    Assessor delivery addresses: §5.3.
     If <code>scope</code> is empty, Link 4 is still issued as
     <code>not_assessed</code> (§8.6).
   </p>
@@ -2876,7 +2828,6 @@ sequenceDiagram
     M->>R: GET roster - select Assessor
     R-->>M: Assessor entries id, jkt, assessor_endpoint
     M->>M: Select Assessor from roster
-    Note over M: ATLAS tokens do not carry assessor_endpoint
 
     M->>A: AssessmentSubDelegation L2, parent L1, cnf equals A key
     Note over M,A: Merchant and CP may each commission different Assessors
@@ -2922,8 +2873,8 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
   <div class="informative">This section is non-normative.</div>
   <p>
     Cloud direct. The subject agent selects an Assessor from the TA-partner roster,
-    issues Link 1-D to that Assessor (<code>permitted_assessors</code>, no
-    <code>permitted_trust_authorities</code>, no URL claim), receives Link 3 inbound,
+    issues Link 1-D to that Assessor (<code>permitted_assessors</code> and
+    <code>permitted_trust_authorities</code>), receives Link 3 inbound,
     returns the JWE, and may receive Link 4.
   </p>
 
@@ -2948,9 +2899,8 @@ sequenceDiagram
     SA->>R: GET roster - TA-partner Assessor list
     R-->>SA: Assessor entries id, jkt, assessor_endpoint
     SA->>SA: Select Assessor from roster
-    Note over SA: L1-D carries permitted_assessors id or jkt, not the URL
 
-    SA->>A: AssessmentDelegation L1-D direct, cnf equals A, permitted_assessors
+    SA->>A: AssessmentDelegation L1-D direct, cnf equals A, permitted_assessors and permitted_trust_authorities
     A->>SA: AssessorAccessAssertion L3, L1-D plus authorization
     SA->>A: AssessmentEvidenceResponse JWE, in-scope only
 
@@ -2971,7 +2921,7 @@ sequenceDiagram
 U   ──intent─────────────────────────────────────────────► SA
 SA  ──GET /roster (TA-partner list)───────────────────────► Roster
 SA  ──selects Assessor
-SA  ──AssessmentDelegation L1-D (direct, cnf=A, permitted_assessors)──► A
+SA  ──AssessmentDelegation L1-D (direct, cnf=A, permitted_assessors + TAs)──► A
 A   ──AssessorAccessAssertion L3──────────────────────────► SA
 SA  ──AssessmentEvidenceResponse JWE──────────────────────► A
 A   ──AssessmentResult L4 + ReportToken L5────────────────► SA
@@ -2984,16 +2934,15 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
 
   <h3 id="s10-device"><span class="secno-heading">10.2</span> On-device agent (deposit)<a class="self-link" href="#s10-device" title="§ 10.2 On-device agent (deposit)">§</a></h3>
   <p>
-    The subject has no inbound URL. It selects from the roster and POSTs Link 1-D plus the
-    JWE to the roster-listed <code>assessor_endpoint</code> (or the TA forwards ciphertext).
-    Tokens do not carry that URL. Roster-endpoint TLS versus certificate pinning is
-    out of scope.
+    The subject has no inbound URL. It selects from the roster, POSTs Link 1-D,
+    receives Link 3 on that outbound response, then POSTs the JWE (§5.3).
+    The Assessor <span class="rfc2119">MUST NOT</span> call the on-device subject.
   </p>
 
   <h4 id="s10-3"><span class="secno-heading">10.2.1</span> Deposit-direct<a class="self-link" href="#s10-3" title="§ 10.2.1 Deposit-direct">§</a></h4>
   <div class="informative">This section is non-normative.</div>
   <p>
-    After the Assessor stores the JWE, the subject agent later requests Link 4
+    After Link 3 and the JWE, the Assessor returns Link 4 / Link 5 on the JWE response
     (<code>deposit_result: direct</code>).
   </p>
 
@@ -3015,14 +2964,11 @@ sequenceDiagram
     SA->>R: GET roster - TA-partner Assessor list
     R-->>SA: Assessor entries id, jkt, assessor_endpoint
     SA->>SA: Select Assessor from roster
-    Note over SA,R: URL is on the roster, not in ATLAS tokens
 
-    SA->>A: POST L1-D deposit-direct plus JWE to roster endpoint
-    Note over SA,TA: If roster endpoint unreachable, POST JWE to TA for opaque forward
+    SA->>A: POST L1-D deposit-direct to roster endpoint
     A-->>SA: AssessorAccessAssertion L3 on outbound response
-    A->>A: Store JWE, no Link 4 yet
-
-    SA->>A: request AssessmentResult
+    SA->>A: AssessmentEvidenceResponse JWE, in-scope only
+    Note over SA,TA: If roster endpoint unreachable, TA may opaque-forward ciphertext
     A->>SA: AssessmentResult L4 and ReportToken L5
     SA->>MP: convey AssessmentResult
 
@@ -3031,18 +2977,17 @@ sequenceDiagram
     TA-->>N: Certified trust-assurance report
     N-->>MP: Authorisation decision plus ATLAS trust signal
     </pre>
-    <figcaption>Figure 3 — On-device deposit-direct: roster selection, outbound L1-D + JWE, stored JWE, then the subject requests Link 4.</figcaption>
+    <figcaption>Figure 3 — On-device deposit-direct: roster selection, outbound L1-D → Link 3 → JWE → Link 4 / Link 5.</figcaption>
   </figure>
 
   <details>
     <summary>Condensed artifact-flow (text fallback)</summary>
     <pre>
 SA  ──GET /roster (TA-partner list)───────────────────────► Roster
-SA  ──selects Assessor (URL from roster, not a token claim)
-SA  ──POST L1-D (deposit-direct) + JWE ─or TA forward─────► A
+SA  ──selects Assessor
+SA  ──POST L1-D (deposit-direct) ─or TA forward────────────► A
 A   ──AssessorAccessAssertion L3 (on response)────────────► SA
-A   ──store JWE
-SA  ──request AssessmentResult────────────────────────────► A
+SA  ──AssessmentEvidenceResponse JWE──────────────────────► A
 A   ──AssessmentResult L4 + ReportToken L5────────────────► SA
 SA  ──convey AssessmentResult─────────────────────────────► MP
 MP  ──payment auth + redeem_tokens────────────────────────► N
@@ -3052,10 +2997,13 @@ N   ──redeem ReportToken─────────────────�
   <h4 id="s10-4"><span class="secno-heading">10.2.2</span> Deposit-holder<a class="self-link" href="#s10-4" title="§ 10.2.2 Deposit-holder">§</a></h4>
   <div class="informative">This section is non-normative.</div>
   <p>
-    After the same deposit, the subject issues holder Link 1 with
-    <code>deposited_assessors[]</code>. The merchant or wallet GETs the roster, selects
-    (or confirms) an Assessor from that list, issues Link 2 (optional cart / AP2 / VI),
-    and receives Link 4 (<code>deposit_result: holder</code>).
+    After the same Link 1-D → Link 3 → JWE exchange, the Assessor returns
+    <code>DepositAcknowledgement</code> and stores the JWE. The subject issues holder
+    Link 1 with <code>deposited_assessors[]</code> and
+    <code>permitted_trust_authorities[]</code>. The merchant or wallet GETs the roster,
+    confirms an Assessor from that list, issues Link 2 (optional
+    <code>holder_commissioned</code> artifacts), and receives Link 4
+    (<code>deposit_result: holder</code>). The Assessor does not call the on-device subject.
   </p>
 
   <figure>
@@ -3077,19 +3025,20 @@ sequenceDiagram
     SA->>R: GET roster - TA-partner Assessor list
     R-->>SA: Assessor entries id, jkt, assessor_endpoint
     SA->>SA: Select Assessor from roster
-    Note over SA,R: URL is on the roster, not in ATLAS tokens
 
-    SA->>A: POST L1-D deposit-holder plus JWE to roster endpoint
-    Note over SA,TA: If roster endpoint unreachable, POST JWE to TA for opaque forward
+    SA->>A: POST L1-D deposit-holder to roster endpoint
     A-->>SA: AssessorAccessAssertion L3 on outbound response
-    A->>A: Store JWE, no Link 4 yet
+    SA->>A: AssessmentEvidenceResponse JWE, in-scope only
+    Note over SA,TA: If roster endpoint unreachable, TA may opaque-forward ciphertext
+    A-->>SA: DepositAcknowledgement, JWE stored, no Link 4 yet
 
-    SA->>H: AssessmentDelegation L1 holder, deposited_assessors
-    H->>R: GET roster - select or confirm deposited Assessor
+    SA->>H: AssessmentDelegation L1 holder, deposited_assessors and permitted_trust_authorities
+    H->>R: GET roster - endpoint of deposited Assessor
     R-->>H: Assessor entries id, jkt, assessor_endpoint
-    H->>H: Select Assessor from roster and deposited_assessors
-    H->>A: AssessmentSubDelegation L2 plus optional cart, AP2, VI
-    A->>H: AssessmentResult L4 and ReportToken L5
+    H->>H: Confirm Assessor is in deposited_assessors and permitted TAs
+    H->>A: AssessmentSubDelegation L2 plus optional holder_commissioned artifacts
+    Note over A,SA: Assessor MUST NOT call the on-device subject
+    A->>H: AssessmentResult L4 and ReportToken L5 after evaluating stored JWE plus holder artifacts
     H->>MP: convey AssessmentResult
 
     MP->>N: Payment authorisation plus redeem_tokens
@@ -3097,21 +3046,22 @@ sequenceDiagram
     TA-->>N: Certified trust-assurance report
     N-->>MP: Authorisation decision plus ATLAS trust signal
     </pre>
-    <figcaption>Figure 4 — On-device deposit-holder: same outbound deposit; holder GETs the roster before Link 2 and receives Link 4.</figcaption>
+    <figcaption>Figure 4 — On-device deposit-holder: outbound L1-D → Link 3 → JWE → acknowledgement; holder GETs the roster before Link 2 and receives Link 4.</figcaption>
   </figure>
 
   <details>
     <summary>Condensed artifact-flow (text fallback)</summary>
     <pre>
 SA  ──GET /roster (TA-partner list)───────────────────────► Roster
-SA  ──selects Assessor (URL from roster, not a token claim)
-SA  ──POST L1-D (deposit-holder) + JWE ─or TA forward─────► A
+SA  ──selects Assessor
+SA  ──POST L1-D (deposit-holder) ─or TA forward────────────► A
 A   ──AssessorAccessAssertion L3 (on response)────────────► SA
-A   ──store JWE
-SA  ──AssessmentDelegation L1 (holder, deposited_assessors)─► H
-H   ──GET /roster (select / confirm)──────────────────────► Roster
-H   ──AssessmentSubDelegation L2 + holder artifacts───────► A
-A   ──AssessmentResult L4 + ReportToken L5────────────────► H
+SA  ──AssessmentEvidenceResponse JWE──────────────────────► A
+A   ──DepositAcknowledgement (store JWE)──────────────────► SA
+SA  ──AssessmentDelegation L1 (holder, deposited_assessors + TAs)─► H
+H   ──GET /roster (endpoint + confirm)────────────────────► Roster
+H   ──AssessmentSubDelegation L2 + holder_commissioned────► A
+A   ──AssessmentResult L4 + ReportToken L5 (no call to SA)─► H
 H   ──convey AssessmentResult─────────────────────────────► MP
 MP  ──payment auth + redeem_tokens────────────────────────► N
 N   ──redeem ReportToken──────────────────────────────────► TA</pre>
@@ -3159,12 +3109,8 @@ N   ──redeem ReportToken─────────────────�
   <h3 id="s11-4"><span class="secno-heading">11.4</span> Transport<a class="self-link" href="#s11-4" title="§ 11.4 Transport">§</a></h3>
   <p>
     TLS 1.2+ (1.3 preferred); certificate validation enabled.
-    Cloud subjects typically expose HTTPS servers. On-device subjects use outbound HTTPS to
-    the roster <code>assessor_endpoint</code>, or opaque TA forward if that URL is unreachable.
-    ATLAS artifacts <span class="rfc2119">MUST NOT</span> convey that URL.
-    How a client authenticates the roster HTTPS endpoint (TLS validation only, certificate
-    pinning, or otherwise) is <strong>out of scope</strong> of this specification.
-    Application trust does not rely on mTLS or DPoP in the base profile.
+    Cloud subjects typically expose HTTPS servers. On-device subjects use outbound HTTPS
+    (§5.3). Application trust does not rely on mTLS or DPoP in the base profile.
   </p>
 
   <h3 id="s11-5"><span class="secno-heading">11.5</span> Downstream Redemption — Accepted Model and Risks<a class="self-link" href="#s11-5" title="§ 11.5 Downstream Redemption — Accepted Model and Risks">§</a></h3>
@@ -3196,14 +3142,14 @@ N   ──redeem ReportToken─────────────────�
   <h2><span class="secno-heading">12.</span> Alignment with AP2, Verifiable Intent, and UCP<a class="self-link" href="#s12" title="§ 12. Alignment with AP2, Verifiable Intent, and UCP">§</a></h2>
   <p>
     ATLAS is <strong>complementary</strong> to AP2: AP2 defines mandate delegation, action authorisation,
-    verifier checks, and receipts; ATLAS adds a standard path for assessing how the subject agent
-    interpreted and operationalised the user's intent before and during those actions.      In holder mode, the CP or merchant <span class="rfc2119">MAY</span> attach
+    verifier checks, and receipts; ATLAS adds a standard path for releasing scoped evidence of
+    subject-agent behaviour around those actions.
+    In holder mode, the CP or merchant <span class="rfc2119">MAY</span> attach
     <code>holder_commissioned</code> artifacts on Link 2 (<code>requester_evidence</code>, §8.3.1).
     In direct and deposit intake, counterparty carts and AP2/VI objects are typically added later
     as <code>holder_commissioned</code> artifacts when a holder requests Link 4.
     In <code>browser-context</code> the SA <span class="rfc2119">MAY</span> relay an observed cart
-    in the JWE. The Assessor cross-checks verified artifacts against in-scope subject evidence
-    without exposing the JWE to the requester.
+    in the JWE. The JWE is not exposed to the requester.
   </p>
   <p>
     ATLAS borrows the <strong>principles</strong> of Verifiable Intent — key-bound credentials,
@@ -3215,11 +3161,9 @@ N   ──redeem ReportToken─────────────────�
   </p>
   <p>
     UCP defines the end-to-end commerce lifecycle — from offer negotiation through checkout completion.
-    ATLAS attaches to that lifecycle at two points: during negotiation, where an <code>AssessmentResult</code>
-    may influence offer terms, and at completion, where the <code>ReportToken</code> travels with the
-    payment authorisation message.  The FACT implementation has already demonstrated that
-    merchant-to-Assessor invocation works within UCP's negotiation phase; ATLAS formalises that
-    proven pattern into a portable, scheme-agnostic protocol.
+    ATLAS artifacts can be exchanged at those lifecycle points (negotiation and completion /
+    authorisation). Whether a merchant changes offer terms because a result is present is
+    programme policy, not this protocol (see the <a href="atlas-protocol-explainer.html">Explainer</a>).
   </p>
 </section>
 
@@ -3232,16 +3176,17 @@ N   ──redeem ReportToken─────────────────�
     <p>
       ATLAS defines a chained-capability-token <em>observability</em> protocol for agentic commerce.
       A <strong>trust registry</strong> publishes an <strong>Assessor roster</strong>.
-      Roster <code>assessment_types</code> are opaque scheme codes (e.g. FACT). Evidence
+      Roster <code>assessment_types</code> are opaque scheme codes (e.g. regulatory
+      compliance, intent-matching verification). Evidence
       <code>scope</code> lists release classes.
     </p>
     <p>
       Two models. <strong>Cloud-based agent:</strong> holder (merchant/CP GETs the roster and
       selects before Link 2) or direct (subject selects, then Link 1-D → Link 3 → JWE → Link 4).
-      <strong>On-device agent (deposit):</strong> same roster selection and Link 1-D; JWE is
-      pushed to the roster URL (or TA-forwarded); then deposit-direct or deposit-holder.
-      ATLAS tokens do not carry the Assessor URL. Roster-endpoint TLS versus pinning is
-      out of scope. An empty <code>scope</code> still produces Link 4
+      <strong>On-device agent (deposit):</strong> same Link 1-D claim set; outbound Link 1-D
+      → Link 3 → JWE; then deposit-direct (Link 4 on the JWE response) or deposit-holder
+      (acknowledgement, then holder Link 1 / Link 2). Delivery addresses: §5.3.
+      An empty <code>scope</code> still produces Link 4
       <code>not_assessed</code>.
       Processors assemble <code>redeem_tokens</code> on ISO 8583 and similar rails.
     </p>
@@ -3249,18 +3194,369 @@ N   ──redeem ReportToken─────────────────�
 </section>
 
 <!-- ===== SECTION 14 ===== -->
+
 <section id="s14">
   <h2><span class="secno-heading">14.</span> FAQ<a class="self-link" href="#s14" title="§ 14. FAQ">§</a></h2>
   <div class="informative">This section is non-normative.</div>
   <p>
-    Common questions about ATLAS — what it is, why it is proposed as a FIDO standard, how it
-    relates to KYA-OS / AP2 / VI, Assessor discovery and opt-in, multi-Assessor use, and benefits
-    by market segment — are answered in the companion FAQ:
+    The three HTML companions have different jobs. Do not copy the same essay into all three:
   </p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Document</th><th>Job</th><th>Do not treat as</th></tr></thead>
+      <tbody>
+        <tr><td><a href="atlas-protocol-specification-draft.html">Protocol</a></td><td>Messages, tokens, <code>scope</code>, <code>registered_identities[]</code></td><td>A method pack or liability rulebook</td></tr>
+        <tr><td><a href="atlas-protocol-explainer.html">Explainer</a></td><td>Why assessment exists; how a scheme <em>may</em> consume a verdict</td><td>Normative protocol text</td></tr>
+        <tr><td><a href="atlas-faq.html">FAQ</a> (this section)</td><td>Questions, including the expanded problem statement (Q6, Q18)</td><td>A second spec; edit <code>FAQ.md</code> as source</td></tr>
+      </tbody>
+    </table>
+  </div>
   <p>
-    <a href="https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC/blob/main/FAQ.md">ATLAS — FAQ</a>
-    (<code>https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC/blob/main/FAQ.md</code>)
+    Standalone page: <a href="atlas-faq.html">atlas-faq.html</a>.
+    Markdown source: <a href="FAQ.md">FAQ.md</a>.
   </p>
+  <div id="faq-html">
+<p>AI agents are starting to shop and pay for us. <strong>ATLAS</strong> is about making that trustworthy: an open way for an <strong>independent inspector</strong> (an Assessor) to check how an agent behaved — did it follow the user’s intent? stay within rules and network policies? stay in good standing under Know-Your-Agent (KYA)? — and to share a compact trust signal with banks and networks <strong>without</strong> broadcasting the user’s private conversation.</p>
+<hr>
+<h2 id="glossary-of-questions">Glossary of questions</h2>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>#</th><th>Question</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><a href="#1-what-is-atlas">What is ATLAS?</a></td></tr>
+<tr><td>2</td><td><a href="#2-what-does-atlas-standardise">What does ATLAS standardise?</a></td></tr>
+<tr><td>3</td><td><a href="#3-why-trust-the-assessor-if-it-is-also-ai-llm-as-a-judge-isnt-that-circular">Why trust the Assessor if it is also AI (“LLM as a judge”)? Isn’t that circular?</a></td></tr>
+<tr><td>4</td><td><a href="#4-why-would-a-shopping-agent-share-personal-data-pii-with-the-assessor">Why would a shopping agent share personal data (PII) with the Assessor?</a></td></tr>
+<tr><td>5</td><td><a href="#5-why-is-atlas-open">Why is ATLAS open?</a></td></tr>
+<tr><td>6</td><td><a href="#6-what-problems-is-this-trying-to-solve">What problems is this trying to solve?</a></td></tr>
+<tr><td>7</td><td><a href="#7-is-atlas-compatible-with-emerging-standards-kya-os-ap2-vi">Is ATLAS compatible with emerging standards (KYA-OS, AP2, VI)?</a></td></tr>
+<tr><td>8</td><td><a href="#8-does-atlas-work-with-browser-agents-and-webmcp">Does ATLAS work with browser agents and WebMCP?</a></td></tr>
+<tr><td>8a</td><td><a href="#8a-how-does-atlas-work-for-a-cloud-agent-vs-an-on-device-agent">How does ATLAS work for a cloud agent vs an on-device agent?</a></td></tr>
+<tr><td>8b</td><td><a href="#8b-what-is-evidence-scope--what-does-the-assessor-actually-see">What is evidence <code>scope</code> — what does the Assessor actually see?</a></td></tr>
+<tr><td>9</td><td><a href="#9-can-i-use-atlas-only-before-payment-or-also-after-a-transaction-has-been-processed">Can I use ATLAS only before payment — or also after a transaction has been processed?</a></td></tr>
+<tr><td>10</td><td><a href="#10-how-do-assessor-trust-authority-and-the-certification-scheme-work-together">How do Assessor, Trust Authority, and the certification scheme work together?</a></td></tr>
+<tr><td>11</td><td><a href="#11-how-do-i-find-a-qualified-assessor-what-is-the-roster-discovery-and-opt-in">How do I find a qualified Assessor — what is the roster, discovery, and opt-in?</a></td></tr>
+<tr><td>12</td><td><a href="#12-can-i-use-several-assessor-agents-for-one-transaction">Can I use several Assessor agents for one transaction?</a></td></tr>
+<tr><td>13</td><td><a href="#13-who-benefits-from-atlas-and-how-by-market-segment">Who benefits from ATLAS — and how (by market segment)?</a></td></tr>
+<tr><td>14</td><td><a href="#14-what-are-the-key-takeaways-benefits-of-atlas">What are the key takeaways / benefits of ATLAS?</a></td></tr>
+<tr><td>15</td><td><a href="#15-why-is-trust-so-important-at-this-stage-of-agentic-commerce-what-about-long-term">Why is trust so important at this stage of agentic commerce? What about long term?</a></td></tr>
+<tr><td>16</td><td><a href="#16-what-protocols-help-merchants-distinguish-a-legitimate-agent-from-a-scam-bot-or-scraper">What protocols help merchants distinguish a legitimate agent from a scam bot or scraper?</a></td></tr>
+<tr><td>17</td><td><a href="#17-what-does-the-audit-trail-for-an-agentic-purchase-look-like-what-proves-consumer-intent-vs-agent-execution">What does the audit trail for an agentic purchase look like? What proves consumer intent vs agent execution?</a></td></tr>
+<tr><td>18</td><td><a href="#18-does-an-agent-carry-a-portable-credential-proving-its-authority-from-merchant-to-merchant">Does an agent carry a portable credential proving its authority from merchant to merchant?</a></td></tr>
+<tr><td>19</td><td><a href="#19-if-an-agent-buys-the-wrong-item-or-exceeds-budget-who-bears-the-loss">If an agent buys the wrong item or exceeds budget, who bears the loss?</a></td></tr>
+<tr><td>20</td><td><a href="#20-what-is-the-risk-of-fragmentation-from-different-agentic-commerce-protocols">What is the risk of fragmentation from different agentic commerce protocols?</a></td></tr>
+<tr><td>21</td><td><a href="#21-is-merchant-willingness-about-technical-readiness-or-genuine-acceptance-of-the-channel">Is merchant willingness about technical readiness or genuine acceptance of the channel?</a></td></tr>
+<tr><td>22</td><td><a href="#22-how-far-out-is-workable-trust-infrastructure-and-what-is-the-biggest-near-term-risk">How far out is workable trust infrastructure, and what is the biggest near-term risk?</a></td></tr>
+</tbody></table></div>
+<p>Also: <a href="#sources">Sources</a></p>
+<hr>
+<h2 id="1-what-is-atlas">1. What is ATLAS?</h2>
+<p><strong>ATLAS</strong> (Agent Trust Layer and Assurance Standard) is an <strong>open protocol</strong> — a shared rulebook — for trusting AI agents when they act in commerce on someone’s behalf.</p>
+<p>In plain terms: when an agent acts for a person, ATLAS defines how an <strong>independent Assessor</strong> can check that agent’s behaviour — not only “did it follow the request?”, but also compliance with regulations, network policies, KYA identity status, and related oversight — and turn the result into a <strong>signed trust signal</strong> that payment parties can use. The full private chat does <strong>not</strong> need to travel on the payment rail.</p>
+<p>ATLAS describes how <strong>entity types</strong> work together: the agent being checked (the “subject” / shopping agent), an independent <strong>Assessor</strong>, a <strong>Trust Authority</strong>, merchants, wallets, and payment systems.</p>
+<hr>
+<h2 id="2-what-does-atlas-standardise">2. What does ATLAS standardise?</h2>
+<p>As an <strong>open standard</strong>, ATLAS defines a shared rulebook for <strong>independent runtime assessment</strong> of agent behaviour in commerce — not a product, and not a replacement for identity or checkout protocols.</p>
+<p>Existing work already covers neighbouring jobs: <a href="https://ap2-protocol.org/ap2/specification/">AP2</a> and <a href="https://verifiableintent.dev/spec/">VI</a> secure <strong>authorization at checkout</strong>; <a href="https://github.com/decentralized-identity/kya-os-mcp">KYA-OS</a> helps establish <strong>who</strong> an agent is. None of them alone standardise <strong>what the agent did</strong> before those artefacts are bound. That is the ATLAS layer.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>What ATLAS standardises</th><th>What that means in practice</th></tr></thead>
+<tbody>
+<tr><td><strong>Assessment language &amp; messages</strong></td><td>Common evidence packages, verdicts, and report tokens that any conforming party can produce or consume</td></tr>
+<tr><td><strong>Evidence <code>scope</code> classes</strong></td><td>A <strong>release ceiling</strong> — which classes the agent is willing to export (dialogue, tool traces, rail choices, …). Chat is not mandatory.</td></tr>
+<tr><td><strong>Deployment models</strong></td><td><strong>Cloud-based agent:</strong> holder and direct. <strong>On-device agent (deposit):</strong> deposit-direct and deposit-holder. Assessor URL is on the roster, not in ATLAS tokens.</td></tr>
+<tr><td><strong>Assessor / Trust Authority roles</strong></td><td>How independent Assessors are authorized, how methods are certified, and how evidence stays encrypted to the Assessor</td></tr>
+<tr><td><strong>Pre-transaction behaviour signal</strong></td><td>A portable trust leg <strong>beside</strong> KYA (identity) and AP2/VI (transaction binding) — not a substitute for either</td></tr>
+<tr><td><strong>Rail-ready outputs</strong></td><td>Compact signed signals that can travel with payment messaging without shipping the user’s private conversation</td></tr>
+</tbody></table></div>
+<p><strong>One-liner:</strong> ATLAS is the open standard for <strong>how the ecosystem independently observes agent behaviour</strong> and turns that into a verifiable trust signal.</p>
+<hr>
+<h2 id="3-why-trust-the-assessor-if-it-is-also-ai-llm-as-a-judge-isnt-that-circular">3. Why trust the Assessor if it is also AI (“LLM as a judge”)? Isn’t that circular?</h2>
+<p>It looks circular at first — “AI checking AI” — but ATLAS is designed so trust does <strong>not</strong> rest on “another chatbot’s opinion” or a bare “trust me.”</p>
+<p>What makes the Assessor different:</p>
+<ol>
+<li><strong>Different job.</strong> The shopping agent is trying to complete a purchase. The Assessor is authorized to judge behaviour against a <strong>named rulebook</strong> (regulation, network policy, safety rules, and so on) — like an auditor reviewing a company, not the company grading itself.</li>
+<li><strong>More than one source.</strong> The Assessor compares what the shopping agent reports <strong>and</strong>, when available, independent material from the merchant or wallet, then cross-checks them.</li>
+<li><strong>Licensed, not anonymous.</strong> A <strong>Trust Authority</strong> authorizes Assessors; they appear on a published <strong>roster</strong>. The Assessor must prove that authorization before it can see sensitive evidence.</li>
+<li><strong>Certified methods — not “trust me.”</strong> The methods and models an Assessor uses are <strong>certified</strong> by the Trust Authority and go through <strong>prior benchmarks and evaluation</strong>. The outcome is closer to: <em>“Using certified method X, against rulebook Y, the score was Z”</em> — not an opaque, untraceable judgment.</li>
+<li><strong>What leaves the room.</strong> Private reasoning stays encrypted for the Assessor only. Everyone else gets a <strong>signed verdict</strong> (and often a short token pointing to a stored report) — not the raw chat.</li>
+</ol>
+<p>So the point isn’t “AI judges are perfect.” The point is <strong>independence + certified method + named rulebook + cross-checks + cryptographic proof</strong>.</p>
+<blockquote><p><strong>Honest caveat:</strong> Assessment still has limits. ATLAS makes it <strong>auditable, independent, and method-certified</strong> — not infallible.</p></blockquote>
+<hr>
+<h2 id="4-why-would-a-shopping-agent-share-personal-data-pii-with-the-assessor">4. Why would a shopping agent share personal data (PII) with the Assessor?</h2>
+<p>The goal is <strong>more privacy for more parties</strong>, not less. Without a standard, either nobody can check what the agent understood (bad for safety and disputes), or too many parties see too much.</p>
+<p>A shopping agent is willing to share personal data with an ATLAS Assessor mainly because of <strong>who</strong> that Assessor is and <strong>how</strong> data is handled:</p>
+<ul>
+<li>The Assessor is an <strong>independent third party</strong> — not the merchant competing for the sale, and <strong>neutral from a payment point of view</strong> (not the network, issuer, or acquirer deciding the rail outcome).</li>
+<li>Sensitive evidence is <strong>not meant to sit in a permanent personal-data store</strong>. It is <strong>decrypted only while the assessment runs</strong>; what lasts is a signed verdict / report token and hashes — not a reusable copy of the user’s private data for other parties.</li>
+<li>Sharing is a deliberate trade: short, limited access for a <strong>neutral inspector</strong>, in exchange for trust signals the rest of the ecosystem can use.</li>
+</ul>
+<p>In ATLAS:</p>
+<ul>
+<li>Evidence is <strong>encrypted so only the chosen Assessor</strong> can read it. The Trust Authority may <strong>forward ciphertext</strong> if the device cannot reach the Assessor URL — it must not decrypt.</li>
+<li>Merchants, card networks, and processors <strong>do not</strong> get the raw evidence package in the base design.</li>
+<li>Sharing is <strong>scoped</strong>: the agent lists evidence <strong>classes</strong> it will release (<code>scope</code>). Chat and chain-of-thought are optional classes, not a minimum payload. See <a href="#8b-what-is-evidence-scope--what-does-the-assessor-actually-see">§8b</a>.</li>
+<li>What travels on payment rails is typically a <strong>short trust token</strong> (a pointer to a report), not the user’s full conversation.</li>
+</ul>
+<hr>
+<h2 id="5-why-is-atlas-open">5. Why is ATLAS open?</h2>
+<p>Agentic commerce spans many vendors — shopping agents, merchants, wallets, schemes, issuers, labs. A <strong>closed, vendor-only</strong> trust check creates lock-in and incompatible “trust islands.” ATLAS is open so assessment can travel with the transaction across that mix, instead of staying trapped inside one product.</p>
+<p>Without an open protocol, common ways to watch agents are:</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Approach without ATLAS</th><th>Limit</th></tr></thead>
+<tbody>
+<tr><td><strong>Software kit (SDK) inside the agent</strong></td><td>Only works if that vendor embeds your kit</td></tr>
+<tr><td><strong>Hosting the agent yourself</strong></td><td>Only works for agents you operate</td></tr>
+<tr><td><strong>Proxy / firewall in the path</strong></td><td>Fragile and hard to apply everywhere</td></tr>
+</tbody></table></div>
+<p>None of these scale across today’s agents — commercial cloud (e.g. Gemini), on-device (e.g. Apple), or custom (e.g. Hermes). Openness is what lets diverse agents emit the <strong>same kind of assessable trust signals</strong> without forcing one host or one vendor kit.</p>
+<p><em>(What ATLAS actually specifies as that shared rulebook is covered in <a href="#2-what-does-atlas-standardise">§2</a>.)</em></p>
+<hr>
+<h2 id="6-what-problems-is-this-trying-to-solve">6. What problems is this trying to solve?</h2>
+<p>Example: <em>“Order pizza under €40, I’m allergic to peanuts, and I’m on medication X.”</em> An AI agent may keep the budget, drop or blur the allergy, show a confirmation that <em>looks</em> fine, then pay — with <strong>no independent record</strong> of what it actually understood.</p>
+<p><strong>When verification matters.</strong> Checking the agent (observability / assessment) can happen <strong>even before a payment network/rail is chosen</strong>, and should happen <strong>before checkout protocols such as <a href="https://ap2-protocol.org/ap2/specification/">AP2</a> and <a href="https://verifiableintent.dev/spec/">VI</a> start</strong>. By the time AP2/VI capture “intent,” that data is already the shopping agent’s <strong>interpreted</strong> intent — and may already include bias or error from discovery, ranking, and cart building.</p>
+<p>In AP2, a <strong>checkout object is shared</strong> with the user and others — that is not the gap. The gap is that this checkout was <strong>already built by the shopping agent without the human browsing and selecting items with the merchant</strong>. Confirming that purchase is therefore <strong>not the same</strong> as classic 3-D Secure-style authentication against a merchant-built checkout: the human is approving an <strong>agent-built cart</strong>. Item selection has already been partly <strong>delegated</strong>.</p>
+<p>That creates real problems — especially for today’s focus on <strong>immediate / real-time</strong> agentic flows (identity, regulation, liability), with further issues under fuller hands-off <strong>delegation</strong>:</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Problem</th><th>Why it matters</th></tr></thead>
+<tbody>
+<tr><td><strong>KYA alone isn’t enough</strong></td><td>Knowing <em>who</em> the agent is (registration, keys, claimed scopes) does not prove <em>what</em> it did in this purchase. Behaviour checks are needed <strong>before</strong> rail choice and <strong>before</strong> AP2/VI checkout</td></tr>
+<tr><td><strong>KYA silos / no cross-repository checks</strong></td><td>If each payment network keeps its <strong>own</strong> KYA list, bad behaviour on Network A may be <strong>invisible</strong> to Network B. Cross-checks should share a <strong>minimal</strong> signal (e.g. “lower trust” / blacklisted) — <strong>not</strong> full case details or the other network’s private status file</td></tr>
+<tr><td><strong>Regulatory / rulebook compliance at transaction time</strong> (payment-method choice; <strong>IFR</strong> as one EU example)</td><td>Many rules assume a <strong>human</strong> chose the merchant, the product, and the <strong>payment instrument / path</strong>. An agent can pick a card, wallet, or rail that changes <strong>cost, routing, or legal treatment</strong> without that choice being transparent to the user or the scheme. <strong>Example — IFR</strong> (EU Interchange Fee Regulation): it caps certain interchange fees and sits in a broader EU push for clear payment-method choice and cost fairness — so if an agent steers the instrument (e.g. toward a higher-cost card product or a path the user did not knowingly select), interchange and related cost treatment can become hard to justify under those rules. The same pattern applies beyond IFR: network rulebooks, restricted goods, age limits, geo/sanctions, SCA expectations, and other obligations that must hold <strong>at transaction time</strong>, not only at agent onboarding. Rail choice may also come <strong>after</strong> the agent has already shaped the cart</td></tr>
+<tr><td><strong>Unclear liability</strong></td><td>When an agent-led purchase fails policy or is disputed, schemes need a fair way to allocate responsibility. ATLAS helps the <strong>liability model</strong> by providing an <strong>independent, signed, redeemable assessment</strong> of what the agent did (and against which rulebook) — evidence schemes, issuers, and merchants can use to <strong>allocate responsibility or evolve liability rules later</strong>, based on verified behaviour rather than each party’s unverifiable claim</td></tr>
+<tr><td><strong>Chargebacks and disputes</strong></td><td>Classic disputes assume a clear story: the cardholder either did or did not authorize a merchant checkout they could see. With agents, the story breaks: the user may have confirmed an <strong>agent-built</strong> cart, yet still claim “that wasn’t what I meant,” “I never chose that merchant/item,” or “my constraints were ignored.” Merchants, issuers, and networks then lack a <strong>neutral, time-stamped record</strong> of agent behaviour to adjudicate quickly — so chargebacks rise, resolution costs rise, and “he said / agent said” replaces evidence</td></tr>
+<tr><td><strong>User confirmation is not enough (unlike classic 3DS)</strong></td><td>Confirming (even on an AP2 checkout object) is <strong>not</strong> the same as authenticating a merchant-presented, human-selected purchase. AP2 <strong>does</strong> share the checkout; the issue is that object was <strong>already forged by the agent</strong> without human–merchant item selection. The shared product details may also <strong>fail user constraints</strong> the person stated in natural language — e.g. <strong>allergies</strong> or <strong>medical</strong> restrictions — while the summary still looks plausible to click “confirm.” Independent assessment can check whether those constraints actually survived into the cart</td></tr>
+<tr><td><strong>Monitoring &amp; explainability gaps</strong> <em>(related to, but not the same as, regulatory compliance above)</em></td><td><strong>Regulatory compliance</strong> asks: <em>did this transaction break a substantive rule?</em> <strong>Monitoring &amp; explainability</strong> asks: <em>can we show, later, what the agent did and why — to supervisors, auditors, or customers?</em> Frameworks such as transparency / explainability duties (e.g. EU AI Act-style obligations), operational resilience / third-party AI assessability (e.g. DORA-style themes), and internal scheme monitoring all need a <strong>durable runtime record</strong>. Today that record may not exist in an independent, portable form — so firms cannot demonstrate oversight even when they believe the agent “usually” complies</td></tr>
+<tr><td><strong>Privacy vs oversight</strong></td><td>Parties need to <strong>observe</strong> agent behaviour for safety, fraud, and disputes — but must not turn agentic commerce into a <strong>surveillance pipe</strong>. Raw user intent and reasoning are sensitive; dumping them to merchants, networks, or processors would overshare. Without a standard, the market swings between two bad options: <strong>blind trust</strong> (no check) or <strong>over-exposure</strong> (too many parties see too much). ATLAS-style design aims at the middle: encrypted evidence for a licensed Assessor only, and compact trust signals downstream</td></tr>
+<tr><td><strong>Wrong or unsafe purchases</strong> (“intent drift”)</td><td>Constraints get lost between what you said and what was ordered — and AP2/VI may later bind that <strong>already-interpreted</strong> (possibly drifted) intent. Along the path, <strong>data-loss risk is high</strong>: natural language is compressed into <strong>tokens and embeddings</strong>, shaped by <strong>model training</strong> priors, then forced into <strong>deterministic tools/schemas</strong> (APIs, MCP, cart fields). Rare or safety-critical constraints (allergies, medical limits, ethics) are easy to under-weight, drop, or never map. <strong>Privacy-preserving</strong> policies can also raise risk: some constraints <strong>may</strong> not be shared with the merchant, or <strong>may</strong> not be processed fully, so the checkout never sees what mattered. Fidelity to the <strong>initial intent</strong> is therefore fragile — <strong>especially</strong> with <strong>custom</strong> or <strong>on-device</strong> agents — unless independently assessed</td></tr>
+<tr><td><strong>User best interest no longer assured</strong></td><td>When an agent shops for you, it is supposed to optimise for <strong>your</strong> goals — budget, safety, preferences, ethics — not for the loudest merchant, the easiest tool call, or its own completion bias. That assurance weakens once selection is delegated: the agent can satisfy a simplified objective (e.g. “buy pizza under €40”) while <strong>quietly dropping</strong> what mattered most to the user (e.g. allergen safety, preferred local shop, “no rush delivery fees”). Example: the user wants a peanut-safe meal under budget; the agent returns a cheap pizza that looks fine on the confirmation screen but <strong>may</strong> ignore the allergy — the purchase “succeeds” for the agent while failing the user’s real interest. Even “immediate” flows already delegate <strong>product selection</strong> to the agent</td></tr>
+<tr><td><strong>Bias in merchant and item selection</strong></td><td>Unlike today’s search engines or aggregators — where a human can still open results and compare merchants — the shopping agent may interpret data or show only a <strong>pre-selected subset</strong>. Even if the user sees some merchants, they <strong>do not see all</strong> underlying offers, so bias can stay <strong>undetected</strong>. That subset is what later becomes “intent” in AP2/VI</td></tr>
+<tr><td><strong>Fairness and equity</strong></td><td>Selection should not systematically disadvantage parties — including <strong>local merchant sovereignty</strong> vs large global / US platforms in agent-mediated discovery</td></tr>
+</tbody></table></div>
+<p><strong>KYA identifiers — why joining lists is hard.</strong> Cross-repository checks need to recognise the <strong>same</strong> agent:</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Approach</th><th>What it means</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><strong>One ID per repository</strong></td><td>Network A calls the agent <code>netA:…</code>, Network B <code>netB:…</code>, with no reliable join</td><td>Risk stays trapped in one silo unless something bridges the IDs</td></tr>
+<tr><td><strong>Single agent / model / version ID</strong></td><td>One stable identity (or mapping) for the same agent build that each repository can link</td><td>Networks can correlate status and assessment outcomes across stores</td></tr>
+</tbody></table></div>
+<p><strong>Both patterns are covered by ATLAS:</strong> an Assessor can query <strong>all available KYA repositories</strong> for a given agent and form a cross-repo trust view — still sharing only <strong>minimal</strong> risk signals where privacy requires it.</p>
+<p>ATLAS closes the <strong>runtime behaviour gap</strong> and feeds portable signals back into KYA-style monitoring.</p>
+<hr>
+<h2 id="7-is-atlas-compatible-with-emerging-standards-kya-os-ap2-vi">7. Is ATLAS compatible with emerging standards (KYA-OS, AP2, VI)?</h2>
+<p><strong>Yes — and more importantly it complements them</strong> by restoring <strong>missing trust signals</strong> those layers do not provide alone.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Protocol</th><th>Rough job</th><th>Relation to ATLAS</th></tr></thead>
+<tbody>
+<tr><td><strong><a href="https://github.com/decentralized-identity/kya-os-mcp">KYA-OS</a></strong> (<a href="https://identity.foundation/">DIF</a>)</td><td>Who is this agent? Identity and delegation</td><td>The Assessor can <strong>work with the KYA-OS layer</strong> and <strong>feed runtime behaviour signals</strong> back into KYA monitoring. Spec: <a href="https://github.com/decentralized-identity/kya-os-mcp/blob/main/SPEC.md">SPEC.md</a>; overview: <a href="https://modelcontextprotocol-identity.io/mcp/introduction">KYA-OS introduction</a></td></tr>
+<tr><td><strong><a href="https://ap2-protocol.org/ap2/specification/">AP2</a></strong></td><td>Permission to check out / pay (mandates)</td><td>ATLAS sits <strong>before and around</strong> checkout: how intent was interpreted while discovering, evaluating, and building the cart</td></tr>
+<tr><td><strong><a href="https://verifiableintent.dev/spec/">VI</a></strong> (Verifiable Intent)</td><td>Cryptographic proof of user intent / constraints</td><td>Complementary at payment boundaries; ATLAS does not replace VI</td></tr>
+<tr><td><strong><a href="https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html">ATLAS</a></strong></td><td>Independent runtime assessment</td><td>Complements the protocols above as an open standard for behaviour assessment</td></tr>
+</tbody></table></div>
+<p><strong>Two signal legs (complementary, not a hard timeline split):</strong></p>
+<ul>
+<li><strong><a href="https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html">ATLAS</a></strong> — independent assessment of <strong>runtime behaviour</strong> along the path from intent capture → discovery → ranking → cart: compliance, intent fidelity, KYA standing, dispute support, oversight.</li>
+<li><strong><a href="https://ap2-protocol.org/ap2/specification/">AP2</a> / <a href="https://verifiableintent.dev/spec/">VI</strong></a> — <strong>authorization and binding artefacts</strong> (consent, mandate, cart integrity, payment instrument, audit trail). Intent/mandate objects can appear earlier in the journey, but they are typically <strong>finalized and relied on at checkout</strong> — and they do <strong>not</strong> by themselves re-audit <em>how</em> the agent discovered, ranked, and built that cart.</li>
+</ul>
+<p><strong>One-liner:</strong> KYA-OS = ID badge; AP2/VI = permission and binding to pay; ATLAS = missing independent signals about behaviour, compliance, and oversight <em>before</em> those artefacts are treated as ground truth.</p>
+<hr>
+<h2 id="8-does-atlas-work-with-browser-agents-and-webmcp">8. Does ATLAS work with browser agents and WebMCP?</h2>
+<p>Yes. ATLAS cares about <strong>what evidence is released and how it is encrypted</strong>, not whether the agent runs in an app, in the cloud, or in a browser.</p>
+<p><strong>MCP / WebMCP</strong> (in short): ways for agents to call tools and websites. Those tool calls are exactly where intent often gets compressed or dropped — so assessment still matters.</p>
+<p>A browser shopping agent typically sets <code>subject_channel: browser-context</code>. Expected evidence then leans toward <strong>navigations, form-submit, checkout origin, and an observed cart</strong> — not a UCP/ACP signed offer. The agent still starts intake the same way as any other subject (holder, direct, or deposit). Detailed WebMCP wiring is emerging; the protocol is <strong>architecture-agnostic</strong>.</p>
+<p>How cloud vs on-device subjects actually start that intake is <a href="#8a-how-does-atlas-work-for-a-cloud-agent-vs-an-on-device-agent">§8a</a>. What they release is <a href="#8b-what-is-evidence-scope--what-does-the-assessor-actually-see">§8b</a>.</p>
+<hr>
+<h2 id="8a-how-does-atlas-work-for-a-cloud-agent-vs-an-on-device-agent">8a. How does ATLAS work for a cloud agent vs an on-device agent?</h2>
+<p><strong>Two models, four modes.</strong> The JWE, Link 4 verdict, and <code>ReportToken</code> do not change. What changes is who selects the Assessor, whether the subject can accept inbound HTTPS, and <strong>when</strong> Link 4 is issued.</p>
+<p>Assessor delivery addresses are on the TA-partner roster (§5.3). There is <strong>no</strong> TA-mediated intake — the TA does not pick the Assessor.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Model</th><th>Mode</th><th>Who selects the Assessor</th><th>How it starts</th><th>When Link 4 is issued</th></tr></thead>
+<tbody>
+<tr><td><strong>Cloud-based agent</strong> (SaaS or hosted)</td><td><strong>Holder</strong></td><td>Merchant/wallet from the roster <strong>before Link 2</strong></td><td>Agent issues Link 1 (<code>permitted_trust_authorities</code>). Holder GETs the roster, selects, then Link 2.</td><td>Holder receives the verdict after Link 3 + JWE.</td></tr>
+<tr><td><strong>Cloud-based agent</strong></td><td><strong>Direct</strong></td><td>The shopping agent from the roster <strong>before Link 1-D</strong></td><td>Link 1-D <strong>SA → Assessor</strong> (<code>permitted_assessors</code> + <code>permitted_trust_authorities</code>). Assessor sends Link 3 inbound.</td><td>The <strong>agent</strong> receives Link 4 after the JWE.</td></tr>
+<tr><td><strong>On-device agent (deposit)</strong></td><td><strong>Deposit-direct</strong></td><td>The shopping agent from the roster <strong>before Link 1-D</strong></td><td>Same Link 1-D claims. Agent POSTs Link 1-D, receives Link 3 on the outbound response, then POSTs the JWE. Assessor <strong>MUST NOT</strong> call the device.</td><td>The agent receives Link 4 / Link 5 on the JWE response.</td></tr>
+<tr><td><strong>On-device agent (deposit)</strong></td><td><strong>Deposit-holder</strong></td><td>Agent selects for the deposit; merchant/wallet confirms via the roster <strong>before Link 2</strong></td><td>Same outbound Link 1-D → Link 3 → JWE; Assessor returns <code>DepositAcknowledgement</code>. Then holder Link 1 with <code>deposited_assessors[]</code> and related TAs.</td><td>Merchant/wallet later asks (Link 2, optional <code>holder_commissioned</code> artifacts); Assessor returns Link 4 to the holder.</td></tr>
+</tbody></table></div>
+<p>There is no Assessor SDK inside the shopping agent, and no Assessor consumer app on the phone.</p>
+<p><strong>Optional hardware-bound <code>agent_cnf</code>:</strong> Link 1 / Link 1-D may set <code>agent_cnf.key_protection: hardware</code> plus a <code>hardware_attestation</code> that proves the signing key lives in a non-exportable store (phone Secure Enclave / Android Keystore / TPM, or a cloud HSM). The base profile still accepts software keys so SaaS agents can participate. A scheme can require hardware for on-device deposit. A hardware claim without a matching attestation is treated as software.</p>
+<p><strong>Carts and payment mandates</strong> still come from the merchant or wallet on a cloud-holder or deposit-holder Link 2. In a browser session the agent <em>may</em> include an observed cart in the encrypted package; a later merchant-signed cart wins if both exist.</p>
+<hr>
+<h2 id="8b-what-is-evidence-scope-what-does-the-assessor-actually-see">8b. What is evidence <code>scope</code> — what does the Assessor actually see?</h2>
+<p><code>scope</code> is a <strong>release ceiling</strong>, not a verdict type. The shopping agent lists <strong>classes</strong> it is willing to export. It must not include a class that is not listed. The Assessor must not treat a <strong>missing</strong> class as “we checked that and it passed.”</p>
+<p>ATLAS does <strong>not</strong> require the full chat or the model’s chain-of-thought. Those are two optional classes. What a scheme (for example regulatory compliance or intent-matching verification) <em>needs</em> for a given method is named by opaque <code>assessment_types</code> on the roster — outside this protocol.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Group</th><th>Examples of classes</th><th>Typical on</th></tr></thead>
+<tbody>
+<tr><td><strong>Narrative</strong></td><td>User–agent turns; free-text reasoning / CoT; a typed decision graph</td><td>Cloud subjects that already log dialogue. Rarely available on locked-down devices.</td></tr>
+<tr><td><strong>Native structured intent</strong></td><td>In-app toggles and caps (<code>ui_slots</code>); a structured constraint set</td><td>Any agent with its own UI — not the same as Verifiable Intent.</td></tr>
+<tr><td><strong>Actions / discovery</strong></td><td>Merchants/SKUs considered; tool / MCP / HTTP traces; browser navigations; OS app launches; affiliate tags; pipeline stage names</td><td>The usual on-device / no-chat path. Browser agents add <code>browser_trace</code>.</td></tr>
+<tr><td><strong>Checkout (agent-side)</strong></td><td><code>rail_choices</code> — instruments the user <em>could</em> use ∩ methods the merchant would accept, <strong>before</strong> commit; confirmation event (pay-sheet vs HTML, SCA done)</td><td>The <strong>selected</strong> rail is a payment-layer fact (merchant / wallet / network), not an agent class.</td></tr>
+<tr><td><strong>Integrity</strong></td><td>Model/version hash; safety-event enums; hash-chained session log; session / transaction binding</td><td>Useful when the OS or runtime can attest the log.</td></tr>
+</tbody></table></div>
+<p>**What is <em>not</em> a <code>scope</code> class:** merchant carts and AP2 / VI mandates. Those are attached later by the merchant or wallet when they ask for Link 4.</p>
+<p><strong>What a missing class means:</strong> if <code>agent_reasoning</code> is not in <code>scope</code>, the Assessor did not see CoT — and must not claim it verified “intent from reasoning.” It can still judge from tool traces, consideration set, and holder artefacts.</p>
+<p><strong>If the OS exports zero classes, or the agent lists an empty <code>scope</code>:</strong> ATLAS cannot assess agent behaviour — there is nothing to evaluate. The transport still runs (deposit can POST Link 1-D; holder can still send Link 2). The Assessor must not invent a chat, a tool trace, or an “intent verified” claim. When the result path asks, Link 4 <strong>must still be issued</strong> with <code>verdict: not_assessed</code>. Empty <code>scope</code> is the reason — no extra reason code. That is recorded on the rail-facing token: not silence, and not a pass or a fail. Holder Link 2 artifacts (cart / AP2 / VI) can still be digested on that same Link 4; they do not change the agent-behaviour verdict.</p>
+<p><strong>Beginner takeaway:</strong> <code>scope</code> is the agent’s privacy dial. Cloud agents can open more classes; on-device agents can open action and receipt-style classes only. The Assessor is honest about which classes it actually saw — including when the agent refused every class.</p>
+<hr>
+<h2 id="9-can-i-use-atlas-only-before-payment-or-also-after-a-transaction-has-been-processed">9. Can I use ATLAS only before payment — or also after a transaction has been processed?</h2>
+<p><strong>Yes.</strong> Assessment is not only a “gate before pay.” Timing depends on need: block until a verdict, continue and review later, or look back at a past transaction.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Mode</th><th>When</th><th>Who typically asks</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td><strong>Direct (cloud)</strong></td><td>Before the next step</td><td>The shopping agent</td><td>Agent selects from the roster, Link 1-D → Link 3 → JWE → Link 4; checkout can wait</td></tr>
+<tr><td><strong>Deposit-direct (on-device)</strong></td><td>At checkout</td><td>The shopping agent</td><td>Same roster selection; L1-D → Link 3 → JWE → Link 4 on the JWE response</td></tr>
+<tr><td><strong>Deposit-holder (on-device)</strong></td><td>At checkout, then later</td><td>Merchant or wallet</td><td>Same L1-D → Link 3 → JWE → acknowledgement; holder Link 2 (optional <code>holder_commissioned</code> artifacts) receives Link 4</td></tr>
+<tr><td><strong>Holder (cloud)</strong></td><td>During negotiation</td><td>Merchant or wallet</td><td>Agent issues Link 1; holder GETs the roster, selects the Assessor, then Link 2; holder receives Link 4</td></tr>
+<tr><td><strong>Post-transaction</strong></td><td>After payment</td><td>e.g. issuer, payment network, acquirer</td><td>Redeem an existing <code>ReportToken</code>, or — if a sealed JWE was stored — request Link 4 later. A TA cannot pull evidence from a phone that never deposited.</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-how-do-assessor-trust-authority-and-the-certification-scheme-work-together">10. How do Assessor, Trust Authority, and the certification scheme work together?</h2>
+<p>In ATLAS language, what people often call an <strong>“authority scheme”</strong> is essentially the <strong>certification scheme</strong>: the programme that defines <em>who may assess</em>, under <em>which rules</em>, and how Assessors are <strong>accredited and listed</strong>.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Entity type</th><th>Simple question it answers</th></tr></thead>
+<tbody>
+<tr><td><strong>Certification scheme</strong></td><td><em>What is the assurance programme?</em> It publishes the <strong>Assessor roster</strong> and ties Trust Authorities into one catalogue</td></tr>
+<tr><td><strong>Trust Authority</strong> (certification body)</td><td><em>Who licenses this Assessor, stores reports, and redeems report tokens?</em></td></tr>
+<tr><td><strong>Assessor</strong></td><td><em>For this purchase, did behaviour match the rulebook — using a certified method?</em></td></tr>
+<tr><td><strong>Conforming implementations</strong></td><td>Products and services that implement ATLAS under scheme profiles (any vendor)</td></tr>
+</tbody></table></div>
+<p><strong>How they connect (simplified):</strong></p>
+<ol>
+<li>The scheme publishes which Assessors are accredited (<strong>roster</strong> — see next question).</li>
+<li><strong>Cloud direct / deposit:</strong> the shopping agent <strong>selects</strong> an Assessor from that TA-partner roster and names it in <code>permitted_assessors</code> plus <code>permitted_trust_authorities</code> on Link 1-D. <strong>Cloud holder / deposit-holder:</strong> the merchant/wallet GETs the roster and selects before Link 2.</li>
+<li>The Assessor proves live authorization; the agent releases <strong>encrypted</strong>, <strong>in-scope</strong> evidence (on-device: after Link 3, outbound JWE).</li>
+<li>The Assessor issues a signed result + report token (immediately in cloud direct and deposit-direct; after holder Link 2 in deposit-holder).</li>
+<li>The payment network can later <strong>redeem</strong> the report from the Trust Authority.</li>
+</ol>
+<hr>
+<h2 id="11-how-do-i-find-a-qualified-assessor-what-is-the-roster-discovery-and-opt-in">11. How do I find a qualified Assessor — what is the roster, discovery, and opt-in?</h2>
+<p><strong>Best related question:</strong> <em>How does the ecosystem discover Assessors, keep them qualified, and let shopping agents choose who may inspect them?</em></p>
+<h3 id="the-roster-the-public-catalogue">The roster (the public catalogue)</h3>
+<p>A <strong>certification scheme</strong> (or trust registry) publishes an <strong>Assessor roster</strong>: a living list of Assessors currently allowed to operate under that programme. Shopping agents, merchants, and wallets use it to <strong>discover</strong> who can assess what, where, and under which rulebooks — instead of private one-off deals.</p>
+<p>The roster is kept fresh through <strong>regular Assessor evaluation</strong> and <strong>roster updates</strong> (add, suspend, revoke, refresh scores and metadata). Discovery uses the roster to <strong>pre-filter</strong> candidates; at assessment time the Assessor must still prove a <strong>live authorization</strong> from its Trust Authority (a stale roster entry is not enough).</p>
+<h3 id="what-a-qualified-assessor-entry-typically-carries">What a qualified Assessor entry typically carries</h3>
+<p>A roster entry for a qualified Assessor is meant to support informed choice. In practice it includes (or is linked to) information such as:</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Field (plain language)</th><th>Why it matters</th></tr></thead>
+<tbody>
+<tr><td><strong>Qualification / quality score</strong></td><td>Result of ongoing evaluation and benchmarks — helps compare Assessors, not only “listed vs not listed”</td></tr>
+<tr><td><strong>Assessment referential(s)</strong></td><td>Which <strong>scheme rulebooks</strong> this Assessor is allowed to apply (opaque codes — e.g. regulatory compliance, intent-matching verification). ATLAS does not define the methods.</td></tr>
+<tr><td><strong>Cost</strong></td><td>Pricing or fee model so merchants/wallets/agents can choose affordably and predictably</td></tr>
+<tr><td><strong>Region</strong></td><td>Where the Assessor is authorized to operate (e.g. EU, US)</td></tr>
+<tr><td><strong>Owning Trust Authority</strong></td><td>The TA that signs this Assessor’s live authorization</td></tr>
+<tr><td>Status, types</td><td>Active / suspended / revoked; opaque <code>assessment_types</code></td></tr>
+</tbody></table></div>
+<p><em>(The <a href="https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html">ATLAS working draft</a> already standardises core discovery fields such as regions, assessment types, policy referentials, and authorization status. Qualification score, cost, and the reverse “who accepts me” view help make the roster usable as a real marketplace of Assessors in scheme / programme deployments.)</em></p>
+<h3 id="discovery">Discovery</h3>
+<ol>
+<li>Look up the TA-partner roster.</li>
+<li>Filter by region, referential, score, cost, and live authorization.</li>
+<li><strong>Cloud direct / deposit:</strong> the shopping agent selects an Assessor and puts that roster id / public key in <code>permitted_assessors</code> plus the authorizing TAs in <code>permitted_trust_authorities</code>. <strong>Cloud holder / deposit-holder:</strong> the merchant/wallet GETs the roster and selects before Link 2.</li>
+</ol>
+<h3 id="opt-in-direct-and-deposit-name-the-assessor">Opt-in (direct and deposit name the Assessor)</h3>
+<p>Assessment is not a free-for-all.</p>
+<ul>
+<li><strong>Cloud direct and deposit:</strong> the agent <strong>selects</strong> from the published roster and records that choice in <code>permitted_assessors</code> and <code>permitted_trust_authorities</code>. Trust still depends on <strong>live roster authorization</strong>, not on the agent inventing an Assessor.</li>
+<li><strong>Cloud holder / deposit-holder:</strong> the agent lists Trust Authorities (<code>permitted_trust_authorities</code>) or <code>deposited_assessors</code>; the merchant or wallet GETs the roster and picks before Link 2.</li>
+<li><code>scope</code> still limits <strong>what</strong> is released, regardless of who was selected.</li>
+</ul>
+<p><strong>Beginner takeaway:</strong> Think of the roster as a <strong>yellow pages of inspected inspectors</strong>. In cloud direct and deposit the shopping agent <strong>picks a name from that list</strong>. In cloud holder (and before deposit-holder Link 2) the merchant/wallet does.</p>
+<hr>
+<h2 id="12-can-i-use-several-assessor-agents-for-one-transaction">12. Can I use several Assessor agents for one transaction?</h2>
+<p><strong>Yes.</strong> One purchase can involve <strong>more than one Assessor</strong>. That is intentional: different parties often need different checks, or the same journey may need several rulebooks.</p>
+<h3 id="why-you-might-use-more-than-one">Why you might use more than one</h3>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Example</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td><strong>Merchant and wallet each commission an Assessor</strong></td><td>The merchant wants a check before accepting the cart; the wallet wants a check before releasing payment credentials. Each picks an eligible Assessor from the roster (they may be different Assessors).</td></tr>
+<tr><td><strong>Different rulebooks</strong></td><td>One Assessor is strong on <strong>intent fidelity</strong>; another on <strong>regulated goods</strong> or <strong>network policy</strong>. Same transaction, separate assessments.</td></tr>
+<tr><td><strong>Different timing</strong></td><td>One Assessor runs <strong>synchronously</strong> as a gate; another runs <strong>asynchronously</strong> for audit/trace on the same journey.</td></tr>
+</tbody></table></div>
+<h3 id="how-it-works-plain-steps">How it works (plain steps)</h3>
+<ol>
+<li>For each check, an Assessor is <strong>selected from the roster</strong> — by the shopping agent (<code>permitted_assessors</code> on Link 1-D) or by a holder (see <a href="#11-how-do-i-find-a-qualified-assessor-what-is-the-roster-discovery-and-opt-in">roster / opt-in</a>). After a deposit, <code>deposited_assessors</code> names who already holds the JWE.</li>
+<li>Each requester (e.g. merchant, wallet) <strong>commissions</strong> its Assessor for that transaction (or from <code>deposited_assessors</code> on deposit-holder).</li>
+<li>Each Assessor proves its <strong>live authorization</strong>, then receives <strong>its own</strong> encrypted evidence package (scoped to what that assessment needs — not a free dump to every Assessor at once beyond what was authorized).</li>
+<li>Each Assessor returns <strong>its own signed verdict</strong> and, when required, <strong>its own report token</strong>.</li>
+<li>Downstream, the merchant processor can attach <strong>several compact report tokens</strong> to the payment message (ATLAS designs for a small number of tokens on the rail — typically up to a few per authorisation). Networks or issuers can redeem each token from the relevant Trust Authority.</li>
+</ol>
+<h3 id="what-stays-true-with-multiple-assessors">What stays true with multiple Assessors</h3>
+<ul>
+<li>Privacy: raw evidence still goes only to <strong>authorized</strong> Assessors, encrypted to them — not to every merchant or to the rail.</li>
+<li>Independence: each Assessor judges under <strong>its</strong> certified method and referential.</li>
+<li>No single Assessor monopoly: the ecosystem can combine complementary views of the same agent journey.</li>
+</ul>
+<p><strong>Beginner takeaway:</strong> Think of it like several specialized inspectors for one shipment — each with a clear brief — whose short signed reports can travel together with the payment.</p>
+<hr>
+<h2 id="13-who-benefits-from-atlas-and-how-by-market-segment">13. Who benefits from ATLAS — and how (by market segment)?</h2>
+<p>Each party gets a different slice of value from the same independent assessment and compact trust signals.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Segment</th><th>What’s in it for them</th></tr></thead>
+<tbody>
+<tr><td><strong>Merchant</strong></td><td>More confidence that an agent-built cart is acceptable <strong>before</strong> fulfilment; better dispute posture; optional sync gate so they don’t proceed blind</td></tr>
+<tr><td><strong>Wallet</strong></td><td>Can require agent observability before releasing payment credentials or finishing mandates — without becoming the Assessor</td></tr>
+<tr><td><strong>Shopping agent</strong></td><td>Neutral way to prove good behaviour without giving raw personal data to every counterparty; open interoperability instead of per-network kits</td></tr>
+<tr><td><strong>Payment network</strong></td><td>Runtime signals on top of KYA; compact tokens for authorisation; help with fraud, IFR/routing policy, and liability design</td></tr>
+<tr><td><strong>Issuer</strong></td><td>Extra signal at authorisation and after the fact; better evidence when the cardholder disputes; redeemable reports via the Trust Authority</td></tr>
+<tr><td><strong>Merchant processor</strong></td><td>Can carry a verified Assessor verdict into payment messaging (existing card/bank message formats) and score risk using an independent result — not only merchant or agent self-claims</td></tr>
+<tr><td><strong>User</strong></td><td>Better chance the agent stayed within constraints <strong>before</strong> AP2/VI bind an agent-built checkout; oversight without putting the raw chat on the rail; fairer disputes</td></tr>
+</tbody></table></div>
+<p><strong>One line:</strong> merchants and wallets get a gate or audit trail; agents get portable proof of behaviour; networks, issuers, and processors get redeemable runtime signals; users get protection that “confirm the agent’s cart” alone cannot provide.</p>
+<hr>
+<h2 id="14-what-are-the-key-takeaways-benefits-of-atlas">14. What are the key takeaways / benefits of ATLAS?</h2>
+<ol>
+<li><strong>Closes the black-box gap</strong> between what you said and what the agent did.</li>
+<li><strong>Independent, method-certified assessment</strong> — not the shopping agent grading itself.</li>
+<li><strong>Privacy-aware oversight</strong> — sensitive evidence to the Assessor only; rails get compact signals.</li>
+<li><strong>Restores missing pre-transaction trust signals</strong> that AP2/VI alone do not cover — while staying complementary to KYA, AP2, and VI.</li>
+<li><strong>Stronger KYA</strong> via cross-repository checks (minimal risk signals, not full case dumps).</li>
+<li><strong>Dispute / liability evidence</strong> — independent, redeemable records schemes, issuers, and merchants can use when disputes arise; can <strong>support future liability frameworks if</strong> networks adopt those signals — not a published agent-specific liability shift today.</li>
+<li><strong>Scalable observability</strong> across commercial, on-device, and custom agents — without relying only on SDKs, hosting, or proxies.</li>
+<li><strong>Flexible timing</strong> — sync gate, async audit, and post-transaction review.</li>
+<li><strong>Discoverable Assessors on the TA-partner roster</strong> — the agent (cloud direct / deposit) or the holder (cloud holder, and before deposit-holder Link 2) selects from that list. The Assessor URL stays on the roster, not in ATLAS tokens.</li>
+<li><strong>Several Assessors per transaction</strong> — merchant, wallet, or different rulebooks can each commission a check; multiple report tokens can travel with the payment.</li>
+<li><strong>Value per segment</strong> — merchant, wallet, shopping agent, network, issuer, processor, and user.</li>
+<li><strong>Open standard</strong> — a shared, vendor-neutral assessment layer the industry can implement, profile, and evolve together.</li>
+<li><strong>Early trust foundation</strong> that scales from human-in-the-loop flows toward delegation, micropayments, and machine-to-machine commerce.</li>
+</ol>
+<hr>
+<h2 id="15-why-is-trust-so-important-at-this-stage-of-agentic-commerce-what-about-long-term">15. Why is trust so important at this stage of agentic commerce? What about long term?</h2>
+<p>Technology matters only insofar as it <em>sustains</em> trust: merchants, issuers, networks, and consumers need evidence they can use to accept an agent, allow a purchase, and resolve disputes later — not another stack for its own sake.</p>
+<p>At this stage the ecosystem is still emerging, and most flows still keep a human in the loop. Models, tools, and threat surfaces are evolving quickly. Classic CNP signals (built over decades) do not fully transfer when an agent interprets intent, picks merchants, and builds the cart. So the industry needs a shared foundation of <strong>trust signals</strong> from day one — compact, independent, and portable across parties — instead of bolting oversight on after losses accumulate.</p>
+<p>Longer term, the same signal layer unlocks the next wave: fuller <strong>delegation</strong> (human no longer in the loop), <strong>micro-payments</strong> (e.g. HTTP 402-style rails), and <strong>machine-to-machine</strong> B2B commerce, where continuous oversight without a human gatekeeper is non-negotiable. ATLAS is designed as that shared assessment layer — restoring missing pre-transaction signals beside identity (KYA) and checkout binding (AP2/VI).</p>
+<hr>
+<h2 id="16-what-protocols-help-merchants-distinguish-a-legitimate-agent-from-a-scam-bot-or-scraper">16. What protocols help merchants distinguish a legitimate agent from a scam bot or scraper?</h2>
+<p>Merchants need to separate two worlds. <strong>Browser-based</strong> commerce spent years stopping malicious bots from acting like humans; that stack (bot detection and similar controls) now has to evolve to tell <em>legitimate</em> agents from <em>malicious</em> ones. That requires <strong>verifiable agent identity</strong> on the request — approaches such as <strong>Web Bot Auth</strong> (an IETF draft profile built on <strong>RFC 9421</strong> HTTP Message Signatures) are promising for carrying identity, but they do not by themselves prove the agent’s <strong>allowed scope of behaviour</strong>. Network programs such as Visa Trusted Agent / Mastercard Agent Pay (and related agentic commerce stacks) similarly strengthen recognition and scoped credentials; they still leave a gap on independent runtime behaviour. In parallel, a <strong>dedicated agentic</strong> stack is emerging that no longer depends on rendering a UI for a human. That stack is better suited to (1) recognise the agent, (2) verify it is authorised for a given action, and (3) leave an <strong>audit trail</strong> — with chained, verifiable evidence across payment method, merchant basket, user consent/authentication, and delegation mandates. Merchant confidence in today’s signals is still <strong>uneven</strong>: identity signals are improving, but <strong>runtime behaviour and scope</strong> remain the weak link without independent assessment — which is what ATLAS Assessors add.</p>
+<hr>
+<h2 id="17-what-does-the-audit-trail-for-an-agentic-purchase-look-like-what-proves-consumer-intent-vs-agent-execution">17. What does the audit trail for an agentic purchase look like? What proves consumer intent vs agent execution?</h2>
+<p>On emerging standards such as <strong>AP2</strong> and <strong>Verifiable Intent (VI)</strong>, key checkout elements are captured deterministically into verifiable credentials: the user intent, merchant basket, selected payment method, and transaction data, often signed with the user’s device key. That chain is <strong>necessary</strong> evidence for checkout and post-purchase binding. It is not sufficient for the full story: those artefacts are typically collected <strong>after</strong> the agent has already interpreted intent, chosen merchants, and built the cart. A <strong>complementary</strong> chain of verifiable evidence should also be captured <strong>up front</strong>, while the agent is processing the user’s initial intent — covering discovery, ranking, and cart construction — so the audit trail proves both <strong>consumer intent fidelity</strong> and <strong>agent execution</strong>, not only the final checkout object the user confirmed. ATLAS assessment (signed verdict + redeemable report token) is designed to provide that independent pre-transaction record.</p>
+<hr>
+<h2 id="18-does-an-agent-carry-a-portable-credential-proving-its-authority-from-merchant-to-merchant">18. Does an agent carry a portable credential proving its authority from merchant to merchant?</h2>
+<p>Emerging work such as <strong>DIF KYA-OS</strong> aims to carry both <strong>agent identity</strong> and <strong>allowed scope</strong>. The harder operational question is how a merchant verifies identity and scope <strong>before</strong> any purchase — and often <strong>before</strong> any payment rail is even chosen. Cross-repository KYA checks are complex: one can imagine a KYA store and authorised scopes <strong>per payment network</strong>, yet during shopping no rail may be identified yet. Asking every merchant to query every known KYA repository for every requesting agent is impractical. This is where an ATLAS <strong>Assessor</strong> helps: it can perform identity and authorisation checks <strong>across</strong> repositories and return a compact result the merchant can rely on, instead of each merchant implementing full KYA verification itself. Portable authority is <strong>emerging, not fully standardised</strong> end-to-end across merchants and rails.</p>
+<hr>
+<h2 id="19-if-an-agent-buys-the-wrong-item-or-exceeds-budget-who-bears-the-loss">19. If an agent buys the wrong item or exceeds budget, who bears the loss?</h2>
+<p>In today’s emerging models, <strong>merchants</strong> often still absorb much of the chargeback cost. Classic three-party fraud framing (1st-party: cardholder as fraudster; 2nd-party: misuse with consent; 3rd-party: fraudster against the genuine user) does not cleanly cover agent-mediated failure. A useful <strong>proposed framing</strong> — not yet standard industry taxonomy — is a <strong>fourth</strong> case: the <strong>user’s agent acted outside approved behaviour</strong> (or drifted from stated constraints) even though the cardholder and merchant are both “genuine.” Dispute resolution is based on <strong>signals collected from initial intent through delivery</strong>. Richer trust signals can <strong>support</strong> future <strong>liability protection or shift</strong> frameworks for merchants <strong>if</strong> schemes and issuers adopt them — analogous <em>in spirit</em> to how CNP evolved with EMV 3-D Secure, but <strong>agent-specific liability rules are not published as settled fact today</strong>. Emerging checkout protocols such as <strong>AP2</strong> and <strong>VI</strong> do reintroduce important transaction-time signals (consent, mandate, cart binding, payment instrument). Even so, some <strong>key signals remain partial or missing</strong> — especially independent evidence of how the agent interpreted intent and built the cart <em>before</em> those artefacts were bound. ATLAS is designed to <strong>restore</strong> those missing pre-transaction signals as independent, redeemable records so schemes can evolve liability and dispute rules on fuller evidence, not “he said / agent said.”</p>
+<hr>
+<h2 id="20-what-is-the-risk-of-fragmentation-from-different-agentic-commerce-protocols">20. What is the risk of fragmentation from different agentic commerce protocols?</h2>
+<p>The main risk is <strong>lack of interoperability</strong>. If a payment card only worked on a few terminals in one region, people would either carry many cards or abandon cards for something more universal. Agentic commerce faces the same adoption cliff: merchants, agents, and downstream parties cannot afford to implement many incompatible stacks. Securing every proprietary channel is costly and unrealistic; improving security on <strong>one shared mechanism</strong> is. <strong>ATLAS</strong> is intentionally <strong>protocol-agnostic</strong> — flexible while protocols emerge, and compatible later with dedicated standards — so assessment and trust signals can travel with the transaction without locking the ecosystem to one vendor island.</p>
+<hr>
+<h2 id="21-is-merchant-willingness-about-technical-readiness-or-genuine-acceptance-of-the-channel">21. Is merchant willingness about technical readiness or genuine acceptance of the channel?</h2>
+<p>Merchants (like every other actor) care about <strong>revenue</strong>. The real question is trust, not technology for its own sake — technology <strong>sustains</strong> trust. Do merchants have enough signals to protect revenue and limit chargeback loss? CNP e-commerce spent decades building those signals (e.g. EMV 3-D Secure). Agentic commerce needs the same: signals that support regulation, dispute mechanisms, and authentication of both user and agent — plus <strong>ongoing agent assessment</strong>, because agents can act autonomously and must be overseen. That is what ATLAS targets. Consumers will accept the channel when they trust that constraints (budget, preferences, safety) survive agent interpretation — not only that a confirmation screen looked plausible.</p>
+<p>Merchant willingness is not primarily a tech-readiness checkbox. It is about <strong>sufficient trust</strong> and <strong>reassurance of business revenue</strong> — with <strong>acceptable fraud mitigation</strong> — so accepting agent-initiated transactions feels commercially safe.</p>
+<hr>
+<h2 id="22-how-far-out-is-workable-trust-infrastructure-and-what-is-the-biggest-near-term-risk">22. How far out is workable trust infrastructure, and what is the biggest near-term risk?</h2>
+<p>The ecosystem is multi-speed. In some regions it is <strong>market-driven</strong>: deploy the commerce stack, mitigate fraud against revenue, harden security over time. In others it is <strong>regulation-driven</strong>: guardrails and compliance must exist before volume, and regulators must also clarify new rules — so adoption is slower. Many markets are a mix. The <strong>common denominator risk is revenue loss</strong> — from chargebacks, fraud, or penalties for non-compliance. Early commercial agentic flows <strong>may</strong> appear around major retail peaks <strong>in some early / market-driven regions</strong>; elsewhere workable trust infrastructure and oversight will take longer — treat any single calendar as a scenario, not a guarantee.</p>
+<p>Near term, the binding constraint is usually <strong>insufficient trust signals and dispute readiness</strong>, not a single binary of “fraud vs backlash vs regulation.” The sharper near-term risk is <strong>exposing consumers to agentic-related threats without sufficient mechanisms to ensure trust</strong> — intent drift, unauthorised agent behaviour, opaque disputes. Damage would not stop with the shopper: <strong>consumers, merchants, and payment brands</strong> would all feel material harm (losses, chargebacks, reputational and regulatory hit) if volume scales ahead of workable oversight.</p>
+<hr>
+<h2 id="sources">Sources</h2>
+<p><a href="#glossary-of-questions">↑ Back to glossary of questions</a></p>
+<ul>
+<li><a href="https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html">ATLAS: Agent Trust Layer and Assurance Standard — v0.2 working draft</a></li>
+<li><a href="https://github.com/decentralized-identity/kya-os-mcp">KYA-OS (DIF)</a> — <a href="https://github.com/decentralized-identity/kya-os-mcp/blob/main/SPEC.md">SPEC.md</a>; <a href="https://modelcontextprotocol-identity.io/mcp/introduction">introduction</a></li>
+<li><a href="https://ap2-protocol.org/ap2/specification/">AP2 — Agent Payments Protocol</a> (<a href="https://ap2-protocol.org/">home</a>)</li>
+<li><a href="https://verifiableintent.dev/spec/">Verifiable Intent (VI)</a> (<a href="https://verifiableintent.dev/">home</a>)</li>
+<li>Combined ATLAS + AP2/VI signal framework (complementary behaviour assessment vs authorization/binding artefacts)</li>
+</ul>
+  </div>
 </section>
 
 <!-- ===== REFERENCES ===== -->
@@ -3287,7 +3583,8 @@ N   ──redeem ReportToken─────────────────�
     <dt>[ISO-8583]</dt><dd>ISO/IEC 8583, "Financial transaction card originated messages".</dd>
     <dt>[EMV-3DS]</dt><dd>EMVCo, "EMV® 3-D Secure Protocol and Core Functions Specification".</dd>
     <dt>[ISO-20022]</dt><dd>ISO 20022, "Universal financial industry message scheme", ISO/TC 68.</dd>
-    <dt>[ATLAS-FAQ]</dt><dd>ATLAS — FAQ. Hyperlab / Consult Hyperion. URL: <a href="https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC/blob/main/FAQ.md">https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC/blob/main/FAQ.md</a></dd>
+    <dt>[ATLAS-EXPLAINER]</dt><dd>ATLAS Explainer (informative). Hyperlab / Consult Hyperion. Companion to this specification.</dd>
+    <dt>[ATLAS-FAQ]</dt><dd>ATLAS — FAQ (HTML). Hyperlab / Consult Hyperion. URL: <a href="atlas-faq.html">atlas-faq.html</a>. Markdown source: <a href="FAQ.md">FAQ.md</a>.</dd>
   </dl>
 </section>
 
