@@ -999,12 +999,10 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <li><a href="#s11-3"><span class="secno">11.3</span> Privacy</a></li>
         <li><a href="#s11-4"><span class="secno">11.4</span> Transport</a></li>
         <li><a href="#s11-5"><span class="secno">11.5</span> Redemption Risks</a></li>
-        <li><a href="#s11-6"><span class="secno">11.6</span> Threat Checklist</a></li>
       </ol>
     </li>
     <li><a href="#s12"><span class="secno">12.</span> Alignment: AP2, VI, UCP</a></li>
     <li><a href="#s13"><span class="secno">13.</span> Proposed Standard Text</a></li>
-    <li><a href="#s14"><span class="secno">14.</span> FAQ</a></li>
     <li><a href="#references"><span class="secno">A.</span> References</a>
       <ol>
         <li><a href="#normative-refs">Normative</a></li>
@@ -1184,8 +1182,6 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <a href="atlas-faq.html#6-what-problems-is-this-trying-to-solve">FAQ — What problems is this trying to solve?</a>
       and portable KYA checks in
       <a href="atlas-faq.html#18-does-an-agent-carry-a-portable-credential-proving-its-authority-from-merchant-to-merchant">FAQ — portable credentials</a>.
-      The same FAQ is included as HTML in
-      <a href="#s14">§14</a>.
       Chargeback, liability, and regulatory <em>use</em> of a verdict are programme policy —
       see the <a href="atlas-protocol-explainer.html">Explainer</a>.
     </p>
@@ -2795,9 +2791,12 @@ Notes:
   <h4 id="s10-1"><span class="secno-heading">10.1.1</span> Holder<a class="self-link" href="#s10-1" title="§ 10.1.1 Holder">§</a></h4>
   <div class="informative">This section is non-normative.</div>
   <p>
-    The subject agent delegates assessment authority to the merchant and CP (<em>holders</em>).
-    Each holder GETs the TA-partner roster, <strong>selects</strong> an Assessor, and issues
-    Link 2. The payment network redeems the <code>ReportToken</code> from the trust authority.
+    The subject agent delegates assessment authority to the merchant and CP (<em>holders</em>)
+    via Link 1, naming the Trust Authorities it will accept
+    (<code>permitted_trust_authorities</code>). The subject does not GET the roster.
+    Each holder GETs the TA-partner roster, <strong>selects</strong> an Assessor whose live
+    authorization is signed by a listed TA, and issues Link 2. The payment network redeems
+    the <code>ReportToken</code> from the trust authority.
   </p>
 
   <figure>
@@ -2819,11 +2818,8 @@ sequenceDiagram
 
     U->>SA: Natural-language intent
 
-    SA->>R: GET roster - discover Assessors and TA anchors
-    R-->>SA: Assessor entries id, jkt, types
-
-    SA->>M: AssessmentDelegation L1 holder, cnf equals M key
-    SA->>M: AssessmentDelegation L1 holder, cnf equals CP key
+    SA->>M: AssessmentDelegation L1 holder, permitted_trust_authorities, cnf equals M key
+    SA->>M: AssessmentDelegation L1 holder, permitted_trust_authorities, cnf equals CP key
 
     M->>R: GET roster - select Assessor
     R-->>M: Assessor entries id, jkt, assessor_endpoint
@@ -2853,9 +2849,8 @@ sequenceDiagram
     <summary>Condensed artifact-flow (text fallback)</summary>
     <pre>
 U   ──intent─────────────────────────────────────────────► SA
-SA  ──GET /roster────────────────────────────────────────► Roster
-SA  ──AssessmentDelegation L1 (holder, cnf=M)─────────────────► M
-SA  ──AssessmentDelegation L1 (holder, cnf=CP)────────────────► CP
+SA  ──AssessmentDelegation L1 (holder, permitted_trust_authorities, cnf=M)─► M
+SA  ──AssessmentDelegation L1 (holder, permitted_trust_authorities, cnf=CP)► CP
 M   ──GET /roster (select Assessor)──────────────────────► Roster
 M   ──AssessmentSubDelegation L2 (cnf=A key)──────────────────► A
 CP  ──AssessmentSubDelegation L2 (cnf=A key)──────────────────► A
@@ -2872,10 +2867,10 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
   <h4 id="s10-2"><span class="secno-heading">10.1.2</span> Direct<a class="self-link" href="#s10-2" title="§ 10.1.2 Direct">§</a></h4>
   <div class="informative">This section is non-normative.</div>
   <p>
-    Cloud direct. The subject agent selects an Assessor from the TA-partner roster,
-    issues Link 1-D to that Assessor (<code>permitted_assessors</code> and
-    <code>permitted_trust_authorities</code>), receives Link 3 inbound,
-    returns the JWE, and may receive Link 4.
+    Cloud direct. The subject agent GETs the TA-partner roster, selects one or more
+    Assessors, issues Link 1-D (<code>permitted_assessors</code> and
+    <code>permitted_trust_authorities</code>), receives Link 3 inbound, returns the JWE,
+    and may receive Link 4.
   </p>
 
   <figure>
@@ -2898,7 +2893,7 @@ sequenceDiagram
 
     SA->>R: GET roster - TA-partner Assessor list
     R-->>SA: Assessor entries id, jkt, assessor_endpoint
-    SA->>SA: Select Assessor from roster
+    SA->>SA: Select Assessor(s) from roster
 
     SA->>A: AssessmentDelegation L1-D direct, cnf equals A, permitted_assessors and permitted_trust_authorities
     A->>SA: AssessorAccessAssertion L3, L1-D plus authorization
@@ -2912,7 +2907,7 @@ sequenceDiagram
     TA-->>N: Certified trust-assurance report
     N-->>MP: Authorisation decision plus ATLAS trust signal
     </pre>
-    <figcaption>Figure 2 — Cloud direct: subject selects from the roster, then Link 1-D → Link 3 → JWE → Link 4.</figcaption>
+    <figcaption>Figure 2 — Cloud direct: subject GETs the roster and selects Assessor(s), then Link 1-D → Link 3 → JWE → Link 4.</figcaption>
   </figure>
 
   <details>
@@ -2920,7 +2915,7 @@ sequenceDiagram
     <pre>
 U   ──intent─────────────────────────────────────────────► SA
 SA  ──GET /roster (TA-partner list)───────────────────────► Roster
-SA  ──selects Assessor
+SA  ──selects Assessor(s)
 SA  ──AssessmentDelegation L1-D (direct, cnf=A, permitted_assessors + TAs)──► A
 A   ──AssessorAccessAssertion L3──────────────────────────► SA
 SA  ──AssessmentEvidenceResponse JWE──────────────────────► A
@@ -3126,15 +3121,6 @@ N   ──redeem ReportToken─────────────────�
     </table>
   </div>
 
-  <h3 id="s11-6"><span class="secno-heading">11.6</span> Threat-Model Checklist (Implementers)<a class="self-link" href="#s11-6" title="§ 11.6 Threat-Model Checklist (Implementers)">§</a></h3>
-  <ul>
-    <li>☐ Compromised merchant issues L2 to colluding Assessor → contained by SA verification at §8.4 and <code>permitted_trust_authorities</code> plus live roster (no Assessor pin-list).</li>
-    <li>☐ Compromised Assessor requests excessive scope → contained by scope ⊆ parent and SA filter before JWE.</li>
-    <li>☐ Compromised SA over-releases evidence → contained by scope; inner JWS + TA assessment trail.</li>
-    <li>☐ Replay of assertion or delegation → <code>jti</code>, nonce, short <code>exp</code>.</li>
-    <li>☐ Forged conveyed <code>AssessmentResult</code> → mandatory signature verification at processor and peers.</li>
-    <li>☐ Stale roster / revoked Assessor → authorization credential + optional revocation list.</li>
-  </ul>
 </section>
 
 <!-- ===== SECTION 12 ===== -->
@@ -3191,372 +3177,6 @@ N   ──redeem ReportToken─────────────────�
       Processors assemble <code>redeem_tokens</code> on ISO 8583 and similar rails.
     </p>
   </blockquote>
-</section>
-
-<!-- ===== SECTION 14 ===== -->
-
-<section id="s14">
-  <h2><span class="secno-heading">14.</span> FAQ<a class="self-link" href="#s14" title="§ 14. FAQ">§</a></h2>
-  <div class="informative">This section is non-normative.</div>
-  <p>
-    The three HTML companions have different jobs. Do not copy the same essay into all three:
-  </p>
-  <div class="table-wrap">
-    <table class="data">
-      <thead><tr><th>Document</th><th>Job</th><th>Do not treat as</th></tr></thead>
-      <tbody>
-        <tr><td><a href="atlas-protocol-specification-draft.html">Protocol</a></td><td>Messages, tokens, <code>scope</code>, <code>registered_identities[]</code></td><td>A method pack or liability rulebook</td></tr>
-        <tr><td><a href="atlas-protocol-explainer.html">Explainer</a></td><td>Why assessment exists; how a scheme <em>may</em> consume a verdict</td><td>Normative protocol text</td></tr>
-        <tr><td><a href="atlas-faq.html">FAQ</a> (this section)</td><td>Questions, including the expanded problem statement (Q6, Q18)</td><td>A second spec; edit <code>FAQ.md</code> as source</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p>
-    Standalone page: <a href="atlas-faq.html">atlas-faq.html</a>.
-    Markdown source: <a href="FAQ.md">FAQ.md</a>.
-  </p>
-  <div id="faq-html">
-<p>AI agents are starting to shop and pay for us. <strong>ATLAS</strong> is about making that trustworthy: an open way for an <strong>independent inspector</strong> (an Assessor) to check how an agent behaved — did it follow the user’s intent? stay within rules and network policies? stay in good standing under Know-Your-Agent (KYA)? — and to share a compact trust signal with banks and networks <strong>without</strong> broadcasting the user’s private conversation.</p>
-<hr>
-<h2 id="glossary-of-questions">Glossary of questions</h2>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>#</th><th>Question</th></tr></thead>
-<tbody>
-<tr><td>1</td><td><a href="#1-what-is-atlas">What is ATLAS?</a></td></tr>
-<tr><td>2</td><td><a href="#2-what-does-atlas-standardise">What does ATLAS standardise?</a></td></tr>
-<tr><td>3</td><td><a href="#3-why-trust-the-assessor-if-it-is-also-ai-llm-as-a-judge-isnt-that-circular">Why trust the Assessor if it is also AI (“LLM as a judge”)? Isn’t that circular?</a></td></tr>
-<tr><td>4</td><td><a href="#4-why-would-a-shopping-agent-share-personal-data-pii-with-the-assessor">Why would a shopping agent share personal data (PII) with the Assessor?</a></td></tr>
-<tr><td>5</td><td><a href="#5-why-is-atlas-open">Why is ATLAS open?</a></td></tr>
-<tr><td>6</td><td><a href="#6-what-problems-is-this-trying-to-solve">What problems is this trying to solve?</a></td></tr>
-<tr><td>7</td><td><a href="#7-is-atlas-compatible-with-emerging-standards-kya-os-ap2-vi">Is ATLAS compatible with emerging standards (KYA-OS, AP2, VI)?</a></td></tr>
-<tr><td>8</td><td><a href="#8-does-atlas-work-with-browser-agents-and-webmcp">Does ATLAS work with browser agents and WebMCP?</a></td></tr>
-<tr><td>8a</td><td><a href="#8a-how-does-atlas-work-for-a-cloud-agent-vs-an-on-device-agent">How does ATLAS work for a cloud agent vs an on-device agent?</a></td></tr>
-<tr><td>8b</td><td><a href="#8b-what-is-evidence-scope--what-does-the-assessor-actually-see">What is evidence <code>scope</code> — what does the Assessor actually see?</a></td></tr>
-<tr><td>9</td><td><a href="#9-can-i-use-atlas-only-before-payment-or-also-after-a-transaction-has-been-processed">Can I use ATLAS only before payment — or also after a transaction has been processed?</a></td></tr>
-<tr><td>10</td><td><a href="#10-how-do-assessor-trust-authority-and-the-certification-scheme-work-together">How do Assessor, Trust Authority, and the certification scheme work together?</a></td></tr>
-<tr><td>11</td><td><a href="#11-how-do-i-find-a-qualified-assessor-what-is-the-roster-discovery-and-opt-in">How do I find a qualified Assessor — what is the roster, discovery, and opt-in?</a></td></tr>
-<tr><td>12</td><td><a href="#12-can-i-use-several-assessor-agents-for-one-transaction">Can I use several Assessor agents for one transaction?</a></td></tr>
-<tr><td>13</td><td><a href="#13-who-benefits-from-atlas-and-how-by-market-segment">Who benefits from ATLAS — and how (by market segment)?</a></td></tr>
-<tr><td>14</td><td><a href="#14-what-are-the-key-takeaways-benefits-of-atlas">What are the key takeaways / benefits of ATLAS?</a></td></tr>
-<tr><td>15</td><td><a href="#15-why-is-trust-so-important-at-this-stage-of-agentic-commerce-what-about-long-term">Why is trust so important at this stage of agentic commerce? What about long term?</a></td></tr>
-<tr><td>16</td><td><a href="#16-what-protocols-help-merchants-distinguish-a-legitimate-agent-from-a-scam-bot-or-scraper">What protocols help merchants distinguish a legitimate agent from a scam bot or scraper?</a></td></tr>
-<tr><td>17</td><td><a href="#17-what-does-the-audit-trail-for-an-agentic-purchase-look-like-what-proves-consumer-intent-vs-agent-execution">What does the audit trail for an agentic purchase look like? What proves consumer intent vs agent execution?</a></td></tr>
-<tr><td>18</td><td><a href="#18-does-an-agent-carry-a-portable-credential-proving-its-authority-from-merchant-to-merchant">Does an agent carry a portable credential proving its authority from merchant to merchant?</a></td></tr>
-<tr><td>19</td><td><a href="#19-if-an-agent-buys-the-wrong-item-or-exceeds-budget-who-bears-the-loss">If an agent buys the wrong item or exceeds budget, who bears the loss?</a></td></tr>
-<tr><td>20</td><td><a href="#20-what-is-the-risk-of-fragmentation-from-different-agentic-commerce-protocols">What is the risk of fragmentation from different agentic commerce protocols?</a></td></tr>
-<tr><td>21</td><td><a href="#21-is-merchant-willingness-about-technical-readiness-or-genuine-acceptance-of-the-channel">Is merchant willingness about technical readiness or genuine acceptance of the channel?</a></td></tr>
-<tr><td>22</td><td><a href="#22-how-far-out-is-workable-trust-infrastructure-and-what-is-the-biggest-near-term-risk">How far out is workable trust infrastructure, and what is the biggest near-term risk?</a></td></tr>
-</tbody></table></div>
-<p>Also: <a href="#sources">Sources</a></p>
-<hr>
-<h2 id="1-what-is-atlas">1. What is ATLAS?</h2>
-<p><strong>ATLAS</strong> (Agent Trust Layer and Assurance Standard) is an <strong>open protocol</strong> — a shared rulebook — for trusting AI agents when they act in commerce on someone’s behalf.</p>
-<p>In plain terms: when an agent acts for a person, ATLAS defines how an <strong>independent Assessor</strong> can check that agent’s behaviour — not only “did it follow the request?”, but also compliance with regulations, network policies, KYA identity status, and related oversight — and turn the result into a <strong>signed trust signal</strong> that payment parties can use. The full private chat does <strong>not</strong> need to travel on the payment rail.</p>
-<p>ATLAS describes how <strong>entity types</strong> work together: the agent being checked (the “subject” / shopping agent), an independent <strong>Assessor</strong>, a <strong>Trust Authority</strong>, merchants, wallets, and payment systems.</p>
-<hr>
-<h2 id="2-what-does-atlas-standardise">2. What does ATLAS standardise?</h2>
-<p>As an <strong>open standard</strong>, ATLAS defines a shared rulebook for <strong>independent runtime assessment</strong> of agent behaviour in commerce — not a product, and not a replacement for identity or checkout protocols.</p>
-<p>Existing work already covers neighbouring jobs: <a href="https://ap2-protocol.org/ap2/specification/">AP2</a> and <a href="https://verifiableintent.dev/spec/">VI</a> secure <strong>authorization at checkout</strong>; <a href="https://github.com/decentralized-identity/kya-os-mcp">KYA-OS</a> helps establish <strong>who</strong> an agent is. None of them alone standardise <strong>what the agent did</strong> before those artefacts are bound. That is the ATLAS layer.</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>What ATLAS standardises</th><th>What that means in practice</th></tr></thead>
-<tbody>
-<tr><td><strong>Assessment language &amp; messages</strong></td><td>Common evidence packages, verdicts, and report tokens that any conforming party can produce or consume</td></tr>
-<tr><td><strong>Evidence <code>scope</code> classes</strong></td><td>A <strong>release ceiling</strong> — which classes the agent is willing to export (dialogue, tool traces, rail choices, …). Chat is not mandatory.</td></tr>
-<tr><td><strong>Deployment models</strong></td><td><strong>Cloud-based agent:</strong> holder and direct. <strong>On-device agent (deposit):</strong> deposit-direct and deposit-holder. Assessor URL is on the roster, not in ATLAS tokens.</td></tr>
-<tr><td><strong>Assessor / Trust Authority roles</strong></td><td>How independent Assessors are authorized, how methods are certified, and how evidence stays encrypted to the Assessor</td></tr>
-<tr><td><strong>Pre-transaction behaviour signal</strong></td><td>A portable trust leg <strong>beside</strong> KYA (identity) and AP2/VI (transaction binding) — not a substitute for either</td></tr>
-<tr><td><strong>Rail-ready outputs</strong></td><td>Compact signed signals that can travel with payment messaging without shipping the user’s private conversation</td></tr>
-</tbody></table></div>
-<p><strong>One-liner:</strong> ATLAS is the open standard for <strong>how the ecosystem independently observes agent behaviour</strong> and turns that into a verifiable trust signal.</p>
-<hr>
-<h2 id="3-why-trust-the-assessor-if-it-is-also-ai-llm-as-a-judge-isnt-that-circular">3. Why trust the Assessor if it is also AI (“LLM as a judge”)? Isn’t that circular?</h2>
-<p>It looks circular at first — “AI checking AI” — but ATLAS is designed so trust does <strong>not</strong> rest on “another chatbot’s opinion” or a bare “trust me.”</p>
-<p>What makes the Assessor different:</p>
-<ol>
-<li><strong>Different job.</strong> The shopping agent is trying to complete a purchase. The Assessor is authorized to judge behaviour against a <strong>named rulebook</strong> (regulation, network policy, safety rules, and so on) — like an auditor reviewing a company, not the company grading itself.</li>
-<li><strong>More than one source.</strong> The Assessor compares what the shopping agent reports <strong>and</strong>, when available, independent material from the merchant or wallet, then cross-checks them.</li>
-<li><strong>Licensed, not anonymous.</strong> A <strong>Trust Authority</strong> authorizes Assessors; they appear on a published <strong>roster</strong>. The Assessor must prove that authorization before it can see sensitive evidence.</li>
-<li><strong>Certified methods — not “trust me.”</strong> The methods and models an Assessor uses are <strong>certified</strong> by the Trust Authority and go through <strong>prior benchmarks and evaluation</strong>. The outcome is closer to: <em>“Using certified method X, against rulebook Y, the score was Z”</em> — not an opaque, untraceable judgment.</li>
-<li><strong>What leaves the room.</strong> Private reasoning stays encrypted for the Assessor only. Everyone else gets a <strong>signed verdict</strong> (and often a short token pointing to a stored report) — not the raw chat.</li>
-</ol>
-<p>So the point isn’t “AI judges are perfect.” The point is <strong>independence + certified method + named rulebook + cross-checks + cryptographic proof</strong>.</p>
-<blockquote><p><strong>Honest caveat:</strong> Assessment still has limits. ATLAS makes it <strong>auditable, independent, and method-certified</strong> — not infallible.</p></blockquote>
-<hr>
-<h2 id="4-why-would-a-shopping-agent-share-personal-data-pii-with-the-assessor">4. Why would a shopping agent share personal data (PII) with the Assessor?</h2>
-<p>The goal is <strong>more privacy for more parties</strong>, not less. Without a standard, either nobody can check what the agent understood (bad for safety and disputes), or too many parties see too much.</p>
-<p>A shopping agent is willing to share personal data with an ATLAS Assessor mainly because of <strong>who</strong> that Assessor is and <strong>how</strong> data is handled:</p>
-<ul>
-<li>The Assessor is an <strong>independent third party</strong> — not the merchant competing for the sale, and <strong>neutral from a payment point of view</strong> (not the network, issuer, or acquirer deciding the rail outcome).</li>
-<li>Sensitive evidence is <strong>not meant to sit in a permanent personal-data store</strong>. It is <strong>decrypted only while the assessment runs</strong>; what lasts is a signed verdict / report token and hashes — not a reusable copy of the user’s private data for other parties.</li>
-<li>Sharing is a deliberate trade: short, limited access for a <strong>neutral inspector</strong>, in exchange for trust signals the rest of the ecosystem can use.</li>
-</ul>
-<p>In ATLAS:</p>
-<ul>
-<li>Evidence is <strong>encrypted so only the chosen Assessor</strong> can read it. The Trust Authority may <strong>forward ciphertext</strong> if the device cannot reach the Assessor URL — it must not decrypt.</li>
-<li>Merchants, card networks, and processors <strong>do not</strong> get the raw evidence package in the base design.</li>
-<li>Sharing is <strong>scoped</strong>: the agent lists evidence <strong>classes</strong> it will release (<code>scope</code>). Chat and chain-of-thought are optional classes, not a minimum payload. See <a href="#8b-what-is-evidence-scope--what-does-the-assessor-actually-see">§8b</a>.</li>
-<li>What travels on payment rails is typically a <strong>short trust token</strong> (a pointer to a report), not the user’s full conversation.</li>
-</ul>
-<hr>
-<h2 id="5-why-is-atlas-open">5. Why is ATLAS open?</h2>
-<p>Agentic commerce spans many vendors — shopping agents, merchants, wallets, schemes, issuers, labs. A <strong>closed, vendor-only</strong> trust check creates lock-in and incompatible “trust islands.” ATLAS is open so assessment can travel with the transaction across that mix, instead of staying trapped inside one product.</p>
-<p>Without an open protocol, common ways to watch agents are:</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Approach without ATLAS</th><th>Limit</th></tr></thead>
-<tbody>
-<tr><td><strong>Software kit (SDK) inside the agent</strong></td><td>Only works if that vendor embeds your kit</td></tr>
-<tr><td><strong>Hosting the agent yourself</strong></td><td>Only works for agents you operate</td></tr>
-<tr><td><strong>Proxy / firewall in the path</strong></td><td>Fragile and hard to apply everywhere</td></tr>
-</tbody></table></div>
-<p>None of these scale across today’s agents — commercial cloud (e.g. Gemini), on-device (e.g. Apple), or custom (e.g. Hermes). Openness is what lets diverse agents emit the <strong>same kind of assessable trust signals</strong> without forcing one host or one vendor kit.</p>
-<p><em>(What ATLAS actually specifies as that shared rulebook is covered in <a href="#2-what-does-atlas-standardise">§2</a>.)</em></p>
-<hr>
-<h2 id="6-what-problems-is-this-trying-to-solve">6. What problems is this trying to solve?</h2>
-<p>Example: <em>“Order pizza under €40, I’m allergic to peanuts, and I’m on medication X.”</em> An AI agent may keep the budget, drop or blur the allergy, show a confirmation that <em>looks</em> fine, then pay — with <strong>no independent record</strong> of what it actually understood.</p>
-<p><strong>When verification matters.</strong> Checking the agent (observability / assessment) can happen <strong>even before a payment network/rail is chosen</strong>, and should happen <strong>before checkout protocols such as <a href="https://ap2-protocol.org/ap2/specification/">AP2</a> and <a href="https://verifiableintent.dev/spec/">VI</a> start</strong>. By the time AP2/VI capture “intent,” that data is already the shopping agent’s <strong>interpreted</strong> intent — and may already include bias or error from discovery, ranking, and cart building.</p>
-<p>In AP2, a <strong>checkout object is shared</strong> with the user and others — that is not the gap. The gap is that this checkout was <strong>already built by the shopping agent without the human browsing and selecting items with the merchant</strong>. Confirming that purchase is therefore <strong>not the same</strong> as classic 3-D Secure-style authentication against a merchant-built checkout: the human is approving an <strong>agent-built cart</strong>. Item selection has already been partly <strong>delegated</strong>.</p>
-<p>That creates real problems — especially for today’s focus on <strong>immediate / real-time</strong> agentic flows (identity, regulation, liability), with further issues under fuller hands-off <strong>delegation</strong>:</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Problem</th><th>Why it matters</th></tr></thead>
-<tbody>
-<tr><td><strong>KYA alone isn’t enough</strong></td><td>Knowing <em>who</em> the agent is (registration, keys, claimed scopes) does not prove <em>what</em> it did in this purchase. Behaviour checks are needed <strong>before</strong> rail choice and <strong>before</strong> AP2/VI checkout</td></tr>
-<tr><td><strong>KYA silos / no cross-repository checks</strong></td><td>If each payment network keeps its <strong>own</strong> KYA list, bad behaviour on Network A may be <strong>invisible</strong> to Network B. Cross-checks should share a <strong>minimal</strong> signal (e.g. “lower trust” / blacklisted) — <strong>not</strong> full case details or the other network’s private status file</td></tr>
-<tr><td><strong>Regulatory / rulebook compliance at transaction time</strong> (payment-method choice; <strong>IFR</strong> as one EU example)</td><td>Many rules assume a <strong>human</strong> chose the merchant, the product, and the <strong>payment instrument / path</strong>. An agent can pick a card, wallet, or rail that changes <strong>cost, routing, or legal treatment</strong> without that choice being transparent to the user or the scheme. <strong>Example — IFR</strong> (EU Interchange Fee Regulation): it caps certain interchange fees and sits in a broader EU push for clear payment-method choice and cost fairness — so if an agent steers the instrument (e.g. toward a higher-cost card product or a path the user did not knowingly select), interchange and related cost treatment can become hard to justify under those rules. The same pattern applies beyond IFR: network rulebooks, restricted goods, age limits, geo/sanctions, SCA expectations, and other obligations that must hold <strong>at transaction time</strong>, not only at agent onboarding. Rail choice may also come <strong>after</strong> the agent has already shaped the cart</td></tr>
-<tr><td><strong>Unclear liability</strong></td><td>When an agent-led purchase fails policy or is disputed, schemes need a fair way to allocate responsibility. ATLAS helps the <strong>liability model</strong> by providing an <strong>independent, signed, redeemable assessment</strong> of what the agent did (and against which rulebook) — evidence schemes, issuers, and merchants can use to <strong>allocate responsibility or evolve liability rules later</strong>, based on verified behaviour rather than each party’s unverifiable claim</td></tr>
-<tr><td><strong>Chargebacks and disputes</strong></td><td>Classic disputes assume a clear story: the cardholder either did or did not authorize a merchant checkout they could see. With agents, the story breaks: the user may have confirmed an <strong>agent-built</strong> cart, yet still claim “that wasn’t what I meant,” “I never chose that merchant/item,” or “my constraints were ignored.” Merchants, issuers, and networks then lack a <strong>neutral, time-stamped record</strong> of agent behaviour to adjudicate quickly — so chargebacks rise, resolution costs rise, and “he said / agent said” replaces evidence</td></tr>
-<tr><td><strong>User confirmation is not enough (unlike classic 3DS)</strong></td><td>Confirming (even on an AP2 checkout object) is <strong>not</strong> the same as authenticating a merchant-presented, human-selected purchase. AP2 <strong>does</strong> share the checkout; the issue is that object was <strong>already forged by the agent</strong> without human–merchant item selection. The shared product details may also <strong>fail user constraints</strong> the person stated in natural language — e.g. <strong>allergies</strong> or <strong>medical</strong> restrictions — while the summary still looks plausible to click “confirm.” Independent assessment can check whether those constraints actually survived into the cart</td></tr>
-<tr><td><strong>Monitoring &amp; explainability gaps</strong> <em>(related to, but not the same as, regulatory compliance above)</em></td><td><strong>Regulatory compliance</strong> asks: <em>did this transaction break a substantive rule?</em> <strong>Monitoring &amp; explainability</strong> asks: <em>can we show, later, what the agent did and why — to supervisors, auditors, or customers?</em> Frameworks such as transparency / explainability duties (e.g. EU AI Act-style obligations), operational resilience / third-party AI assessability (e.g. DORA-style themes), and internal scheme monitoring all need a <strong>durable runtime record</strong>. Today that record may not exist in an independent, portable form — so firms cannot demonstrate oversight even when they believe the agent “usually” complies</td></tr>
-<tr><td><strong>Privacy vs oversight</strong></td><td>Parties need to <strong>observe</strong> agent behaviour for safety, fraud, and disputes — but must not turn agentic commerce into a <strong>surveillance pipe</strong>. Raw user intent and reasoning are sensitive; dumping them to merchants, networks, or processors would overshare. Without a standard, the market swings between two bad options: <strong>blind trust</strong> (no check) or <strong>over-exposure</strong> (too many parties see too much). ATLAS-style design aims at the middle: encrypted evidence for a licensed Assessor only, and compact trust signals downstream</td></tr>
-<tr><td><strong>Wrong or unsafe purchases</strong> (“intent drift”)</td><td>Constraints get lost between what you said and what was ordered — and AP2/VI may later bind that <strong>already-interpreted</strong> (possibly drifted) intent. Along the path, <strong>data-loss risk is high</strong>: natural language is compressed into <strong>tokens and embeddings</strong>, shaped by <strong>model training</strong> priors, then forced into <strong>deterministic tools/schemas</strong> (APIs, MCP, cart fields). Rare or safety-critical constraints (allergies, medical limits, ethics) are easy to under-weight, drop, or never map. <strong>Privacy-preserving</strong> policies can also raise risk: some constraints <strong>may</strong> not be shared with the merchant, or <strong>may</strong> not be processed fully, so the checkout never sees what mattered. Fidelity to the <strong>initial intent</strong> is therefore fragile — <strong>especially</strong> with <strong>custom</strong> or <strong>on-device</strong> agents — unless independently assessed</td></tr>
-<tr><td><strong>User best interest no longer assured</strong></td><td>When an agent shops for you, it is supposed to optimise for <strong>your</strong> goals — budget, safety, preferences, ethics — not for the loudest merchant, the easiest tool call, or its own completion bias. That assurance weakens once selection is delegated: the agent can satisfy a simplified objective (e.g. “buy pizza under €40”) while <strong>quietly dropping</strong> what mattered most to the user (e.g. allergen safety, preferred local shop, “no rush delivery fees”). Example: the user wants a peanut-safe meal under budget; the agent returns a cheap pizza that looks fine on the confirmation screen but <strong>may</strong> ignore the allergy — the purchase “succeeds” for the agent while failing the user’s real interest. Even “immediate” flows already delegate <strong>product selection</strong> to the agent</td></tr>
-<tr><td><strong>Bias in merchant and item selection</strong></td><td>Unlike today’s search engines or aggregators — where a human can still open results and compare merchants — the shopping agent may interpret data or show only a <strong>pre-selected subset</strong>. Even if the user sees some merchants, they <strong>do not see all</strong> underlying offers, so bias can stay <strong>undetected</strong>. That subset is what later becomes “intent” in AP2/VI</td></tr>
-<tr><td><strong>Fairness and equity</strong></td><td>Selection should not systematically disadvantage parties — including <strong>local merchant sovereignty</strong> vs large global / US platforms in agent-mediated discovery</td></tr>
-</tbody></table></div>
-<p><strong>KYA identifiers — why joining lists is hard.</strong> Cross-repository checks need to recognise the <strong>same</strong> agent:</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Approach</th><th>What it means</th><th>Effect</th></tr></thead>
-<tbody>
-<tr><td><strong>One ID per repository</strong></td><td>Network A calls the agent <code>netA:…</code>, Network B <code>netB:…</code>, with no reliable join</td><td>Risk stays trapped in one silo unless something bridges the IDs</td></tr>
-<tr><td><strong>Single agent / model / version ID</strong></td><td>One stable identity (or mapping) for the same agent build that each repository can link</td><td>Networks can correlate status and assessment outcomes across stores</td></tr>
-</tbody></table></div>
-<p><strong>Both patterns are covered by ATLAS:</strong> an Assessor can query <strong>all available KYA repositories</strong> for a given agent and form a cross-repo trust view — still sharing only <strong>minimal</strong> risk signals where privacy requires it.</p>
-<p>ATLAS closes the <strong>runtime behaviour gap</strong> and feeds portable signals back into KYA-style monitoring.</p>
-<hr>
-<h2 id="7-is-atlas-compatible-with-emerging-standards-kya-os-ap2-vi">7. Is ATLAS compatible with emerging standards (KYA-OS, AP2, VI)?</h2>
-<p><strong>Yes — and more importantly it complements them</strong> by restoring <strong>missing trust signals</strong> those layers do not provide alone.</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Protocol</th><th>Rough job</th><th>Relation to ATLAS</th></tr></thead>
-<tbody>
-<tr><td><strong><a href="https://github.com/decentralized-identity/kya-os-mcp">KYA-OS</a></strong> (<a href="https://identity.foundation/">DIF</a>)</td><td>Who is this agent? Identity and delegation</td><td>The Assessor can <strong>work with the KYA-OS layer</strong> and <strong>feed runtime behaviour signals</strong> back into KYA monitoring. Spec: <a href="https://github.com/decentralized-identity/kya-os-mcp/blob/main/SPEC.md">SPEC.md</a>; overview: <a href="https://modelcontextprotocol-identity.io/mcp/introduction">KYA-OS introduction</a></td></tr>
-<tr><td><strong><a href="https://ap2-protocol.org/ap2/specification/">AP2</a></strong></td><td>Permission to check out / pay (mandates)</td><td>ATLAS sits <strong>before and around</strong> checkout: how intent was interpreted while discovering, evaluating, and building the cart</td></tr>
-<tr><td><strong><a href="https://verifiableintent.dev/spec/">VI</a></strong> (Verifiable Intent)</td><td>Cryptographic proof of user intent / constraints</td><td>Complementary at payment boundaries; ATLAS does not replace VI</td></tr>
-<tr><td><strong><a href="https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html">ATLAS</a></strong></td><td>Independent runtime assessment</td><td>Complements the protocols above as an open standard for behaviour assessment</td></tr>
-</tbody></table></div>
-<p><strong>Two signal legs (complementary, not a hard timeline split):</strong></p>
-<ul>
-<li><strong><a href="https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html">ATLAS</a></strong> — independent assessment of <strong>runtime behaviour</strong> along the path from intent capture → discovery → ranking → cart: compliance, intent fidelity, KYA standing, dispute support, oversight.</li>
-<li><strong><a href="https://ap2-protocol.org/ap2/specification/">AP2</a> / <a href="https://verifiableintent.dev/spec/">VI</strong></a> — <strong>authorization and binding artefacts</strong> (consent, mandate, cart integrity, payment instrument, audit trail). Intent/mandate objects can appear earlier in the journey, but they are typically <strong>finalized and relied on at checkout</strong> — and they do <strong>not</strong> by themselves re-audit <em>how</em> the agent discovered, ranked, and built that cart.</li>
-</ul>
-<p><strong>One-liner:</strong> KYA-OS = ID badge; AP2/VI = permission and binding to pay; ATLAS = missing independent signals about behaviour, compliance, and oversight <em>before</em> those artefacts are treated as ground truth.</p>
-<hr>
-<h2 id="8-does-atlas-work-with-browser-agents-and-webmcp">8. Does ATLAS work with browser agents and WebMCP?</h2>
-<p>Yes. ATLAS cares about <strong>what evidence is released and how it is encrypted</strong>, not whether the agent runs in an app, in the cloud, or in a browser.</p>
-<p><strong>MCP / WebMCP</strong> (in short): ways for agents to call tools and websites. Those tool calls are exactly where intent often gets compressed or dropped — so assessment still matters.</p>
-<p>A browser shopping agent typically sets <code>subject_channel: browser-context</code>. Expected evidence then leans toward <strong>navigations, form-submit, checkout origin, and an observed cart</strong> — not a UCP/ACP signed offer. The agent still starts intake the same way as any other subject (holder, direct, or deposit). Detailed WebMCP wiring is emerging; the protocol is <strong>architecture-agnostic</strong>.</p>
-<p>How cloud vs on-device subjects actually start that intake is <a href="#8a-how-does-atlas-work-for-a-cloud-agent-vs-an-on-device-agent">§8a</a>. What they release is <a href="#8b-what-is-evidence-scope--what-does-the-assessor-actually-see">§8b</a>.</p>
-<hr>
-<h2 id="8a-how-does-atlas-work-for-a-cloud-agent-vs-an-on-device-agent">8a. How does ATLAS work for a cloud agent vs an on-device agent?</h2>
-<p><strong>Two models, four modes.</strong> The JWE, Link 4 verdict, and <code>ReportToken</code> do not change. What changes is who selects the Assessor, whether the subject can accept inbound HTTPS, and <strong>when</strong> Link 4 is issued.</p>
-<p>Assessor delivery addresses are on the TA-partner roster (§5.3). There is <strong>no</strong> TA-mediated intake — the TA does not pick the Assessor.</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Model</th><th>Mode</th><th>Who selects the Assessor</th><th>How it starts</th><th>When Link 4 is issued</th></tr></thead>
-<tbody>
-<tr><td><strong>Cloud-based agent</strong> (SaaS or hosted)</td><td><strong>Holder</strong></td><td>Merchant/wallet from the roster <strong>before Link 2</strong></td><td>Agent issues Link 1 (<code>permitted_trust_authorities</code>). Holder GETs the roster, selects, then Link 2.</td><td>Holder receives the verdict after Link 3 + JWE.</td></tr>
-<tr><td><strong>Cloud-based agent</strong></td><td><strong>Direct</strong></td><td>The shopping agent from the roster <strong>before Link 1-D</strong></td><td>Link 1-D <strong>SA → Assessor</strong> (<code>permitted_assessors</code> + <code>permitted_trust_authorities</code>). Assessor sends Link 3 inbound.</td><td>The <strong>agent</strong> receives Link 4 after the JWE.</td></tr>
-<tr><td><strong>On-device agent (deposit)</strong></td><td><strong>Deposit-direct</strong></td><td>The shopping agent from the roster <strong>before Link 1-D</strong></td><td>Same Link 1-D claims. Agent POSTs Link 1-D, receives Link 3 on the outbound response, then POSTs the JWE. Assessor <strong>MUST NOT</strong> call the device.</td><td>The agent receives Link 4 / Link 5 on the JWE response.</td></tr>
-<tr><td><strong>On-device agent (deposit)</strong></td><td><strong>Deposit-holder</strong></td><td>Agent selects for the deposit; merchant/wallet confirms via the roster <strong>before Link 2</strong></td><td>Same outbound Link 1-D → Link 3 → JWE; Assessor returns <code>DepositAcknowledgement</code>. Then holder Link 1 with <code>deposited_assessors[]</code> and related TAs.</td><td>Merchant/wallet later asks (Link 2, optional <code>holder_commissioned</code> artifacts); Assessor returns Link 4 to the holder.</td></tr>
-</tbody></table></div>
-<p>There is no Assessor SDK inside the shopping agent, and no Assessor consumer app on the phone.</p>
-<p><strong>Optional hardware-bound <code>agent_cnf</code>:</strong> Link 1 / Link 1-D may set <code>agent_cnf.key_protection: hardware</code> plus a <code>hardware_attestation</code> that proves the signing key lives in a non-exportable store (phone Secure Enclave / Android Keystore / TPM, or a cloud HSM). The base profile still accepts software keys so SaaS agents can participate. A scheme can require hardware for on-device deposit. A hardware claim without a matching attestation is treated as software.</p>
-<p><strong>Carts and payment mandates</strong> still come from the merchant or wallet on a cloud-holder or deposit-holder Link 2. In a browser session the agent <em>may</em> include an observed cart in the encrypted package; a later merchant-signed cart wins if both exist.</p>
-<hr>
-<h2 id="8b-what-is-evidence-scope-what-does-the-assessor-actually-see">8b. What is evidence <code>scope</code> — what does the Assessor actually see?</h2>
-<p><code>scope</code> is a <strong>release ceiling</strong>, not a verdict type. The shopping agent lists <strong>classes</strong> it is willing to export. It must not include a class that is not listed. The Assessor must not treat a <strong>missing</strong> class as “we checked that and it passed.”</p>
-<p>ATLAS does <strong>not</strong> require the full chat or the model’s chain-of-thought. Those are two optional classes. What a scheme (for example regulatory compliance or intent-matching verification) <em>needs</em> for a given method is named by opaque <code>assessment_types</code> on the roster — outside this protocol.</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Group</th><th>Examples of classes</th><th>Typical on</th></tr></thead>
-<tbody>
-<tr><td><strong>Narrative</strong></td><td>User–agent turns; free-text reasoning / CoT; a typed decision graph</td><td>Cloud subjects that already log dialogue. Rarely available on locked-down devices.</td></tr>
-<tr><td><strong>Native structured intent</strong></td><td>In-app toggles and caps (<code>ui_slots</code>); a structured constraint set</td><td>Any agent with its own UI — not the same as Verifiable Intent.</td></tr>
-<tr><td><strong>Actions / discovery</strong></td><td>Merchants/SKUs considered; tool / MCP / HTTP traces; browser navigations; OS app launches; affiliate tags; pipeline stage names</td><td>The usual on-device / no-chat path. Browser agents add <code>browser_trace</code>.</td></tr>
-<tr><td><strong>Checkout (agent-side)</strong></td><td><code>rail_choices</code> — instruments the user <em>could</em> use ∩ methods the merchant would accept, <strong>before</strong> commit; confirmation event (pay-sheet vs HTML, SCA done)</td><td>The <strong>selected</strong> rail is a payment-layer fact (merchant / wallet / network), not an agent class.</td></tr>
-<tr><td><strong>Integrity</strong></td><td>Model/version hash; safety-event enums; hash-chained session log; session / transaction binding</td><td>Useful when the OS or runtime can attest the log.</td></tr>
-</tbody></table></div>
-<p>**What is <em>not</em> a <code>scope</code> class:** merchant carts and AP2 / VI mandates. Those are attached later by the merchant or wallet when they ask for Link 4.</p>
-<p><strong>What a missing class means:</strong> if <code>agent_reasoning</code> is not in <code>scope</code>, the Assessor did not see CoT — and must not claim it verified “intent from reasoning.” It can still judge from tool traces, consideration set, and holder artefacts.</p>
-<p><strong>If the OS exports zero classes, or the agent lists an empty <code>scope</code>:</strong> ATLAS cannot assess agent behaviour — there is nothing to evaluate. The transport still runs (deposit can POST Link 1-D; holder can still send Link 2). The Assessor must not invent a chat, a tool trace, or an “intent verified” claim. When the result path asks, Link 4 <strong>must still be issued</strong> with <code>verdict: not_assessed</code>. Empty <code>scope</code> is the reason — no extra reason code. That is recorded on the rail-facing token: not silence, and not a pass or a fail. Holder Link 2 artifacts (cart / AP2 / VI) can still be digested on that same Link 4; they do not change the agent-behaviour verdict.</p>
-<p><strong>Beginner takeaway:</strong> <code>scope</code> is the agent’s privacy dial. Cloud agents can open more classes; on-device agents can open action and receipt-style classes only. The Assessor is honest about which classes it actually saw — including when the agent refused every class.</p>
-<hr>
-<h2 id="9-can-i-use-atlas-only-before-payment-or-also-after-a-transaction-has-been-processed">9. Can I use ATLAS only before payment — or also after a transaction has been processed?</h2>
-<p><strong>Yes.</strong> Assessment is not only a “gate before pay.” Timing depends on need: block until a verdict, continue and review later, or look back at a past transaction.</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Mode</th><th>When</th><th>Who typically asks</th><th>What happens</th></tr></thead>
-<tbody>
-<tr><td><strong>Direct (cloud)</strong></td><td>Before the next step</td><td>The shopping agent</td><td>Agent selects from the roster, Link 1-D → Link 3 → JWE → Link 4; checkout can wait</td></tr>
-<tr><td><strong>Deposit-direct (on-device)</strong></td><td>At checkout</td><td>The shopping agent</td><td>Same roster selection; L1-D → Link 3 → JWE → Link 4 on the JWE response</td></tr>
-<tr><td><strong>Deposit-holder (on-device)</strong></td><td>At checkout, then later</td><td>Merchant or wallet</td><td>Same L1-D → Link 3 → JWE → acknowledgement; holder Link 2 (optional <code>holder_commissioned</code> artifacts) receives Link 4</td></tr>
-<tr><td><strong>Holder (cloud)</strong></td><td>During negotiation</td><td>Merchant or wallet</td><td>Agent issues Link 1; holder GETs the roster, selects the Assessor, then Link 2; holder receives Link 4</td></tr>
-<tr><td><strong>Post-transaction</strong></td><td>After payment</td><td>e.g. issuer, payment network, acquirer</td><td>Redeem an existing <code>ReportToken</code>, or — if a sealed JWE was stored — request Link 4 later. A TA cannot pull evidence from a phone that never deposited.</td></tr>
-</tbody></table></div>
-<hr>
-<h2 id="10-how-do-assessor-trust-authority-and-the-certification-scheme-work-together">10. How do Assessor, Trust Authority, and the certification scheme work together?</h2>
-<p>In ATLAS language, what people often call an <strong>“authority scheme”</strong> is essentially the <strong>certification scheme</strong>: the programme that defines <em>who may assess</em>, under <em>which rules</em>, and how Assessors are <strong>accredited and listed</strong>.</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Entity type</th><th>Simple question it answers</th></tr></thead>
-<tbody>
-<tr><td><strong>Certification scheme</strong></td><td><em>What is the assurance programme?</em> It publishes the <strong>Assessor roster</strong> and ties Trust Authorities into one catalogue</td></tr>
-<tr><td><strong>Trust Authority</strong> (certification body)</td><td><em>Who licenses this Assessor, stores reports, and redeems report tokens?</em></td></tr>
-<tr><td><strong>Assessor</strong></td><td><em>For this purchase, did behaviour match the rulebook — using a certified method?</em></td></tr>
-<tr><td><strong>Conforming implementations</strong></td><td>Products and services that implement ATLAS under scheme profiles (any vendor)</td></tr>
-</tbody></table></div>
-<p><strong>How they connect (simplified):</strong></p>
-<ol>
-<li>The scheme publishes which Assessors are accredited (<strong>roster</strong> — see next question).</li>
-<li><strong>Cloud direct / deposit:</strong> the shopping agent <strong>selects</strong> an Assessor from that TA-partner roster and names it in <code>permitted_assessors</code> plus <code>permitted_trust_authorities</code> on Link 1-D. <strong>Cloud holder / deposit-holder:</strong> the merchant/wallet GETs the roster and selects before Link 2.</li>
-<li>The Assessor proves live authorization; the agent releases <strong>encrypted</strong>, <strong>in-scope</strong> evidence (on-device: after Link 3, outbound JWE).</li>
-<li>The Assessor issues a signed result + report token (immediately in cloud direct and deposit-direct; after holder Link 2 in deposit-holder).</li>
-<li>The payment network can later <strong>redeem</strong> the report from the Trust Authority.</li>
-</ol>
-<hr>
-<h2 id="11-how-do-i-find-a-qualified-assessor-what-is-the-roster-discovery-and-opt-in">11. How do I find a qualified Assessor — what is the roster, discovery, and opt-in?</h2>
-<p><strong>Best related question:</strong> <em>How does the ecosystem discover Assessors, keep them qualified, and let shopping agents choose who may inspect them?</em></p>
-<h3 id="the-roster-the-public-catalogue">The roster (the public catalogue)</h3>
-<p>A <strong>certification scheme</strong> (or trust registry) publishes an <strong>Assessor roster</strong>: a living list of Assessors currently allowed to operate under that programme. Shopping agents, merchants, and wallets use it to <strong>discover</strong> who can assess what, where, and under which rulebooks — instead of private one-off deals.</p>
-<p>The roster is kept fresh through <strong>regular Assessor evaluation</strong> and <strong>roster updates</strong> (add, suspend, revoke, refresh scores and metadata). Discovery uses the roster to <strong>pre-filter</strong> candidates; at assessment time the Assessor must still prove a <strong>live authorization</strong> from its Trust Authority (a stale roster entry is not enough).</p>
-<h3 id="what-a-qualified-assessor-entry-typically-carries">What a qualified Assessor entry typically carries</h3>
-<p>A roster entry for a qualified Assessor is meant to support informed choice. In practice it includes (or is linked to) information such as:</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Field (plain language)</th><th>Why it matters</th></tr></thead>
-<tbody>
-<tr><td><strong>Qualification / quality score</strong></td><td>Result of ongoing evaluation and benchmarks — helps compare Assessors, not only “listed vs not listed”</td></tr>
-<tr><td><strong>Assessment referential(s)</strong></td><td>Which <strong>scheme rulebooks</strong> this Assessor is allowed to apply (opaque codes — e.g. regulatory compliance, intent-matching verification). ATLAS does not define the methods.</td></tr>
-<tr><td><strong>Cost</strong></td><td>Pricing or fee model so merchants/wallets/agents can choose affordably and predictably</td></tr>
-<tr><td><strong>Region</strong></td><td>Where the Assessor is authorized to operate (e.g. EU, US)</td></tr>
-<tr><td><strong>Owning Trust Authority</strong></td><td>The TA that signs this Assessor’s live authorization</td></tr>
-<tr><td>Status, types</td><td>Active / suspended / revoked; opaque <code>assessment_types</code></td></tr>
-</tbody></table></div>
-<p><em>(The <a href="https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html">ATLAS working draft</a> already standardises core discovery fields such as regions, assessment types, policy referentials, and authorization status. Qualification score, cost, and the reverse “who accepts me” view help make the roster usable as a real marketplace of Assessors in scheme / programme deployments.)</em></p>
-<h3 id="discovery">Discovery</h3>
-<ol>
-<li>Look up the TA-partner roster.</li>
-<li>Filter by region, referential, score, cost, and live authorization.</li>
-<li><strong>Cloud direct / deposit:</strong> the shopping agent selects an Assessor and puts that roster id / public key in <code>permitted_assessors</code> plus the authorizing TAs in <code>permitted_trust_authorities</code>. <strong>Cloud holder / deposit-holder:</strong> the merchant/wallet GETs the roster and selects before Link 2.</li>
-</ol>
-<h3 id="opt-in-direct-and-deposit-name-the-assessor">Opt-in (direct and deposit name the Assessor)</h3>
-<p>Assessment is not a free-for-all.</p>
-<ul>
-<li><strong>Cloud direct and deposit:</strong> the agent <strong>selects</strong> from the published roster and records that choice in <code>permitted_assessors</code> and <code>permitted_trust_authorities</code>. Trust still depends on <strong>live roster authorization</strong>, not on the agent inventing an Assessor.</li>
-<li><strong>Cloud holder / deposit-holder:</strong> the agent lists Trust Authorities (<code>permitted_trust_authorities</code>) or <code>deposited_assessors</code>; the merchant or wallet GETs the roster and picks before Link 2.</li>
-<li><code>scope</code> still limits <strong>what</strong> is released, regardless of who was selected.</li>
-</ul>
-<p><strong>Beginner takeaway:</strong> Think of the roster as a <strong>yellow pages of inspected inspectors</strong>. In cloud direct and deposit the shopping agent <strong>picks a name from that list</strong>. In cloud holder (and before deposit-holder Link 2) the merchant/wallet does.</p>
-<hr>
-<h2 id="12-can-i-use-several-assessor-agents-for-one-transaction">12. Can I use several Assessor agents for one transaction?</h2>
-<p><strong>Yes.</strong> One purchase can involve <strong>more than one Assessor</strong>. That is intentional: different parties often need different checks, or the same journey may need several rulebooks.</p>
-<h3 id="why-you-might-use-more-than-one">Why you might use more than one</h3>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Example</th><th>What happens</th></tr></thead>
-<tbody>
-<tr><td><strong>Merchant and wallet each commission an Assessor</strong></td><td>The merchant wants a check before accepting the cart; the wallet wants a check before releasing payment credentials. Each picks an eligible Assessor from the roster (they may be different Assessors).</td></tr>
-<tr><td><strong>Different rulebooks</strong></td><td>One Assessor is strong on <strong>intent fidelity</strong>; another on <strong>regulated goods</strong> or <strong>network policy</strong>. Same transaction, separate assessments.</td></tr>
-<tr><td><strong>Different timing</strong></td><td>One Assessor runs <strong>synchronously</strong> as a gate; another runs <strong>asynchronously</strong> for audit/trace on the same journey.</td></tr>
-</tbody></table></div>
-<h3 id="how-it-works-plain-steps">How it works (plain steps)</h3>
-<ol>
-<li>For each check, an Assessor is <strong>selected from the roster</strong> — by the shopping agent (<code>permitted_assessors</code> on Link 1-D) or by a holder (see <a href="#11-how-do-i-find-a-qualified-assessor-what-is-the-roster-discovery-and-opt-in">roster / opt-in</a>). After a deposit, <code>deposited_assessors</code> names who already holds the JWE.</li>
-<li>Each requester (e.g. merchant, wallet) <strong>commissions</strong> its Assessor for that transaction (or from <code>deposited_assessors</code> on deposit-holder).</li>
-<li>Each Assessor proves its <strong>live authorization</strong>, then receives <strong>its own</strong> encrypted evidence package (scoped to what that assessment needs — not a free dump to every Assessor at once beyond what was authorized).</li>
-<li>Each Assessor returns <strong>its own signed verdict</strong> and, when required, <strong>its own report token</strong>.</li>
-<li>Downstream, the merchant processor can attach <strong>several compact report tokens</strong> to the payment message (ATLAS designs for a small number of tokens on the rail — typically up to a few per authorisation). Networks or issuers can redeem each token from the relevant Trust Authority.</li>
-</ol>
-<h3 id="what-stays-true-with-multiple-assessors">What stays true with multiple Assessors</h3>
-<ul>
-<li>Privacy: raw evidence still goes only to <strong>authorized</strong> Assessors, encrypted to them — not to every merchant or to the rail.</li>
-<li>Independence: each Assessor judges under <strong>its</strong> certified method and referential.</li>
-<li>No single Assessor monopoly: the ecosystem can combine complementary views of the same agent journey.</li>
-</ul>
-<p><strong>Beginner takeaway:</strong> Think of it like several specialized inspectors for one shipment — each with a clear brief — whose short signed reports can travel together with the payment.</p>
-<hr>
-<h2 id="13-who-benefits-from-atlas-and-how-by-market-segment">13. Who benefits from ATLAS — and how (by market segment)?</h2>
-<p>Each party gets a different slice of value from the same independent assessment and compact trust signals.</p>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Segment</th><th>What’s in it for them</th></tr></thead>
-<tbody>
-<tr><td><strong>Merchant</strong></td><td>More confidence that an agent-built cart is acceptable <strong>before</strong> fulfilment; better dispute posture; optional sync gate so they don’t proceed blind</td></tr>
-<tr><td><strong>Wallet</strong></td><td>Can require agent observability before releasing payment credentials or finishing mandates — without becoming the Assessor</td></tr>
-<tr><td><strong>Shopping agent</strong></td><td>Neutral way to prove good behaviour without giving raw personal data to every counterparty; open interoperability instead of per-network kits</td></tr>
-<tr><td><strong>Payment network</strong></td><td>Runtime signals on top of KYA; compact tokens for authorisation; help with fraud, IFR/routing policy, and liability design</td></tr>
-<tr><td><strong>Issuer</strong></td><td>Extra signal at authorisation and after the fact; better evidence when the cardholder disputes; redeemable reports via the Trust Authority</td></tr>
-<tr><td><strong>Merchant processor</strong></td><td>Can carry a verified Assessor verdict into payment messaging (existing card/bank message formats) and score risk using an independent result — not only merchant or agent self-claims</td></tr>
-<tr><td><strong>User</strong></td><td>Better chance the agent stayed within constraints <strong>before</strong> AP2/VI bind an agent-built checkout; oversight without putting the raw chat on the rail; fairer disputes</td></tr>
-</tbody></table></div>
-<p><strong>One line:</strong> merchants and wallets get a gate or audit trail; agents get portable proof of behaviour; networks, issuers, and processors get redeemable runtime signals; users get protection that “confirm the agent’s cart” alone cannot provide.</p>
-<hr>
-<h2 id="14-what-are-the-key-takeaways-benefits-of-atlas">14. What are the key takeaways / benefits of ATLAS?</h2>
-<ol>
-<li><strong>Closes the black-box gap</strong> between what you said and what the agent did.</li>
-<li><strong>Independent, method-certified assessment</strong> — not the shopping agent grading itself.</li>
-<li><strong>Privacy-aware oversight</strong> — sensitive evidence to the Assessor only; rails get compact signals.</li>
-<li><strong>Restores missing pre-transaction trust signals</strong> that AP2/VI alone do not cover — while staying complementary to KYA, AP2, and VI.</li>
-<li><strong>Stronger KYA</strong> via cross-repository checks (minimal risk signals, not full case dumps).</li>
-<li><strong>Dispute / liability evidence</strong> — independent, redeemable records schemes, issuers, and merchants can use when disputes arise; can <strong>support future liability frameworks if</strong> networks adopt those signals — not a published agent-specific liability shift today.</li>
-<li><strong>Scalable observability</strong> across commercial, on-device, and custom agents — without relying only on SDKs, hosting, or proxies.</li>
-<li><strong>Flexible timing</strong> — sync gate, async audit, and post-transaction review.</li>
-<li><strong>Discoverable Assessors on the TA-partner roster</strong> — the agent (cloud direct / deposit) or the holder (cloud holder, and before deposit-holder Link 2) selects from that list. The Assessor URL stays on the roster, not in ATLAS tokens.</li>
-<li><strong>Several Assessors per transaction</strong> — merchant, wallet, or different rulebooks can each commission a check; multiple report tokens can travel with the payment.</li>
-<li><strong>Value per segment</strong> — merchant, wallet, shopping agent, network, issuer, processor, and user.</li>
-<li><strong>Open standard</strong> — a shared, vendor-neutral assessment layer the industry can implement, profile, and evolve together.</li>
-<li><strong>Early trust foundation</strong> that scales from human-in-the-loop flows toward delegation, micropayments, and machine-to-machine commerce.</li>
-</ol>
-<hr>
-<h2 id="15-why-is-trust-so-important-at-this-stage-of-agentic-commerce-what-about-long-term">15. Why is trust so important at this stage of agentic commerce? What about long term?</h2>
-<p>Technology matters only insofar as it <em>sustains</em> trust: merchants, issuers, networks, and consumers need evidence they can use to accept an agent, allow a purchase, and resolve disputes later — not another stack for its own sake.</p>
-<p>At this stage the ecosystem is still emerging, and most flows still keep a human in the loop. Models, tools, and threat surfaces are evolving quickly. Classic CNP signals (built over decades) do not fully transfer when an agent interprets intent, picks merchants, and builds the cart. So the industry needs a shared foundation of <strong>trust signals</strong> from day one — compact, independent, and portable across parties — instead of bolting oversight on after losses accumulate.</p>
-<p>Longer term, the same signal layer unlocks the next wave: fuller <strong>delegation</strong> (human no longer in the loop), <strong>micro-payments</strong> (e.g. HTTP 402-style rails), and <strong>machine-to-machine</strong> B2B commerce, where continuous oversight without a human gatekeeper is non-negotiable. ATLAS is designed as that shared assessment layer — restoring missing pre-transaction signals beside identity (KYA) and checkout binding (AP2/VI).</p>
-<hr>
-<h2 id="16-what-protocols-help-merchants-distinguish-a-legitimate-agent-from-a-scam-bot-or-scraper">16. What protocols help merchants distinguish a legitimate agent from a scam bot or scraper?</h2>
-<p>Merchants need to separate two worlds. <strong>Browser-based</strong> commerce spent years stopping malicious bots from acting like humans; that stack (bot detection and similar controls) now has to evolve to tell <em>legitimate</em> agents from <em>malicious</em> ones. That requires <strong>verifiable agent identity</strong> on the request — approaches such as <strong>Web Bot Auth</strong> (an IETF draft profile built on <strong>RFC 9421</strong> HTTP Message Signatures) are promising for carrying identity, but they do not by themselves prove the agent’s <strong>allowed scope of behaviour</strong>. Network programs such as Visa Trusted Agent / Mastercard Agent Pay (and related agentic commerce stacks) similarly strengthen recognition and scoped credentials; they still leave a gap on independent runtime behaviour. In parallel, a <strong>dedicated agentic</strong> stack is emerging that no longer depends on rendering a UI for a human. That stack is better suited to (1) recognise the agent, (2) verify it is authorised for a given action, and (3) leave an <strong>audit trail</strong> — with chained, verifiable evidence across payment method, merchant basket, user consent/authentication, and delegation mandates. Merchant confidence in today’s signals is still <strong>uneven</strong>: identity signals are improving, but <strong>runtime behaviour and scope</strong> remain the weak link without independent assessment — which is what ATLAS Assessors add.</p>
-<hr>
-<h2 id="17-what-does-the-audit-trail-for-an-agentic-purchase-look-like-what-proves-consumer-intent-vs-agent-execution">17. What does the audit trail for an agentic purchase look like? What proves consumer intent vs agent execution?</h2>
-<p>On emerging standards such as <strong>AP2</strong> and <strong>Verifiable Intent (VI)</strong>, key checkout elements are captured deterministically into verifiable credentials: the user intent, merchant basket, selected payment method, and transaction data, often signed with the user’s device key. That chain is <strong>necessary</strong> evidence for checkout and post-purchase binding. It is not sufficient for the full story: those artefacts are typically collected <strong>after</strong> the agent has already interpreted intent, chosen merchants, and built the cart. A <strong>complementary</strong> chain of verifiable evidence should also be captured <strong>up front</strong>, while the agent is processing the user’s initial intent — covering discovery, ranking, and cart construction — so the audit trail proves both <strong>consumer intent fidelity</strong> and <strong>agent execution</strong>, not only the final checkout object the user confirmed. ATLAS assessment (signed verdict + redeemable report token) is designed to provide that independent pre-transaction record.</p>
-<hr>
-<h2 id="18-does-an-agent-carry-a-portable-credential-proving-its-authority-from-merchant-to-merchant">18. Does an agent carry a portable credential proving its authority from merchant to merchant?</h2>
-<p>Emerging work such as <strong>DIF KYA-OS</strong> aims to carry both <strong>agent identity</strong> and <strong>allowed scope</strong>. The harder operational question is how a merchant verifies identity and scope <strong>before</strong> any purchase — and often <strong>before</strong> any payment rail is even chosen. Cross-repository KYA checks are complex: one can imagine a KYA store and authorised scopes <strong>per payment network</strong>, yet during shopping no rail may be identified yet. Asking every merchant to query every known KYA repository for every requesting agent is impractical. This is where an ATLAS <strong>Assessor</strong> helps: it can perform identity and authorisation checks <strong>across</strong> repositories and return a compact result the merchant can rely on, instead of each merchant implementing full KYA verification itself. Portable authority is <strong>emerging, not fully standardised</strong> end-to-end across merchants and rails.</p>
-<hr>
-<h2 id="19-if-an-agent-buys-the-wrong-item-or-exceeds-budget-who-bears-the-loss">19. If an agent buys the wrong item or exceeds budget, who bears the loss?</h2>
-<p>In today’s emerging models, <strong>merchants</strong> often still absorb much of the chargeback cost. Classic three-party fraud framing (1st-party: cardholder as fraudster; 2nd-party: misuse with consent; 3rd-party: fraudster against the genuine user) does not cleanly cover agent-mediated failure. A useful <strong>proposed framing</strong> — not yet standard industry taxonomy — is a <strong>fourth</strong> case: the <strong>user’s agent acted outside approved behaviour</strong> (or drifted from stated constraints) even though the cardholder and merchant are both “genuine.” Dispute resolution is based on <strong>signals collected from initial intent through delivery</strong>. Richer trust signals can <strong>support</strong> future <strong>liability protection or shift</strong> frameworks for merchants <strong>if</strong> schemes and issuers adopt them — analogous <em>in spirit</em> to how CNP evolved with EMV 3-D Secure, but <strong>agent-specific liability rules are not published as settled fact today</strong>. Emerging checkout protocols such as <strong>AP2</strong> and <strong>VI</strong> do reintroduce important transaction-time signals (consent, mandate, cart binding, payment instrument). Even so, some <strong>key signals remain partial or missing</strong> — especially independent evidence of how the agent interpreted intent and built the cart <em>before</em> those artefacts were bound. ATLAS is designed to <strong>restore</strong> those missing pre-transaction signals as independent, redeemable records so schemes can evolve liability and dispute rules on fuller evidence, not “he said / agent said.”</p>
-<hr>
-<h2 id="20-what-is-the-risk-of-fragmentation-from-different-agentic-commerce-protocols">20. What is the risk of fragmentation from different agentic commerce protocols?</h2>
-<p>The main risk is <strong>lack of interoperability</strong>. If a payment card only worked on a few terminals in one region, people would either carry many cards or abandon cards for something more universal. Agentic commerce faces the same adoption cliff: merchants, agents, and downstream parties cannot afford to implement many incompatible stacks. Securing every proprietary channel is costly and unrealistic; improving security on <strong>one shared mechanism</strong> is. <strong>ATLAS</strong> is intentionally <strong>protocol-agnostic</strong> — flexible while protocols emerge, and compatible later with dedicated standards — so assessment and trust signals can travel with the transaction without locking the ecosystem to one vendor island.</p>
-<hr>
-<h2 id="21-is-merchant-willingness-about-technical-readiness-or-genuine-acceptance-of-the-channel">21. Is merchant willingness about technical readiness or genuine acceptance of the channel?</h2>
-<p>Merchants (like every other actor) care about <strong>revenue</strong>. The real question is trust, not technology for its own sake — technology <strong>sustains</strong> trust. Do merchants have enough signals to protect revenue and limit chargeback loss? CNP e-commerce spent decades building those signals (e.g. EMV 3-D Secure). Agentic commerce needs the same: signals that support regulation, dispute mechanisms, and authentication of both user and agent — plus <strong>ongoing agent assessment</strong>, because agents can act autonomously and must be overseen. That is what ATLAS targets. Consumers will accept the channel when they trust that constraints (budget, preferences, safety) survive agent interpretation — not only that a confirmation screen looked plausible.</p>
-<p>Merchant willingness is not primarily a tech-readiness checkbox. It is about <strong>sufficient trust</strong> and <strong>reassurance of business revenue</strong> — with <strong>acceptable fraud mitigation</strong> — so accepting agent-initiated transactions feels commercially safe.</p>
-<hr>
-<h2 id="22-how-far-out-is-workable-trust-infrastructure-and-what-is-the-biggest-near-term-risk">22. How far out is workable trust infrastructure, and what is the biggest near-term risk?</h2>
-<p>The ecosystem is multi-speed. In some regions it is <strong>market-driven</strong>: deploy the commerce stack, mitigate fraud against revenue, harden security over time. In others it is <strong>regulation-driven</strong>: guardrails and compliance must exist before volume, and regulators must also clarify new rules — so adoption is slower. Many markets are a mix. The <strong>common denominator risk is revenue loss</strong> — from chargebacks, fraud, or penalties for non-compliance. Early commercial agentic flows <strong>may</strong> appear around major retail peaks <strong>in some early / market-driven regions</strong>; elsewhere workable trust infrastructure and oversight will take longer — treat any single calendar as a scenario, not a guarantee.</p>
-<p>Near term, the binding constraint is usually <strong>insufficient trust signals and dispute readiness</strong>, not a single binary of “fraud vs backlash vs regulation.” The sharper near-term risk is <strong>exposing consumers to agentic-related threats without sufficient mechanisms to ensure trust</strong> — intent drift, unauthorised agent behaviour, opaque disputes. Damage would not stop with the shopper: <strong>consumers, merchants, and payment brands</strong> would all feel material harm (losses, chargebacks, reputational and regulatory hit) if volume scales ahead of workable oversight.</p>
-<hr>
-<h2 id="sources">Sources</h2>
-<p><a href="#glossary-of-questions">↑ Back to glossary of questions</a></p>
-<ul>
-<li><a href="https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html">ATLAS: Agent Trust Layer and Assurance Standard — v0.2 working draft</a></li>
-<li><a href="https://github.com/decentralized-identity/kya-os-mcp">KYA-OS (DIF)</a> — <a href="https://github.com/decentralized-identity/kya-os-mcp/blob/main/SPEC.md">SPEC.md</a>; <a href="https://modelcontextprotocol-identity.io/mcp/introduction">introduction</a></li>
-<li><a href="https://ap2-protocol.org/ap2/specification/">AP2 — Agent Payments Protocol</a> (<a href="https://ap2-protocol.org/">home</a>)</li>
-<li><a href="https://verifiableintent.dev/spec/">Verifiable Intent (VI)</a> (<a href="https://verifiableintent.dev/">home</a>)</li>
-<li>Combined ATLAS + AP2/VI signal framework (complementary behaviour assessment vs authorization/binding artefacts)</li>
-</ul>
-  </div>
 </section>
 
 <!-- ===== REFERENCES ===== -->
