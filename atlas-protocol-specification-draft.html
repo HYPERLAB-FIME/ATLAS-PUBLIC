@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>ATLAS: Agent Trust Layer and Assurance Standard — v0.2 Draft</title>
+  <title>ATLAS: Agent Trust Layer and Assurance Standard — v0.2 Working Draft</title>
   <!--
-    ATLAS Protocol Specification — v0.1 Working Draft
+    ATLAS Protocol Specification — v0.2 Working Draft
     Published by Hyperlab, the innovation lab within Consult Hyperion.
     GitHub: https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC
   -->
@@ -853,7 +853,11 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     </li>
     <li><a href="#s2"><span class="secno">2.</span> Conformance</a></li>
     <li><a href="#s3"><span class="secno">3.</span> Terminology</a></li>
-    <li><a href="#s4"><span class="secno">4.</span> Roles and Participants</a></li>
+    <li><a href="#s4"><span class="secno">4.</span> Roles and Participants</a>
+      <ol>
+        <li><a href="#s4-1"><span class="secno">4.1</span> Subject deployments</a></li>
+      </ol>
+    </li>
     <li><a href="#s5"><span class="secno">5.</span> Assessor Roster</a>
       <ol>
         <li><a href="#s5-1"><span class="secno">5.1</span> Scope</a></li>
@@ -867,8 +871,18 @@ details pre { margin: .5em 0 0; font-size: .72em; }
         <li><a href="#s6-1"><span class="secno">6.1</span> Artifact Summary</a></li>
         <li><a href="#s6-2"><span class="secno">6.2</span> JWS/JWT Chain Reference</a>
           <ol>
-            <li><a href="#s6-2">6.2.1 Holder-Mode Chain (Pattern A)</a></li>
-            <li><a href="#s6-2-2">6.2.2 Direct-Mode Chain (Pattern B)</a></li>
+            <li><a href="#s6-2-1">6.2.1 Cloud-based agent</a>
+              <ol>
+                <li><a href="#s6-2-1-h">6.2.1.1 Holder</a></li>
+                <li><a href="#s6-2-1-d">6.2.1.2 Direct</a></li>
+              </ol>
+            </li>
+            <li><a href="#s6-2-2">6.2.2 On-device agent (deposit)</a>
+              <ol>
+                <li><a href="#s6-2-2-d">6.2.2.1 Deposit-direct</a></li>
+                <li><a href="#s6-2-2-h">6.2.2.2 Deposit-holder</a></li>
+              </ol>
+            </li>
             <li><a href="#s6-2-3">6.2.3 Signing Chain at a Glance</a></li>
           </ol>
         </li>
@@ -876,15 +890,26 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     </li>
     <li><a href="#s7"><span class="secno">7.</span> Assessment Initiation Patterns</a>
       <ol>
-        <li><a href="#s7-1"><span class="secno">7.1</span> Pattern A — Holder Mode</a></li>
-        <li><a href="#s7-2"><span class="secno">7.2</span> Pattern B — Direct Mode</a></li>
+        <li><a href="#s7-1"><span class="secno">7.1</span> Cloud-based agent — holder and direct</a>
+          <ol>
+            <li><a href="#s7-1-h"><span class="secno">7.1.1</span> Holder</a></li>
+            <li><a href="#s7-2"><span class="secno">7.1.2</span> Direct</a></li>
+          </ol>
+        </li>
+        <li><a href="#s7-3"><span class="secno">7.2</span> On-device agent — deposit (direct and holder)</a>
+          <ol>
+            <li><a href="#s7-3-d"><span class="secno">7.2.1</span> Deposit-direct</a></li>
+            <li><a href="#s7-3-h"><span class="secno">7.2.2</span> Deposit-holder</a></li>
+          </ol>
+        </li>
       </ol>
     </li>
     <li><a href="#s8"><span class="secno">8.</span> Protocol Steps</a>
       <ol>
+        <li><a href="#s8-0"><span class="secno">8.0</span> Evidence <code>scope</code> classes</a></li>
         <li><a href="#s8-1"><span class="secno">8.1</span> Assessment Delegation (Holder)</a></li>
         <li><a href="#s8-1-1"><span class="secno">8.1.1</span> Agent (<code>agent</code> + <code>agent_cnf</code>)</a></li>
-        <li><a href="#s8-2"><span class="secno">8.2</span> Direct Assessment Commission</a></li>
+        <li><a href="#s8-2"><span class="secno">8.2</span> Direct Mode and Deposit (Link 1-D)</a></li>
         <li><a href="#s8-3"><span class="secno">8.3</span> Sub-Delegation &amp; Commission</a></li>
         <li><a href="#s8-3-1"><span class="secno">8.3.1</span> Evidence Artifacts</a></li>
         <li><a href="#s8-4"><span class="secno">8.4</span> Assessor Access Assertion</a></li>
@@ -906,8 +931,18 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <li><a href="#s9"><span class="secno">9.</span> Trust Chain Summary</a></li>
     <li><a href="#s10"><span class="secno">10.</span> End-to-End Sequence</a>
       <ol>
-        <li><a href="#s10-1"><span class="secno">10.1</span> Pattern A</a></li>
-        <li><a href="#s10-2"><span class="secno">10.2</span> Pattern B</a></li>
+        <li><a href="#s10-cloud"><span class="secno">10.1</span> Cloud-based agent</a>
+          <ol>
+            <li><a href="#s10-1"><span class="secno">10.1.1</span> Holder</a></li>
+            <li><a href="#s10-2"><span class="secno">10.1.2</span> Direct</a></li>
+          </ol>
+        </li>
+        <li><a href="#s10-device"><span class="secno">10.2</span> On-device agent (deposit)</a>
+          <ol>
+            <li><a href="#s10-3"><span class="secno">10.2.1</span> Deposit-direct</a></li>
+            <li><a href="#s10-4"><span class="secno">10.2.2</span> Deposit-holder</a></li>
+          </ol>
+        </li>
       </ol>
     </li>
     <li><a href="#s11"><span class="secno">11.</span> Security &amp; Privacy</a>
@@ -953,19 +988,19 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <p id="doc-state">
     <span class="badge">Working Draft</span>
-     July 2026
+     v0.2 · September 2026
   </p>
 
   <!-- Metadata DL — exact W3C pattern: dt+dd pairs -->
   <dl>
     <dt>This version:</dt>
-    <dd><a href="https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC>fact-protocol-specification-v0.1draft</a></dd>
+    <dd><a href="https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC">ATLAS Protocol Specification v0.2 (this document)</a></dd>
 
     <dt>Latest published version:</dt>
     <dd><a href="https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC">https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC</a> <em>(pending)</em></dd>
 
     <dt>Previous versions:</dt>
-    <dd>None — first published working draft</dd>
+    <dd>Working Draft v0.1 (July 2026)</dd>
 
     <dt>Feedback:</dt>
     <dd><a href="https://github.com/HYPERLAB-FIME/ATLAS-PUBLIC/issues">GitHub Issues</a> · Contact  Fime / Consult Hyperion</dd>
@@ -983,19 +1018,24 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <h2>Abstract</h2>
   <p>
     This specification defines the <strong>Agent Trust Layer and Assurance Standard (ATLAS) protocol</strong>
-    — a chained-capability-token assessment framework for agentic commerce.
-    ATLAS standardises how authorized <em>Assessor agents</em> obtain bounded, encrypted evidence from
-    <em>subject agents</em>, evaluate intent fidelity and policy compliance, and produce signed artifacts
-    that can be consumed upstream and downstream without exposing raw conversations or unnecessary personal data.
+    — a chained-capability-token <em>observability</em> framework for agentic commerce.
+    ATLAS standardises how a subject agent releases <em>scoped, encrypted evidence</em> to an
+    authorized Assessor, and how signed results and compact <code>ReportToken</code> values
+    can be redeemed by merchants, wallets, processors, networks, and issuers — without an Assessor
+    SDK inside the subject, without requiring the Assessor to host the subject, and without a
+    man-in-the-middle that can read evidence.
   </p>
   <p>
-    ATLAS supports two assessment-initiation patterns: a <strong>holder-mediated</strong> path
-    (merchant or credential provider commissions an Assessor) and a <strong>direct</strong> path
-    (subject agent self-commissions an Assessor for compliance or regulatory evidence).
-    Application trust relies on chained JWS/JWT delegation tokens and JWE-encrypted evidence over
-    HTTPS with standard TLS. Downstream payment-rail integration uses compact <code>ReportToken</code>
-    references assembled into a <code>redeem_tokens</code> field by the merchant processor for
-    ISO 8583, EMV 3-D Secure, and ISO 20022.
+    ATLAS is <strong>scheme-agnostic</strong>. What an Assessor <em>concludes</em> from evidence
+    (method, referential, verdict semantics) is defined by the deploying scheme or programme
+    (for example a FACT profile), not by this document. This specification defines evidence
+    <code>scope</code> classes, initiation patterns, and the token/JWE chain.
+    Two deployment models: a <strong>cloud-based</strong> subject uses <strong>holder</strong>
+    or <strong>direct</strong>; an <strong>on-device</strong> subject uses <strong>deposit</strong>,
+    which itself has <strong>direct</strong> and <strong>holder</strong> result paths.
+    Assessor HTTPS URLs come from the roster, not from ATLAS tokens.
+    Downstream payment-rail integration uses <code>redeem_tokens</code> on ISO 8583, EMV 3-D Secure,
+    and ISO 20022.
   </p>
 
  
@@ -1123,16 +1163,16 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h3 id="s1-2"><span class="secno-heading">1.2</span> Design Goals<a class="self-link" href="#s1-2" title="§ 1.2 Design Goals">§</a></h3>
   <ol>
-    <li><strong>Privacy by default.</strong> Structured summaries; encrypt user intent and agent reasoning so only the designated Assessor can read it.</li>
-    <li><strong>Cryptographic chain of trust.</strong> Verifiable chain across Subject Agent, Assessor, Merchant, CP, processor, network, bank, and trust authority.</li>
-    <li><strong>Complementarity with AP2/VI/UCP.</strong> Align with mandate delegation, key binding, verifier receipts — don't replace them.</li>
-    <li><strong>Durable evidence.</strong> Support real-time processing decisions and later dispute review.</li>
-    <li><strong>Direct assessment commissioning.</strong> Subject agent may self-commission assessments without a merchant holder.</li>
-    <li><strong>Registry-level Assessor roster.</strong> Discover eligible Assessors, TA trust anchors, and authorization metadata without ad hoc configuration.</li>
-    <li><strong>Separation of authority.</strong> Separate authority to request an assessment / read private evidence / redeem downstream reports.</li>
+    <li><strong>Observability without lock-in.</strong> A portable evidence-release protocol — not an Assessor SDK, not a requirement to host the subject, and not a readable proxy on the path.</li>
+    <li><strong>Privacy by default.</strong> Release only classes listed in <code>scope</code>; encrypt the JWE so only the designated Assessor can decrypt it. The Trust Authority <span class="rfc2119">MUST NOT</span> obtain plaintext evidence.</li>
+    <li><strong>Scheme-agnostic assessment types.</strong> Roster <code>assessment_types</code> are opaque codes defined by the scheme (e.g. a FACT profile). This specification does not define intent, fairness, or regulatory methods.</li>
+    <li><strong>Complementarity with AP2/VI/UCP.</strong> Align with mandate delegation and checkout objects — do not replace them. Merchant/wallet artefacts arrive on holder Link 2 when they exist.</li>
+    <li><strong>Durable redeemable output.</strong> Compact <code>ReportToken</code> for rails and later retrieval from the TA.</li>
+    <li><strong>Deployment-appropriate initiation.</strong> Two models: cloud-based agent (holder and direct); on-device agent via deposit (deposit-direct and deposit-holder).</li>
+    <li><strong>Registry-level Assessor roster.</strong> The subject agent (cloud direct / deposit) or the holder (cloud holder, and before deposit-holder Link 2) selects an Assessor from the TA-partner roster. ATLAS tokens <span class="rfc2119">MUST NOT</span> carry the Assessor URL — clients read <code>assessor_endpoint</code> from the live roster. How a device authenticates the roster endpoint (TLS only vs certificate pinning) is out of scope.</li>
+    <li><strong>Separation of authority.</strong> Separate authority to request a result / decrypt evidence / redeem reports.</li>
     <li><strong>Rail-compatible token.</strong> Downstream token fits in ISO 8583 / EMV 3DS / ISO 20022.</li>
-    <li><strong>Chained signed-token model.</strong> JWS/JWT + JWE over HTTPS/TLS.</li>
-    <li><strong>Chained capability tokens</strong> (<code>cnf</code> per RFC 7800) - (no human verifier in this flow).</li>
+    <li><strong>Chained signed-token model.</strong> JWS/JWT + JWE over TLS; <code>cnf</code> per RFC 7800.</li>
   </ol>
 
   <h3 id="s1-4"><span class="secno-heading">1.4</span> Why Assessment? The Agentic Commerce Trust Problem<a class="self-link" href="#s1-4" title="§ 1.4 Why Assessment? The Agentic Commerce Trust Problem">§</a></h3>
@@ -1258,49 +1298,21 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     Subject Agent.
   </p>
   <p>
-    In <strong>holder mode</strong>, merchants and CPs <span class="rfc2119">MAY</span> attach
-    <code>holder_commissioned</code> artifacts on Link 2.  In <strong>direct mode</strong>, the Subject
-    Agent <span class="rfc2119">MUST</span> supply counterparty material via
-    <code>agent_observed</code> artifacts in the JWE when the policy referential requires it.
-    The Assessor <span class="rfc2119">SHOULD</span> perform <code>evidence_cross_check</code> (§8.6)
-    before issuing <code>AssessmentResult</code>.
+    In <strong>holder mode</strong> and on deposit-holder result request, merchants and CPs
+    <span class="rfc2119">MAY</span> attach <code>holder_commissioned</code> artifacts on Link 2
+    (carts, AP2/VI). Carts and mandates are not required on Link 1-D. In
+    <code>browser-context</code> the Subject Agent <span class="rfc2119">MAY</span> include an
+    observed cart in the JWE. The Assessor <span class="rfc2119">SHOULD</span> perform
+    <code>evidence_cross_check</code> (§8.6) before issuing <code>AssessmentResult</code>.
   </p>
   <p>
-    The <strong>policy referential</strong> identifies the framework or rulebook against
-    which the evidence is evaluated.  Examples:
+    The <strong>policy referential</strong> and roster <code>assessment_types</code> are
+    <strong>opaque scheme identifiers</strong>. This protocol does not define what an Assessor
+    must conclude (intent accuracy, fairness, regulation, or otherwise). A scheme or programme
+    such as FACT <span class="rfc2119">MAY</span> bind those codes to certified methods.
+    ATLAS only requires that the Assessor decrypt in-scope evidence, apply the method its
+    authorization names, and issue Link 4 / Link 5.
   </p>
-  <div class="table-wrap">
-    <table class="data">
-      <thead><tr><th>Referential type</th><th>Example</th><th>Assessment question</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Regulatory</td>
-          <td>EU AI Act Article 13 transparency requirements</td>
-          <td>Did the agent disclose its automated nature and the constraints it applied?</td>
-        </tr>
-        <tr>
-          <td>Network rulebook</td>
-          <td>Card payment network -  Trusted Agent Policy</td>
-          <td>Did the agent stay within registered scopes and spend limits?</td>
-        </tr>
-        <tr>
-          <td>Industry standard</td>
-          <td>OWASP LLM Top 10 — Prompt Injection prevention</td>
-          <td>Is there evidence that the agent's reasoning was injected or manipulated?</td>
-        </tr>
-        <tr>
-          <td>Health and safety</td>
-          <td>Food allergen disclosure obligations (EU 1169/2011)</td>
-          <td>Were declared allergen constraints propagated to every item selection call?</td>
-        </tr>
-        <tr>
-          <td>Merchant policy</td>
-          <td>Age-restricted goods verification rule</td>
-          <td>Did the agent verify user eligibility before adding restricted items to cart?</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
   <p>
     the Assessor produces an <code>AssessmentResult</code> (Link 4) containing a binary or graded
     <code>verdict</code>, a hash of the evidence reviewed, the <code>policy_referential</code>
@@ -1347,10 +1359,10 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     when, and only when, they appear in all capitals.
   </p>
   <dl class="defn">
-    <dt>Subject Agent</dt><dd><span class="rfc2119">MUST</span> implement Link 1 issuance (§8.1/§8.2), Link 3 assertion verification (§8.4), JWE evidence release (§8.5), and <code>AssessmentResult</code> conveyance (§8.6).</dd>
-    <dt>Merchant / Credential Provider (Holder)</dt><dd><span class="rfc2119">MUST</span> implement Link 2 issuance (§8.3) including optional <code>requester_evidence</code> (§8.3.1), and <code>AssessmentResult</code> conveyance (§8.6).</dd>
-    <dt>Assessor Agent</dt><dd><span class="rfc2119">MUST</span> implement Link 3 assertion issuance (§8.4), evidence decryption, requester-artifact verification (§8.3.1), evidence cross-check (§8.6), and <code>AssessmentResult</code> / <code>ReportToken</code> issuance (§8.6).</dd>
-    <dt>Trust Authority</dt><dd><span class="rfc2119">MUST</span> issue authorization credentials, operate a report API, and participate in the trust registry roster.</dd>
+    <dt>Subject Agent</dt><dd><span class="rfc2119">MUST</span> implement holder Link 1 issuance (§8.1) and/or Link 1-D issuance (§8.2), roster selection of the Assessor, Link 3 verification, JWE evidence release (§8.5), and <code>AssessmentResult</code> conveyance when it is the requester (§8.6).</dd>
+    <dt>Merchant / Credential Provider (Holder)</dt><dd><span class="rfc2119">MUST</span> implement Link 2 issuance (§8.3) including optional <code>requester_evidence</code> (§8.3.1), and <code>AssessmentResult</code> conveyance (§8.6). On deposit-holder, Link 2 is the result request against a stored JWE.</dd>
+    <dt>Assessor Agent</dt><dd><span class="rfc2119">MUST</span> implement Link 3 issuance, evidence decryption, requester-artifact verification (§8.3.1), evidence cross-check (§8.6), and <code>AssessmentResult</code> / <code>ReportToken</code> issuance (§8.6). On deposit, it <span class="rfc2119">MUST</span> store the JWE and issue Link 4 only when the deposit result path asks (SA for deposit-direct; holder for deposit-holder).</dd>
+    <dt>Trust Authority</dt><dd><span class="rfc2119">MUST</span> issue authorization credentials, operate a report API, and participate in the trust registry roster. When the subject cannot reach the roster <code>assessor_endpoint</code>, the TA <span class="rfc2119">MAY</span> forward the JWE opaquely without decrypting. The TA does <span class="rfc2119">not</span> select the Assessor.</dd>
     <dt>Merchant Processor</dt><dd><span class="rfc2119">MUST</span> verify conveyed <code>AssessmentResult</code> payloads, extract <code>report_token</code> values, and assemble <code>redeem_tokens</code> for payment rails (§8.7).</dd>
   </dl>
 </section>
@@ -1360,28 +1372,34 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   <h2><span class="secno-heading">3.</span> Terminology<a class="self-link" href="#s3" title="§ 3. Terminology">§</a></h2>
   <dl class="defn">
     <dt>Agentic Commerce</dt><dd>A commerce flow in which autonomous AI agents negotiate, select, and authorise transactions on behalf of a user using structured mandate and policy artifacts.</dd>
-    <dt>Subject Agent</dt><dd>An autonomous software agent that is the subject of an ATLAS assessment. It issues Link 1, holds user intent and reasoning evidence, and serves as the cryptographic root of trust for that evidence within the protocol.</dd>
-    <dt>Holder</dt><dd>The merchant or credential provider that holds an ATLAS <code>AssessmentDelegation</code> and may issue a chained <code>AssessmentSubDelegation</code>. Holder mode only.</dd>
+    <dt>Subject Agent</dt><dd>An autonomous software agent that is the subject of an ATLAS assessment. It issues Link 1 and/or Link 1-D, holds scoped evidence, and is the cryptographic root of trust for that evidence within the protocol.</dd>
+    <dt>Holder</dt><dd>The merchant or credential provider that holds an ATLAS <code>AssessmentDelegation</code> and may issue a chained <code>AssessmentSubDelegation</code> (cloud holder, and deposit-holder result request).</dd>
     <dt>Assessor Agent</dt><dd>An authorized software agent that presents an <code>AssessorAccessAssertion</code>, receives encrypted evidence, evaluates it, and issues signed <code>AssessmentResult</code> and <code>ReportToken</code>.</dd>
-    <dt>Trust Authority (TA)</dt><dd>An independent organisation that authorizes Assessor agents, signs authorization credentials, stores reports, and redeems <code>ReportToken</code> values.</dd>
+    <dt>Trust Authority (TA)</dt><dd>An independent organisation that authorizes Assessor agents, signs authorization credentials, publishes them on the TA-partner roster, optionally forwards opaque JWE when the subject cannot reach the Assessor URL, stores reports, and redeems <code>ReportToken</code> values. The TA does not select the Assessor for a transaction.</dd>
     <dt>Trust Registry</dt><dd>A governance framework that manages participating TAs and publishes the authoritative Assessor roster.</dd>
-    <dt>AssessmentDelegation (Link 1)</dt><dd>Signed JWT/JWS issued by the subject agent. <span class="rfc2119">MUST</span> carry <code>agent_cnf</code> and <code>agent</code> (§8.1.1).</dd>
-    <dt>AssessmentSubDelegation (Link 2)</dt><dd>Signed JWT issued by a holder to a specific Assessor, chained to Link 1 via <code>parent_jti</code>, binding the assessor's key in <code>cnf</code>. Holder mode only. <span class="rfc2119">MAY</span> carry <code>requester_evidence</code> (§8.3.1).</dd>
-    <dt>AssessorAccessAssertion (Link 3)</dt><dd>Signed JWS issued by the Assessor to the subject agent, embedding the delegation chain and authorization credential, signed over a fresh nonce. Unlocks the JWE evidence release on successful verification.</dd>
-    <dt>AssessmentEvidenceResponse</dt><dd>JWE (RFC 7516) issued by the subject agent to the Assessor containing sensitive user intent and agent reasoning. Not forwarded to any other party.</dd>
-    <dt>AssessmentResult (Link 4)</dt><dd>Signed JWS result envelope issued by the Assessor containing the assessment verdict, policy referential, evidence hashes, optional <code>evidence_cross_check</code> summary (§8.6), and a <code>report_token</code>. Link 4 <span class="rfc2119">MUST NOT</span> embed Link 2; it references evaluated artifacts via <code>link2_jti</code>, <code>requester_evidence_digest</code>, and <code>observed_artifacts_digest</code>.</dd>
+    <dt>AssessmentDelegation (Link 1)</dt><dd>Signed JWT/JWS issued by the subject agent to a merchant or CP (holder mode). <span class="rfc2119">MUST</span> carry <code>agent_cnf</code> and <code>agent</code> (§8.1.1).</dd>
+    <dt>AssessmentDelegation (Link 1-D)</dt><dd>Signed JWT issued by the subject agent straight to a roster-selected Assessor (<code>assessment_mode: direct</code> or <code>deposit</code>). <code>cnf</code> binds the Assessor key. <code>permitted_assessors</code> <span class="rfc2119">MUST</span> name that Assessor’s roster identifier and/or public-key <code>jkt</code>. Link 1-D <span class="rfc2119">MUST NOT</span> carry <code>permitted_trust_authorities</code> or <code>assessor_endpoint</code>.</dd>
+    <dt>deposit_result</dt><dd>Claim on deposit Link 1-D: <code>direct</code> (the SA later requests Link 4) or <code>holder</code> (a merchant/CP later requests Link 4 against the stored JWE).</dd>
+    <dt>AssessmentSubDelegation (Link 2)</dt><dd>Signed JWT issued by a holder to a specific Assessor, chained to Link 1 via <code>parent_jti</code>, binding the assessor's key in <code>cnf</code>. Used in cloud holder and as the deposit-holder result request. The holder <span class="rfc2119">MUST</span> select that Assessor from the live roster before issuing Link 2. <span class="rfc2119">MAY</span> carry <code>requester_evidence</code> (§8.3.1).</dd>
+    <dt>AssessorAccessAssertion (Link 3)</dt><dd>Signed JWS issued by the Assessor to the subject agent, embedding the delegation chain and authorization, signed over a fresh nonce. In deposit mode it is returned on the outbound deposit response (the device has no inbound URL).</dd>
+    <dt>AssessmentEvidenceResponse</dt><dd>JWE (RFC 7516) issued by the subject agent to the Assessor containing scoped evidence classes (§8.0). Encrypted to the Assessor <code>cnf</code> only.</dd>
+    <dt>AssessmentResult (Link 4)</dt><dd>Signed JWS result envelope issued by the Assessor containing the assessment verdict, policy referential, evidence hashes, optional <code>evidence_cross_check</code> summary (§8.6), and a <code>report_token</code>. When the subject releases no evidence classes, Link 4 <span class="rfc2119">MUST</span> still be issued with <code>verdict: not_assessed</code> (§8.6). Link 4 <span class="rfc2119">MUST NOT</span> embed Link 2; it references evaluated artifacts via <code>link2_jti</code>, <code>requester_evidence_digest</code>, and <code>observed_artifacts_digest</code>.</dd>
     <dt>ReportToken (Link 5)</dt><dd>Compact, opaque downstream token providing a redeemable reference to one stored assessment report. One token per assessment.</dd>
     <dt>redeem_tokens</dt><dd>Payment-rail-only field (ISO 8583 / EMV 3DS / ISO 20022) assembled by the merchant processor from up to three <code>report_token</code> values. Not an ATLAS protocol link.</dd>
     <dt>cnf claim</dt><dd>JSON key confirmation claim (RFC 7800) binding a specific public key via JWK thumbprint (<code>jkt</code>) to a JWT.</dd>
     <dt>agent</dt><dd>Scheme-agnostic JSON object on Link 1 naming the Subject Agent and optional <code>registered_identities[]</code> for network-scoped registrations. Cryptographic binding is in <code>agent_cnf</code> (§8.1.1).</dd>
-    <dt>agent_cnf claim</dt><dd>RFC 7800 key confirmation on Link 1 binding the Subject Agent issuer public key (<code>jkt</code>). The Subject Agent <span class="rfc2119">MUST</span> sign Link 1 and the inner evidence JWS with the matching private key.</dd>
+    <dt>agent_cnf claim</dt><dd>RFC 7800 key confirmation on Link 1 / Link 1-D binding the Subject Agent issuer public key (<code>jkt</code>). The Subject Agent <span class="rfc2119">MUST</span> sign Link 1 / Link 1-D and the inner evidence JWS with the matching private key. Optional <code>key_protection: hardware</code> plus <code>hardware_attestation</code> bind that key to a non-exportable hardware-backed store (§8.1.1).</dd>
     <dt>identity scheme</dt><dd>A URI in <code>agent.scheme</code> or per <code>registered_identities[]</code> entry identifying an external identity framework (e.g. KYA-OS).</dd>
     <dt>requester_evidence</dt><dd>Link 2 wrapper (holder mode) carrying <code>artifacts[]</code> with <code>provenance: holder_commissioned</code> (§8.3.1).</dd>
     <dt>evidence artifact</dt><dd>Unified signed-object envelope (<code>artifact_id</code>, <code>provenance</code>, <code>source_id</code>, <code>kind</code>, <code>attestation</code>) carried on Link 2 or in the JWE (§8.3.1).</dd>
     <dt>evidence_artifacts</dt><dd>Array on the JWE inner payload of <code>agent_observed</code> artifacts relayed by the Subject Agent (§8.5.1).</dd>
     <dt>evidence cross-check</dt><dd>Assessor step comparing verified artifacts (Link 2 and/or JWE) against Subject Agent narrative under the active <code>policy_referential</code>; recorded in <code>AssessmentResult.evidence_cross_check</code> (§8.6).</dd>
-    <dt>assessment_mode</dt><dd>Claim on <code>AssessmentDelegation</code>: <code>holder</code> (Pattern A) or <code>direct</code> (Pattern B).</dd>
-    <dt>policy_referential</dt><dd>Identifier for the assessment framework or regulatory standard against which the Assessor evaluates evidence.</dd>
+    <dt>assessment_mode</dt><dd>Claim on Link 1 / Link 1-D: <code>holder</code> (cloud holder), <code>direct</code> (cloud direct), or <code>deposit</code> (on-device). Deposit then uses <code>deposit_result</code> <code>direct</code> or <code>holder</code>.</dd>
+    <dt>permitted_assessors</dt><dd>Array on Link 1-D of the roster Assessor(s) the subject selected: each entry is an <code>assessor_id</code> and/or signing-key <code>jkt</code> from the TA-partner roster. The Assessor bound in <code>cnf</code> <span class="rfc2119">MUST</span> appear in this array.</dd>
+    <dt>scope</dt><dd>Array of evidence-class identifiers the subject is willing to release (§8.0). A ceiling, not a verdict type.</dd>
+    <dt>subject_channel</dt><dd>Optional Link 1 / Link 1-D claim: <code>browser-context</code> or <code>agent-protocol</code>.</dd>
+    <dt>deposited_assessors</dt><dd>Optional array on holder Link 1 listing Assessor (and TA) identifiers that already hold a JWE for this session.</dd>
+    <dt>policy_referential</dt><dd>Opaque scheme identifier naming the method pack the Assessor is authorized to apply. Semantics are scheme-defined (e.g. FACT), not ATLAS-defined.</dd>
     <dt>Assessor Roster</dt><dd>Machine-readable catalogue published by a trust registry, listing every currently authorized Assessor agent with its public keys, assessment types, regions, and owning TA.</dd>
     <dt>Hyperlab</dt><dd>The Innovation Lab within Consult Hyperion responsible for this specification and related ATLAS artefacts as part of the agentic commerce trust and assurance programme.</dd>
   </dl>
@@ -1396,17 +1414,47 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Role</th><th>Purpose within ATLAS</th><th>Existing analogue</th></tr></thead>
       <tbody>
         <tr><td><strong>End User</strong> (out of ATLAS loop)</td><td>Intent and mandates formed upstream (AP2/VI). ATLAS has no human-verifier step.</td><td>User in AP2/VI only</td></tr>
-        <tr><td><strong>Subject Agent</strong></td><td>Agent under assessment; issues Link 1 and encrypted evidence to Assessors.</td><td>Shopping agent in AP2 (illustrative)</td></tr>
+        <tr><td><strong>Subject Agent</strong></td><td>Agent under assessment; issues Link 1 and/or Link 1-D and encrypted evidence to Assessors.</td><td>Shopping agent in AP2 (illustrative)</td></tr>
         <tr><td><strong>Merchant / Merchant Agent</strong></td><td>Receives checkout artifacts, may issue Link 2, conveys <code>AssessmentResult</code>.</td><td>Merchant in AP2/UCP</td></tr>
         <tr><td><strong>Credential Provider (CP)</strong></td><td>Verifies payment mandate, may issue Link 2, conveys <code>AssessmentResult</code>.</td><td>CP in AP2/VI</td></tr>
         <tr><td><strong>Merchant Processor</strong></td><td>Collects conveyed <code>AssessmentResult</code> values, injects <code>redeem_tokens</code> on payment rails.</td><td>Acquirer / processor</td></tr>
         <tr><td><strong>Assessor Agent</strong></td><td>Requests evidence, evaluates it, issues <code>AssessmentResult</code> and <code>ReportToken</code>.</td><td>ATLAS-native role</td></tr>
-        <tr><td><strong>Trust Authority (TA)</strong></td><td>Authorizes Assessors, signs authorization credentials, stores reports, redeems tokens.</td><td>TA report API role</td></tr>
+        <tr><td><strong>Trust Authority (TA)</strong></td><td>Authorizes Assessors, publishes the roster, optionally forwards opaque JWE, stores reports, redeems tokens.</td><td>TA report API role</td></tr>
         <tr><td><strong>Trust Registry</strong></td><td>Governs TAs, publishes the Assessor roster.</td><td>Scheme trust registry</td></tr>
         <tr><td><strong>Downstream Relying Party</strong></td><td>Payment network, issuer, or bank redeeming trust-assurance output via TA report API.</td><td>Payment network / issuer</td></tr>
       </tbody>
     </table>
   </div>
+
+  <h3 id="s4-1"><span class="secno-heading">4.1</span> Subject deployments<a class="self-link" href="#s4-1" title="§ 4.1 Subject deployments">§</a></h3>
+  <p>
+    ATLAS has two deployment models. Token types are shared; who selects the Assessor and
+    when Link 4 is issued are not.
+  </p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Model</th><th>Where the subject runs</th><th>Modes</th><th>Who selects the Assessor</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cloud-based agent</strong></td><td>SaaS or operator-hosted subject (inbound HTTPS typical)</td><td><strong>Holder</strong> and <strong>direct</strong></td><td>Holder: merchant/CP from the TA-partner roster before Link 2. Direct: the subject from the same roster before Link 1-D.</td></tr>
+        <tr><td><strong>On-device agent (deposit)</strong></td><td>Phone or laptop (outbound only)</td><td><strong>Deposit-direct</strong> and <strong>deposit-holder</strong></td><td>The subject from the TA-partner roster before Link 1-D. URL is read from the roster, not from an ATLAS claim.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    ATLAS artifacts <span class="rfc2119">MUST NOT</span> convey the Assessor HTTPS URL.
+    Clients <span class="rfc2119">MUST</span> take <code>assessor_endpoint</code> from the
+    live roster entry of the selected Assessor. How the device authenticates the
+    <strong>roster</strong> endpoint (TLS only, certificate pinning, or otherwise) is
+    <strong>out of scope</strong> of this specification.
+  </p>
+  <p>
+    Link 1 and Link 1-D <span class="rfc2119">SHOULD</span> carry <code>subject_channel</code>:
+    <code>browser-context</code> (human web / DOM / WebMCP) or
+    <code>agent-protocol</code> (UCP, ACP, or similar machine checkout).
+    ATLAS messages do not change; expected evidence shape does
+    (browser traces vs protocol-signed offers). Hybrid sessions that used the open web
+    <span class="rfc2119">SHOULD</span> send <code>browser-context</code>.
+  </p>
 </section>
 
 <!-- ===== SECTION 5 ===== -->
@@ -1437,17 +1485,17 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <thead><tr><th>Field</th><th>Type</th><th>Purpose</th></tr></thead>
       <tbody>
         <tr><td><code>assessor_id</code></td><td>URI or registered ID</td><td>Stable agent identifier</td></tr>
-        <tr><td><code>assessor_signing_keys</code></td><td>JWK thumbprints (<code>jkt</code>)</td><td>Public keys for Link 2/3/<code>AssessmentResult</code></td></tr>
+        <tr><td><code>assessor_signing_keys</code></td><td>JWK thumbprints (<code>jkt</code>)</td><td>Public keys for Link 1-D <code>cnf</code> / <code>permitted_assessors</code>, Link 2/3, and <code>AssessmentResult</code></td></tr>
         <tr><td><code>trust_authority_id</code></td><td>URI</td><td>Owning TA for this authorization</td></tr>
         <tr><td><code>trust_authority_signing_keys</code></td><td>JWK thumbprints</td><td>TA keys signing authorization credentials</td></tr>
-        <tr><td><code>assessment_types</code></td><td>Array of codes</td><td>Types authorized (e.g. <code>intent_fidelity</code>, <code>regulated_goods</code>)</td></tr>
+        <tr><td><code>assessment_types</code></td><td>Array of opaque codes</td><td>Scheme-defined method identifiers (not defined by ATLAS; e.g. a FACT profile)</td></tr>
         <tr><td><code>regions</code></td><td>Array of codes</td><td>Geographic coverage (e.g. <code>EU</code>, <code>US-CA</code>)</td></tr>
         <tr><td><code>authorization_issued_at</code></td><td>Datetime</td><td>Date authorization was granted</td></tr>
         <tr><td><code>authorization_expires_at</code></td><td>Datetime</td><td>Authorization validity end</td></tr>
         <tr><td><code>authorization_status</code></td><td>Enum</td><td><code>active</code> | <code>suspended</code> | <code>revoked</code></td></tr>
         <tr><td><code>policy_referentials</code></td><td>Array of IDs</td><td>Referentials the Assessor is approved to evaluate</td></tr>
         <tr><td><code>assessor_provider_id</code></td><td>String</td><td>Optional operator/lab ID</td></tr>
-        <tr><td><code>assessor_endpoint</code></td><td>HTTPS URL</td><td>Optional callback/agent-card URL</td></tr>
+        <tr><td><code>assessor_endpoint</code></td><td>HTTPS URL</td><td>Where the Assessor accepts Link 1-D / JWE. Clients <span class="rfc2119">MUST</span> read this from the live roster. ATLAS tokens <span class="rfc2119">MUST NOT</span> carry this URL.</td></tr>
       </tbody>
     </table>
   </div>
@@ -1459,12 +1507,14 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     (<code>roster_version</code>, <code>updated_at</code>) and revocation.
     Implementations <span class="rfc2119">MAY</span> expose the roster as a JSON document, REST
     collection, or signed JWT bundle.
+    How a client authenticates the roster HTTPS endpoint (TLS validation only, certificate
+    pinning, or otherwise) is <strong>out of scope</strong> of this specification.
   </p>
 
   <h3 id="s5-4"><span class="secno-heading">5.4</span> Use in ATLAS Flows<a class="self-link" href="#s5-4" title="§ 5.4 Use in ATLAS Flows">§</a></h3>
   <ul>
-    <li>Subject agent <span class="rfc2119">MAY</span> copy <code>jkt</code> values from roster entries into <code>permitted_assessors</code> / <code>permitted_trust_authorities</code> when building Link 1.</li>
-    <li>In holder mode, the merchant or CP selects an Assessor from the roster and binds the Assessor's <code>jkt</code> in Link 2 <code>cnf</code>.</li>
+    <li>Subject agent <span class="rfc2119">MUST</span> copy the selected Assessor’s roster <code>assessor_id</code> and/or <code>jkt</code> into <code>permitted_assessors</code> when building Link 1-D. Holder-mode Link 1 <span class="rfc2119">MAY</span> copy TA <code>jkt</code> values into <code>permitted_trust_authorities</code>.</li>
+    <li>In cloud holder and before deposit-holder Link 2, the merchant or CP <span class="rfc2119">MUST</span> GET the live roster and select the Assessor from it, then bind that Assessor’s <code>jkt</code> in Link 2 <code>cnf</code>. ATLAS tokens <span class="rfc2119">MUST NOT</span> include <code>assessor_endpoint</code>.</li>
     <li>Holders and Assessors <span class="rfc2119">SHOULD</span> reject commission if the Assessor's keys or authorization dates do not match the current roster entry.</li>
   </ul>
 </section>
@@ -1473,8 +1523,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 <section id="s6">
   <h2><span class="secno-heading">6.</span> Core Artifacts<a class="self-link" href="#s6" title="§ 6. Core Artifacts">§</a></h2>
   <p>
-    ATLAS defines five signed artifacts. The upstream three are compact JWS/JWT capability tokens
-    with cryptographic key binding via <code>cnf</code> (RFC 7800), not W3C Verifiable Credentials.
+    ATLAS defines Links 1–5 (holder and Link 1-D / deposit). Upstream tokens are compact JWS/JWT
+    capability tokens with <code>cnf</code> (RFC 7800), not W3C Verifiable Credentials.
   </p>
 
   <h3 id="s6-1"><span class="secno-heading">6.1</span> Artifact Summary<a class="self-link" href="#s6-1" title="§ 6.1 Artifact Summary">§</a></h3>
@@ -1482,9 +1532,10 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <table class="data">
       <thead><tr><th>Artifact</th><th>Link</th><th>Shape</th><th>Issuer</th><th>Subject</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td><code>AssessmentDelegation</code></td><td>1</td><td>Signed JWT</td><td>Subject Agent</td><td>Merchant / CP / Assessor</td><td>Commission assessment; <code>assessment_mode: holder | direct</code></td></tr>
-        <tr><td><code>AssessmentSubDelegation</code></td><td>2</td><td>Signed JWT (chained)</td><td>Merchant or CP</td><td>Specific Assessor</td><td>Holder mode only — binds assessor key in <code>cnf</code></td></tr>
-        <tr><td><code>AssessorAccessAssertion</code></td><td>3</td><td>Signed JWS envelope</td><td>Assessor</td><td>Subject Agent</td><td>Embeds chain + authorization; unlocks JWE</td></tr>
+        <tr><td><code>AssessmentDelegation</code></td><td>1</td><td>Signed JWT</td><td>Subject Agent</td><td>Merchant / CP</td><td>Holder commission; <code>assessment_mode: holder</code></td></tr>
+        <tr><td><code>AssessmentDelegation</code></td><td>1-D</td><td>Signed JWT</td><td>Subject Agent</td><td>Roster-selected Assessor</td><td><code>direct</code> or <code>deposit</code>; <code>cnf</code> + <code>permitted_assessors</code></td></tr>
+        <tr><td><code>AssessmentSubDelegation</code></td><td>2</td><td>Signed JWT (chained)</td><td>Merchant or CP</td><td>Specific Assessor</td><td>Holder / deposit-holder — binds assessor key; optional <code>requester_evidence</code></td></tr>
+        <tr><td><code>AssessorAccessAssertion</code></td><td>3</td><td>Signed JWS envelope</td><td>Assessor</td><td>Subject Agent</td><td>Embeds chain + authorization; unlocks JWE (deposit: on the outbound response)</td></tr>
         <tr><td><code>AssessmentEvidenceResponse</code></td><td>—</td><td>JWE (RFC 7516)</td><td>Subject Agent</td><td>Assessor only</td><td>Encrypted to assessor key; not forwarded</td></tr>
         <tr><td><code>AssessmentResult</code></td><td>4</td><td>Signed JWS</td><td>Assessor</td><td>Merchant / CP / SA</td><td>Verdict; carries one <code>report_token</code></td></tr>
         <tr><td><code>ReportToken</code></td><td>5</td><td>Compact opaque token</td><td>Assessor / TA</td><td>Downstream party</td><td>One opaque handle per assessment</td></tr>
@@ -1492,17 +1543,25 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     </table>
   </div>
   <div class="note">
-    <strong>Holder-mode chain:</strong> SA signs L1 → holder signs L2 bound to assessor key → Assessor signs assertion → JWE evidence → <code>AssessmentResult</code> to holder.<br>
-    <strong>Direct-mode chain:</strong> SA signs L1 bound directly to assessor key → Assessor signs assertion (no L2) → JWE evidence → <code>AssessmentResult</code> to SA.
+    Four token chains, matching §7 and §10. Cloud-based agent: holder and direct.
+    On-device agent (deposit): deposit-direct and deposit-holder.
+    If the subject releases no evidence classes, Link 4 is still issued with
+    <code>verdict: not_assessed</code>.
   </div>
 
   <h3 id="s6-2"><span class="secno-heading">6.2</span> JWS/JWT Chain Reference<a class="self-link" href="#s6-2" title="§ 6.2 JWS/JWT Chain Reference">§</a></h3>
   <p>
     Each link <span class="rfc2119">MUST</span> be signed by the private key named in the previous
-    link's <code>cnf</code> claim.
+    link's <code>cnf</code> claim. Assessor HTTPS URLs are read from the roster, not from
+    ATLAS tokens.
   </p>
 
-  <h4>6.2.1 Holder-Mode Chain (Pattern A)</h4>
+  <h3 id="s6-2-1"><span class="secno-heading">6.2.1</span> Cloud-based agent<a class="self-link" href="#s6-2-1" title="§ 6.2.1 Cloud-based agent">§</a></h3>
+
+  <h4 id="s6-2-1-h">6.2.1.1 Holder</h4>
+  <p>
+    Holder GETs the TA-partner roster and selects the Assessor before Link 2.
+  </p>
   <pre>
 ┌─────────────────────────────────────────────────────────────────────┐
 │  LINK 1 — AssessmentDelegation (signed JWT)                         │
@@ -1510,13 +1569,15 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 │  typ: "atlas-assessment-delegation+jwt"  assessment_mode: holder    │
 │  iss: SA   sub: merchant_id|cp_id                                   │
 │  agent_cnf.jkt = Subject Agent key (signs L1 + evidence JWS)        │
+│  agent_cnf.key_protection: software | hardware (opt; §8.1.1)        │
 │  cnf.jkt = Holder Public Key (signs Link 2)                         │
 │  agent { id, registered_identities[] }                              │
-│  scope, permitted_assessors, permitted_trust_authorities            │
-│  transaction_reference, session_id                                  │
+│  scope[] (empty = subject refuses all), permitted_trust_authorities │
+│  subject_channel opt, transaction_reference, session_id             │
 │  exp, nbf, jti (root — NO parent_jti)                               │
 └─────────────────────────┬───────────────────────────────────────────┘
-                          │ signed by key in Link 1 cnf
+                          │ holder GET /roster — select Assessor
+                          │ (URL from roster, not from tokens)
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  LINK 2 — AssessmentSubDelegation (signed JWT)                      │
@@ -1552,67 +1613,156 @@ details pre { margin: .5em 0 0; font-size: .72em; }
           ▼                                  ▼
 ┌─────────────────────┐   ┌───────────────────────────────────────────┐
 │ LINK 4 Result       │   │ LINK 5 ReportToken                        │
-│ Assessor → requester│   │ atlas:1:<ta_id>:<report_id>               │
+│ Assessor → holder   │   │ atlas:1:<ta_id>:<report_id>               │
 │ compliant /         │   │ redeem_nbf … redeem_exp                   │
 │ partially_compliant │   │ Signed by: Assessor / TA                  │
-│ not_compliant       │   │ One token per assessment                  │
-│ link2_jti,          │   │                                           │
-│ requester_evidence_ │   │                                           │
-│ observed_artifacts_ │   │                                           │
-│ digest, report_token│   │                                           │
+│ not_compliant /     │   │ One token per assessment                  │
+│ not_assessed        │   │                                           │
+│ (empty scope)       │   │                                           │
 └─────────────────────┘   └───────────────────────────────────────────┘</pre>
 
-  <h4 id="s6-2-2">6.2.2 Direct-Mode Chain (Pattern B)</h4>
+  <h4 id="s6-2-1-d">6.2.1.2 Direct</h4>
   <p>
-    In direct mode there is <strong>no Link 2</strong>: the subject agent binds the Assessor's
-    key directly in Link 1, and the Assessor presents only Link 1 in the
-    <code>AssessorAccessAssertion</code>.
+    The subject selects the Assessor from the roster before Link 1-D. Link 3 is inbound.
   </p>
   <pre>
 ┌─────────────────────────────────────────────────────────────────────┐
-│  LINK 1-D — AssessmentDelegation (signed JWT)                       │
-│  Subject Agent → Assessor  (direct — no holder)                     │
-│  typ: "atlas-assessment-delegation+jwt"  assessment_mode: direct    │
-│  iss: SA   sub: assessor_id                                         │
-│  agent_cnf.jkt = Subject Agent key (signs L1 + evidence JWS)        │
-│  cnf.jkt = Assessor Public Key (encrypt JWE)                        │
-│  agent { id, registered_identities[] }                              │
-│  scope, permitted_assessors, permitted_trust_authorities            │
-│  transaction_reference, session_id                                  │
-│  exp, nbf, jti (root — NO parent_jti)                               │
+│  Prerequisite — roster selection                                    │
+│  SA GET /roster (TA-partner list)                                   │
+│  SA selects Assessor (id + jkt; endpoint from roster, not a claim)  │
 └─────────────────────────┬───────────────────────────────────────────┘
-                          │ signed by key in Link 1-D cnf
-                          │ (no Link 2)
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  LINK 3 — AssessorAccessAssertion (signed JWS)  NO L2               │
-│  Assessor → Subject Agent                                           │
-│  iss: assessor   aud: subject_agent                                 │
-│  nonce: <fresh single-use from SA>  (replay protection)             │
-│  embedded: L1-D ONLY                                                │
-│  assessor_authorization: JWS signed by TA                           │
-│  Signed by: Assessor key (MUST match Link 1-D cnf)                  │
+│  LINK 1-D — AssessmentDelegation (signed JWT)                       │
+│  Subject Agent → selected Assessor                                  │
+│  typ: "atlas-assessment-delegation+jwt"  assessment_mode: direct    │
+│  iss: SA   sub: assessor_id                                         │
+│  agent_cnf.jkt = Subject Agent key                                  │
+│  agent_cnf.key_protection: software | hardware (opt; §8.1.1)        │
+│  cnf.jkt = Assessor key (MUST appear in permitted_assessors)        │
+│  permitted_assessors[]  (roster id and/or jkt — NOT the URL)        │
+│  MUST NOT include permitted_trust_authorities                       │
+│  scope[] (empty = refuse all), subject_channel, session_id          │
+│  exp, nbf, jti (root — NO parent_jti)                               │
 └─────────────────────────┬───────────────────────────────────────────┘
-                          │ chain verified → evidence release
+                          │ Assessor → SA inbound
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LINK 3 — AssessorAccessAssertion (signed JWS)                      │
+│  Assessor → Subject Agent                                           │
+│  nonce; embedded L1-D; assessor_authorization                       │
+│  Signed by: Assessor key (MUST match L1-D cnf)                      │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          │ SA returns JWE
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  AssessmentEvidenceResponse (JWE) — SA → Assessor ONLY              │
-│  typ: "atlas-assessment-evidence+jwe"                               │
-│  Encrypted to: Assessor key in Link 1-D cnf (A256GCM)               │
-│  Payload: intent, reasoning, evidence_artifacts[]                   │
-│  agent_observed carts/mandates (§8.5.1); NOT forwarded              │
+│  Encrypted to L1-D cnf. In-scope classes only (may be empty).       │
 └─────────────────────────┬───────────────────────────────────────────┘
-                          │ after evaluation
+                          │ SA may request result
           ┌───────────────┴──────────────────┐
           ▼                                  ▼
 ┌─────────────────────┐   ┌───────────────────────────────────────────┐
 │ LINK 4 Result       │   │ LINK 5 ReportToken                        │
 │ Assessor → SA       │   │ atlas:1:<ta_id>:<report_id>               │
-│ compliant /         │   │ redeem_nbf … redeem_exp                   │
-│ partially_compliant │   │ Signed by: Assessor / TA                  │
-│ not_compliant       │   │ One token per assessment                  │
-│ observed_artifacts_ │   │                                           │
-│ digest, report_token│   │                                           │
+│ compliant /         │   │ One token per assessment                  │
+│ partially_compliant │   │                                           │
+│ not_compliant /     │   │                                           │
+│ not_assessed        │   │                                           │
+│ (empty scope)       │   │                                           │
+└─────────────────────┘   └───────────────────────────────────────────┘</pre>
+
+  <h3 id="s6-2-2"><span class="secno-heading">6.2.2</span> On-device agent (deposit)<a class="self-link" href="#s6-2-2" title="§ 6.2.2 On-device agent (deposit)">§</a></h3>
+  <p>
+    The subject selects the Assessor from the roster before Link 1-D and POSTs Link 1-D
+    plus the JWE to the roster <code>assessor_endpoint</code> (or the TA forwards ciphertext).
+    Link 3 returns on that outbound response. The Assessor stores the JWE.
+  </p>
+
+  <h4 id="s6-2-2-d">6.2.2.1 Deposit-direct</h4>
+  <p>
+    After the store, the subject later requests Link 4 (<code>deposit_result: direct</code>).
+  </p>
+  <pre>
+┌─────────────────────────────────────────────────────────────────────┐
+│  Prerequisite — roster selection                                    │
+│  SA GET /roster (TA-partner list)                                   │
+│  SA selects Assessor (id + jkt; endpoint from roster, not a claim)  │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LINK 1-D — AssessmentDelegation (signed JWT)                       │
+│  Subject Agent → selected Assessor                                  │
+│  assessment_mode: deposit    deposit_result: direct                 │
+│  cnf.jkt = Assessor key; permitted_assessors[] (id/jkt, not URL)    │
+│  MUST NOT include permitted_trust_authorities                       │
+│  agent_cnf.key_protection: software | hardware (opt)                │
+│  scope[]  (empty = subject refuses all agent evidence)              │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          │ POST L1-D + JWE to roster endpoint
+                          │ (or TA opaque forward if unreachable)
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LINK 3 — on outbound response                                      │
+│  AssessmentEvidenceResponse JWE stored (no Link 4 yet)              │
+│  Encrypted to L1-D cnf. TA MUST NOT decrypt.                        │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          │ SA later requests result
+          ┌───────────────┴──────────────────┐
+          ▼                                  ▼
+┌─────────────────────┐   ┌───────────────────────────────────────────┐
+│ LINK 4 Result       │   │ LINK 5 ReportToken                        │
+│ Assessor → SA       │   │ atlas:1:<ta_id>:<report_id>               │
+│ compliant /         │   │ One token per assessment                  │
+│ partially_compliant │   │                                           │
+│ not_compliant /     │   │                                           │
+│ not_assessed        │   │                                           │
+│ (empty scope)       │   │                                           │
+└─────────────────────┘   └───────────────────────────────────────────┘</pre>
+
+  <h4 id="s6-2-2-h">6.2.2.2 Deposit-holder</h4>
+  <p>
+    After the same store, the subject issues holder Link 1 with
+    <code>deposited_assessors[]</code>. The holder GETs the roster, selects or confirms,
+    then issues Link 2 and receives Link 4 (<code>deposit_result: holder</code>).
+  </p>
+  <pre>
+┌─────────────────────────────────────────────────────────────────────┐
+│  Prerequisite — roster selection                                    │
+│  SA GET /roster; SA selects Assessor (id + jkt; URL from roster)    │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LINK 1-D + JWE (deposit)                                           │
+│  assessment_mode: deposit    deposit_result: holder                 │
+│  POST to roster assessor_endpoint (or TA opaque forward)            │
+│  L3 on outbound response. Assessor stores JWE.                      │
+│  scope[] may be empty (subject refuses all agent evidence)          │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          │ later: result request via holder
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LINK 1 — AssessmentDelegation (holder)                             │
+│  SA → Merchant / CP                                                 │
+│  deposited_assessors[] = Assessors that already hold the JWE        │
+└─────────────────────────┬───────────────────────────────────────────┘
+                          │ holder GET /roster — select / confirm
+                          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LINK 2 — AssessmentSubDelegation                                   │
+│  Holder → Assessor (one of deposited_assessors)                     │
+│  parent_jti:<L1>  optional requester_evidence (cart / AP2 / VI)     │
+└─────────────────────────┬───────────────────────────────────────────┘
+          ┌───────────────┴──────────────────┐
+          ▼                                  ▼
+┌─────────────────────┐   ┌───────────────────────────────────────────┐
+│ LINK 4 Result       │   │ LINK 5 ReportToken                        │
+│ Assessor → holder   │   │ atlas:1:<ta_id>:<report_id>               │
+│ compliant /         │   │ One token per assessment                  │
+│ partially_compliant │   │                                           │
+│ not_compliant /     │   │                                           │
+│ not_assessed        │   │                                           │
+│ (empty scope)       │   │                                           │
 └─────────────────────┘   └───────────────────────────────────────────┘</pre>
 
   <h4 id="s6-2-3">6.2.3 Signing Chain at a Glance</h4>
@@ -1620,18 +1770,17 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <table class="data">
       <thead>
         <tr>
-          <th>Link</th><th>Pattern</th><th>Signed by</th>
+          <th>Link</th><th>Mode</th><th>Signed by</th>
           <th>Verified using</th><th>Binds next actor via</th>
         </tr>
       </thead>
       <tbody>
-        <tr><td>1 <code>AssessmentDelegation</code></td><td>A (holder)</td><td>Subject agent</td><td>Merchant / CP</td><td><code>cnf</code> → holder key</td></tr>
-        <tr><td>1-D <code>AssessmentDelegation</code></td><td>B (direct)</td><td>Subject agent</td><td>Assessor</td><td><code>cnf</code> → assessor key</td></tr>
-        <tr><td>2 <code>AssessmentSubDelegation</code></td><td>A only</td><td>Holder (Link 1 <code>cnf</code>)</td><td>Assessor</td><td><code>cnf</code> → assessor key</td></tr>
-        <tr><td>3 <code>AssessorAccessAssertion</code></td><td>A &amp; B</td><td>Assessor (L2 <code>cnf</code> / L1-D <code>cnf</code>)</td><td>Subject agent</td><td>— unlocks evidence only</td></tr>
-        <tr><td>— <code>AssessmentEvidenceResponse</code></td><td>A &amp; B</td><td>SA (encrypt)</td><td>Assessor (decrypt)</td><td>Encrypted to L2 / L1-D <code>cnf</code></td></tr>
-        <tr><td>4 <code>AssessmentResult</code></td><td>A &amp; B</td><td>Assessor</td><td>Requester / TA</td><td>—</td></tr>
-        <tr><td>5 <code>ReportToken</code></td><td>A &amp; B</td><td>Assessor / TA</td><td>TA report API</td><td>One opaque handle per assessment</td></tr>
+        <tr><td>1 <code>AssessmentDelegation</code></td><td>Cloud holder; deposit-holder</td><td>Subject agent</td><td>Merchant / CP</td><td><code>cnf</code> → holder key</td></tr>
+        <tr><td>1-D <code>AssessmentDelegation</code></td><td>Cloud direct; deposit</td><td>Subject agent</td><td>Selected Assessor</td><td><code>cnf</code> + <code>permitted_assessors</code></td></tr>
+        <tr><td>2 <code>AssessmentSubDelegation</code></td><td>Cloud holder; deposit-holder</td><td>Holder (Link 1 <code>cnf</code>)</td><td>Assessor</td><td><code>cnf</code> → assessor key</td></tr>
+        <tr><td>3 <code>AssessorAccessAssertion</code></td><td>All four modes</td><td>Assessor (L2 or L1-D <code>cnf</code>)</td><td>Subject agent</td><td>unlocks JWE if not already deposited</td></tr>
+        <tr><td>— JWE</td><td>All four modes</td><td>SA (encrypt)</td><td>Assessor (decrypt)</td><td>Encrypted to L2 or L1-D <code>cnf</code></td></tr>
+        <tr><td>4 / 5</td><td>All four modes</td><td>Assessor / TA</td><td>Requester / TA report API</td><td>Deposit-holder: after holder Link 2</td></tr>
       </tbody>
     </table>
   </div>
@@ -1640,35 +1789,135 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 <!-- ===== SECTION 7 ===== -->
 <section id="s7">
   <h2><span class="secno-heading">7.</span> Assessment Initiation Patterns<a class="self-link" href="#s7" title="§ 7. Assessment Initiation Patterns">§</a></h2>
-
-  <h3 id="s7-1"><span class="secno-heading">7.1</span> Pattern A — Holder Mode<a class="self-link" href="#s7-1" title="§ 7.1 Pattern A — Holder Mode">§</a></h3>
   <p>
-    The subject agent issues <code>AssessmentDelegation</code> to a merchant or CP during negotiation.
-    The holder selects an eligible Assessor and issues a chained <code>AssessmentSubDelegation</code>.
-    Each delegation is independent — the merchant and CP may each commission different Assessors.
+    ATLAS has two models. A <strong>cloud-based</strong> subject uses <strong>holder</strong>
+    or <strong>direct</strong>. An <strong>on-device</strong> subject uses <strong>deposit</strong>,
+    then <strong>deposit-direct</strong> or <strong>deposit-holder</strong> for Link 4.
+    There is no TA-mediated intake. ATLAS artifacts <span class="rfc2119">MUST NOT</span>
+    convey the Assessor HTTPS URL; clients take <code>assessor_endpoint</code> from the live roster.
   </p>
 
-  <h3 id="s7-2"><span class="secno-heading">7.2</span> Pattern B — Direct Mode<a class="self-link" href="#s7-2" title="§ 7.2 Pattern B — Direct Mode">§</a></h3>
+  <h3 id="s7-1"><span class="secno-heading">7.1</span> Cloud-based agent — holder and direct<a class="self-link" href="#s7-1" title="§ 7.1 Cloud-based agent">§</a></h3>
   <p>
-    The subject agent commissions an assessment for its own behaviour — for self-compliance, regulatory evidence,
-    or pre-dispute attestation. There is no merchant and no Link 2; counterparty artifacts are carried in the
-    JWE as <code>agent_observed</code> evidence (§8.5.1).
+    Typical for SaaS and operator-hosted subjects that are reachable over HTTPS.
+  </p>
+
+  <h4 id="s7-1-h"><span class="secno-heading">7.1.1</span> Holder<a class="self-link" href="#s7-1-h" title="§ 7.1.1 Holder">§</a></h4>
+  <p>
+    The subject agent issues <code>AssessmentDelegation</code> to a merchant or CP
+    (<code>assessment_mode: holder</code>, <code>permitted_trust_authorities</code>).
+    Before Link 2 the holder <span class="rfc2119">MUST</span> GET the TA-partner roster
+    and <strong>select</strong> an Assessor whose live authorization is signed by a listed TA.
+    The holder then issues Link 2. Merchant and CP may each select different Assessors.
+    If a prior deposit exists, holder Link 1 <span class="rfc2119">SHOULD</span> carry
+    <code>deposited_assessors[]</code>; the holder <span class="rfc2119">MUST</span> commission
+    one of those Assessors so Link 4 can use the stored JWE.
+  </p>
+
+  <h4 id="s7-2"><span class="secno-heading">7.1.2</span> Direct<a class="self-link" href="#s7-2" title="§ 7.1.2 Direct">§</a></h4>
+  <p>
+    The subject agent <span class="rfc2119">MUST</span> first select an Assessor from the
+    TA-partner roster, then issue Link 1-D to that Assessor
+    (<code>assessment_mode: direct</code>, <code>cnf</code> = Assessor key).
+    Link 1-D <span class="rfc2119">MUST</span> carry <code>permitted_assessors</code> with
+    that Assessor’s roster public key and/or identifier and
+    <span class="rfc2119">MUST NOT</span> carry <code>permitted_trust_authorities</code>
+    or <code>assessor_endpoint</code>.
+    The Assessor presents Link 3 inbound; the SA returns the JWE; the SA
+    <span class="rfc2119">MAY</span> then receive Link 4 / Link 5.
   </p>
   <div class="warning">
-    In direct mode the subject agent <span class="rfc2119">MUST NOT</span> be the sole source of
-    Assessor trust. <code>permitted_assessors</code> / <code>permitted_trust_authorities</code>
-    <span class="rfc2119">MUST</span> be constrained by trust registry roster and registry or enterprise policy
-    to prevent the SA from unilaterally appointing a captive Assessor.
+    The selected Assessor <span class="rfc2119">MUST</span> be roster-active under a TA-partner
+    at presentation time. Roster membership — not the agent’s word — is the trust source.
   </div>
+
+  <h3 id="s7-3"><span class="secno-heading">7.2</span> On-device agent — deposit (direct and holder)<a class="self-link" href="#s7-3" title="§ 7.2 On-device agent — deposit">§</a></h3>
+  <p>
+    Required for phone or laptop subjects that have no inbound URL.
+    The agent picks the Assessor from the TA-partner roster and issues Link 1-D
+    (<code>assessment_mode: deposit</code>, <code>permitted_assessors</code>, no
+    <code>permitted_trust_authorities</code>, no URL claim).
+    Delivery uses the roster <code>assessor_endpoint</code>
+    (or the TA forwards ciphertext if that URL is unreachable).
+    How the device authenticates the roster HTTPS endpoint (TLS only vs certificate pinning)
+    is <strong>out of scope</strong>.
+    The Assessor stores the JWE. Link 3 is returned on that outbound response.
+  </p>
+
+  <h4 id="s7-3-d"><span class="secno-heading">7.2.1</span> Deposit-direct<a class="self-link" href="#s7-3-d" title="§ 7.2.1 Deposit-direct">§</a></h4>
+  <p>
+    <code>deposit_result: direct</code> — the subject agent later requests Link 4 / Link 5.
+  </p>
+
+  <h4 id="s7-3-h"><span class="secno-heading">7.2.2</span> Deposit-holder<a class="self-link" href="#s7-3-h" title="§ 7.2.2 Deposit-holder">§</a></h4>
+  <p>
+    <code>deposit_result: holder</code> — the agent issues holder Link 1 with
+    <code>deposited_assessors[]</code>. Before Link 2 the merchant or wallet
+    <span class="rfc2119">MUST</span> GET the roster and select (or confirm) an Assessor
+    in that list, then issue Link 2 (optional cart / AP2 / VI) and receive Link 4 / Link 5.
+  </p>
+  <p>
+    In <code>browser-context</code>, the JWE <span class="rfc2119">MAY</span> include an
+    agent-observed cart. A later merchant-signed cart on Link 2 is authoritative when both exist.
+  </p>
 </section>
 
 <!-- ===== SECTION 8 ===== -->
 <section id="s8">
   <h2><span class="secno-heading">8.</span> Protocol Steps<a class="self-link" href="#s8" title="§ 8. Protocol Steps">§</a></h2>
   <p>
-    All interactions are between server-side agents over HTTPS with server TLS.
+    Application trust is entirely in the signed-token chain. Cloud subjects typically use
+    HTTPS server endpoints. On-device subjects use outbound TLS only (roster <code>assessor_endpoint</code> or TA forward).
     There is no human in the ATLAS protocol loop.
-    Application trust is entirely in the signed-token chain.
+  </p>
+
+  <h3 id="s8-0"><span class="secno-heading">8.0</span> Evidence <code>scope</code> classes<a class="self-link" href="#s8-0" title="§ 8.0 Evidence scope classes">§</a></h3>
+  <p>
+    <code>scope</code> on Link 1 / Link 1-D / Link 2 is an array of <strong>evidence-class</strong>
+    identifiers. It is a <strong>release ceiling</strong>: the subject <span class="rfc2119">MUST NOT</span>
+    include a class that is not listed; the Assessor <span class="rfc2119">MUST NOT</span> treat a
+    missing class as a successful check of that class. Scheme <code>assessment_types</code> say
+    which classes a method needs; that binding is outside this specification.
+  </p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Group</th><th>Class</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3">Narrative</td><td><code>user_dialogue</code></td><td>Turns between the user and the subject agent.</td></tr>
+        <tr><td><code>agent_reasoning</code></td><td>Free-text rationale or chain-of-thought (CoT) the runtime is willing to export.</td></tr>
+        <tr><td><code>reasoning_graph</code></td><td>Typed graph of decisions emitted by the runtime (lossy; agent-declared unless slots were user-set in-app).</td></tr>
+        <tr><td rowspan="2">Native structured intent</td><td><code>ui_slots</code></td><td>Constraints collected in this agent's own UI (toggles, caps, categories) — not Verifiable Intent.</td></tr>
+        <tr><td><code>constraint_set</code></td><td>Structured constraints included by the subject (may be agent-declared).</td></tr>
+        <tr><td rowspan="6">Actions / discovery</td><td><code>consideration_set</code></td><td>Merchants, SKUs, or origins considered, with order/rank/price when known.</td></tr>
+        <tr><td><code>tool_trace</code></td><td>MCP/tool/HTTP names, origins, status, retries; arguments hashed or redacted.</td></tr>
+        <tr><td><code>browser_trace</code></td><td>Navigations, redirects, form-submit, checkout origin (<code>browser-context</code>).</td></tr>
+        <tr><td><code>app_invocations</code></td><td>OS application identifiers / intent names (on-device).</td></tr>
+        <tr><td><code>affiliate_steering</code></td><td>Partner, utm, or affiliate identifiers on the winning path.</td></tr>
+        <tr><td><code>pipeline_spans</code></td><td>Stage names only (e.g. retrieve → rank → cart → pay).</td></tr>
+        <tr><td rowspan="2">Checkout (agent-side)</td><td><code>rail_choices</code></td><td>Intersection of instruments available to the user and methods the merchant would accept, as computed by the agent <em>before</em> rail commit. The selected rail is a payment-layer fact (merchant/wallet/network), not an agent <code>scope</code> class.</td></tr>
+        <tr><td><code>confirmation_event</code></td><td>Pay-sheet vs HTML, SCA/biometric completed, timestamps — not a screenshot.</td></tr>
+        <tr><td rowspan="4">Integrity</td><td><code>model_attestation</code></td><td>Model/version/weights or adapter hash; deterministic-decode flag.</td></tr>
+        <tr><td><code>safety_events</code></td><td>Policy, injection, or PII-redaction events as enums — not the triggering text.</td></tr>
+        <tr><td><code>integrity_chain</code></td><td>Hash-chained session log and/or runtime attestation that the log was produced below the LLM.</td></tr>
+        <tr><td><code>session_binding</code></td><td>Checkout or transaction id, timestamps, nonce bound to this deposit.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Merchant or wallet carts and AP2/VI mandates are <strong>not</strong> required <code>scope</code>
+    classes. They are attached as <code>holder_commissioned</code> artifacts on Link 2 when those
+    parties request Link 4. In <code>browser-context</code> the subject <span class="rfc2119">MAY</span>
+    include an agent-observed cart in the JWE.
+  </p>
+  <p>
+    An empty <code>scope</code> array, or a JWE that contains no in-scope classes, is an
+    explicit <strong>subject refusal of all agent evidence</strong>. The protocol does not
+    invent classes. The Assessor <span class="rfc2119">MUST</span> still issue Link 4 when
+    the result path asks, with <code>verdict: not_assessed</code> (§8.6). Empty
+    <code>scope</code> is the reason — no extra reason code. It
+    <span class="rfc2119">MUST NOT</span> treat that outcome as
+    <code>compliant</code>, <code>partially_compliant</code>, or
+    <code>not_compliant</code> of agent behaviour.
   </p>
 
   <h3 id="s8-1"><span class="secno-heading">8.1</span> Step 1 — Assessment Delegation Issuance (Holder Mode)<a class="self-link" href="#s8-1" title="§ 8.1 Step 1 — Assessment Delegation Issuance (Holder Mode)">§</a></h3>
@@ -1682,8 +1931,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <table class="data">
       <thead><tr><th>Constraint</th><th>Claim</th><th>Type</th><th>Meaning</th></tr></thead>
       <tbody>
-        <tr><td>Named Assessor keys</td><td><code>permitted_assessors</code></td><td>Array of <code>jkt</code></td><td>Explicit list of assessor signing keys allowed as <code>sub</code> of sub-delegation</td></tr>
-        <tr><td>TA trust anchors</td><td><code>permitted_trust_authorities</code></td><td>Array of TA key <code>jkt</code></td><td>Any Assessor whose authorization is signed by a listed TA key is eligible</td></tr>
+        <tr><td>TA trust anchors (holder Link 1 only)</td><td><code>permitted_trust_authorities</code></td><td>Array of TA key <code>jkt</code></td><td>Cloud holder: any Assessor whose live roster authorization is signed by a listed TA is eligible.</td></tr>
+        <tr><td>Selected Assessor (Link 1-D only)</td><td><code>permitted_assessors</code></td><td>Array of roster <code>assessor_id</code> and/or <code>jkt</code></td><td>Cloud direct and deposit: the agent-selected Assessor. Link 1-D <span class="rfc2119">MUST NOT</span> include <code>permitted_trust_authorities</code> or the Assessor URL.</td></tr>
         <tr><td>Region filter</td><td><code>permitted_regions</code></td><td>Array of codes</td><td>Assessor authorization <span class="rfc2119">MUST</span> cover at least one listed region</td></tr>
         <tr><td>Provider filter</td><td><code>permitted_assessor_providers</code></td><td>Array of IDs</td><td>Assessor <span class="rfc2119">MUST</span> be registered under a listed provider</td></tr>
       </tbody>
@@ -1715,15 +1964,57 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <table class="data">
       <thead><tr><th>Field</th><th>Type</th><th>Req</th><th>Meaning</th></tr></thead>
       <tbody>
-        <tr><td><code>agent_cnf.jkt</code></td><td>String</td><td><span class="rfc2119">MUST</span></td><td>JWK thumbprint (RFC 7638) of the Subject Agent key that signs Link 1 and the inner evidence JWS (§8.5)</td></tr>
+        <tr><td><code>agent_cnf.jkt</code></td><td>String</td><td><span class="rfc2119">MUST</span></td><td>JWK thumbprint (RFC 7638) of the Subject Agent key that signs Link 1 / Link 1-D and the inner evidence JWS (§8.5)</td></tr>
+        <tr><td><code>agent_cnf.key_protection</code></td><td>Enum</td><td>OPTIONAL</td><td><code>software</code> (default if absent) or <code>hardware</code>. Hardware means the private key is generated and held in a non-exportable hardware-backed store (device SE/TEE/Secure Enclave/Keystore/TPM, or a cloud HSM/KMS with attestation).</td></tr>
+        <tr><td><code>agent_cnf.hardware_attestation</code></td><td>Object</td><td>REQUIRED if <code>key_protection</code> is <code>hardware</code></td><td>Proof that the private key matching <code>jkt</code> is hardware-bound. Same <code>form</code> wrapper as <code>agent.attestation</code>, plus <code>profile</code>.</td></tr>
+        <tr><td><code>agent_cnf.hardware_attestation.profile</code></td><td>URI</td><td>REQUIRED with hardware attestation</td><td>Opaque profile identifying how to verify the proof (scheme-defined; examples below). ATLAS does not define the attestation payload format.</td></tr>
       </tbody>
     </table>
   </div>
   <p>
-    Verifiers <span class="rfc2119">MUST</span> confirm that the JWS signature on Link 1 was produced by the
+    Verifiers <span class="rfc2119">MUST</span> confirm that the JWS signature on Link 1 / Link 1-D was produced by the
     key identified in <code>agent_cnf.jkt</code> before evaluating holder constraints or releasing evidence.
     <code>iss</code> on Link 1 <span class="rfc2119">SHOULD</span> equal <code>agent.id</code>.
   </p>
+  <p>
+    A self-asserted <code>key_protection: hardware</code> without a verifiable
+    <code>hardware_attestation</code> that binds to the same <code>jkt</code>
+    <span class="rfc2119">MUST</span> be treated as <code>software</code>.
+    When the active <code>policy_referential</code> requires hardware binding,
+    verifiers <span class="rfc2119">MUST</span> fail closed if
+    <code>key_protection</code> is not <code>hardware</code>, if the attestation
+    is missing, invalid, revoked, or does not name the same <code>jkt</code>.
+  </p>
+  <p>
+    On-device subjects (deposit) <span class="rfc2119">SHOULD</span> set
+    <code>key_protection: hardware</code> when the platform provides a non-exportable
+    key. Cloud subjects <span class="rfc2119">MAY</span> use hardware when the
+    operator holds the key in an attesting HSM/KMS; otherwise they use
+    <code>software</code> (tenant, model, or conversation key).
+  </p>
+  <div class="note">
+    <p class="note-title">Hardware binding is optional in the base profile</p>
+    <p>
+      The base ATLAS profile accepts <code>software</code> keys so SaaS agents can
+      participate. A scheme or <code>policy_referential</code> <span class="rfc2119">MAY</span>
+      require hardware for on-device deposit, high-assurance rails, or both.
+      ATLAS names the option and the fail-closed rule; it does not certify
+      Secure Enclave, Android Keystore, TPM, or cloud-HSM products.
+    </p>
+  </div>
+  <p>Informative hardware-attestation profiles (not exhaustive):</p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th><code>profile</code></th><th>Typical platform</th></tr></thead>
+      <tbody>
+        <tr><td><code>urn:atlas:hw-attest:apple-secure-enclave</code></td><td>iOS / iPadOS Secure Enclave or App Attest bound to the agent key</td></tr>
+        <tr><td><code>urn:atlas:hw-attest:android-key</code></td><td>Android Keystore / StrongBox key attestation</td></tr>
+        <tr><td><code>urn:atlas:hw-attest:tpm</code></td><td>TPM 2.0 key attestation (laptop / desktop)</td></tr>
+        <tr><td><code>urn:atlas:hw-attest:webauthn</code></td><td>WebAuthn / passkey-bound agent key</td></tr>
+        <tr><td><code>urn:atlas:hw-attest:cloud-hsm</code></td><td>Attested cloud HSM or KMS key for a hosted subject</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <h5><code>agent</code> object (metadata)</h5>
   <div class="table-wrap">
@@ -1814,9 +2105,37 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       }
     ]
   },
-  "scope": ["intent_fidelity"],
+  "scope": ["tool_trace", "rail_choices", "session_binding"],
+  "permitted_trust_authorities": ["sha256-TAKeyThumbprint..."],
+  "subject_channel": "agent-protocol",
   "transaction_reference": "txn_9f3a...",
   "jti": "l1_01HZ..."
+}</pre>
+
+  <h5>Example — hardware-bound <code>agent_cnf</code> (on-device deposit)</h5>
+  <pre>{
+  "typ": "atlas-assessment-delegation+jwt",
+  "iss": "did:example:on-device-shop-agent",
+  "sub": "assessor_17",
+  "assessment_mode": "deposit",
+  "deposit_result": "direct",
+  "agent_cnf": {
+    "jkt": "sha256-SecureEnclaveKeyThumbprint...",
+    "key_protection": "hardware",
+    "hardware_attestation": {
+      "form": "by-value",
+      "profile": "urn:atlas:hw-attest:apple-secure-enclave",
+      "media_type": "application/json",
+      "payload": "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9..."
+    }
+  },
+  "cnf": { "jkt": "sha256-AssessorKeyThumbprint..." },
+  "permitted_assessors": ["sha256-AssessorKeyThumbprint..."],
+  "agent": { "id": "did:example:on-device-shop-agent" },
+  "scope": ["tool_trace", "rail_choices", "session_binding"],
+  "subject_channel": "browser-context",
+  "transaction_reference": "txn_9f3a...",
+  "jti": "l1d_01HZ..."
 }</pre>
 
   <h5>Example — KYA-OS profile (by reference)</h5>
@@ -1846,31 +2165,63 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   }
 }</pre>
 
-  <h3 id="s8-2"><span class="secno-heading">8.2</span> Step 1b — Direct Assessment Commission<a class="self-link" href="#s8-2" title="§ 8.2 Step 1b — Direct Assessment Commission">§</a></h3>
+  <h3 id="s8-2"><span class="secno-heading">8.2</span> Cloud Direct and Deposit — Link 1-D<a class="self-link" href="#s8-2" title="§ 8.2 Cloud Direct and Deposit">§</a></h3>
   <p>
-    <code>assessment_mode</code> <span class="rfc2119">MUST</span> be <code>direct</code>;
-    <code>sub</code> <span class="rfc2119">MUST</span> be the assessor identifier;
-    <code>cnf.jkt</code> <span class="rfc2119">MUST</span> be the assessor's public key.
-    <code>agent_cnf</code> and <code>agent</code> <span class="rfc2119">MUST</span> be present as defined in §8.1.1.
-    No merchant <code>cnf</code> and no Link 2.  Counterparty evidence (carts, mandates)
-    <span class="rfc2119">MUST</span> be relayed by the Subject Agent in
-    <code>evidence_artifacts[]</code> with <code>provenance: agent_observed</code> inside the
-    JWE (§8.5.1) when required by the active <code>policy_referential</code>.
+    Used for <code>assessment_mode: direct</code> (cloud) and <code>deposit</code> (on-device).
+    There is no TA-mediated intake. The subject agent selects the Assessor from the
+    TA-partner roster.
   </p>
+  <ol class="algorithm">
+    <li>SA GETs the TA-partner roster and selects a roster-active Assessor authorized for the
+        requested <code>scope</code>.</li>
+    <li>SA issues Link 1-D (<code>AssessmentDelegation</code>) to that Assessor:
+        <code>cnf</code> = Assessor key; <code>permitted_assessors</code> contains that
+        Assessor’s roster <code>assessor_id</code> and/or <code>jkt</code>;
+        <code>scope</code>; optional <code>subject_channel</code>;
+        <code>agent_cnf</code> / <code>agent</code> as §8.1.1.
+        Link 1-D <span class="rfc2119">MUST NOT</span> include
+        <code>permitted_trust_authorities</code> or <code>assessor_endpoint</code>.
+        Deposit Link 1-D <span class="rfc2119">MUST</span> include
+        <code>deposit_result</code> = <code>direct</code> or <code>holder</code>.</li>
+    <li><strong>Cloud direct:</strong> Assessor presents Link 3 inbound over HTTPS.
+        SA verifies Link 3 (signature matches L1-D <code>cnf</code>, nonce, live roster
+        authorization, <code>permitted_assessors</code>) and POSTs the JWE encrypted to
+        L1-D <code>cnf</code>. The SA <span class="rfc2119">MAY</span> then request
+        Link 4 / Link 5.</li>
+    <li><strong>On-device deposit:</strong> SA POSTs Link 1-D and the JWE to the roster
+        <code>assessor_endpoint</code> (URL from the roster, not from the token).
+        Link 3 is returned on that response.
+        If the device cannot reach that URL, the SA <span class="rfc2119">MAY</span> POST
+        the same JWE to the TA, which <span class="rfc2119">MUST</span> forward it opaquely
+        and <span class="rfc2119">MUST NOT</span> decrypt.
+        How the device authenticates the roster endpoint is out of scope.</li>
+    <li>On deposit the Assessor <span class="rfc2119">MUST</span> store the JWE bound to
+        Link 1-D <code>jti</code> / <code>assessment_id</code>, encrypted at rest, with a
+        hard <code>exp</code>. It <span class="rfc2119">MUST NOT</span> reuse the JWE on
+        another transaction. It <span class="rfc2119">MUST</span> delete the JWE on expiry,
+        after Link 4 issuance, or on SA revoke.</li>
+    <li>Deposit-direct: the SA <span class="rfc2119">MAY</span> later request Link 4 / Link 5.
+        Deposit-holder: Link 4 / Link 5 <span class="rfc2119">MUST NOT</span> be issued until
+        a merchant or wallet presents holder Link 2 (optional <code>requester_evidence</code>).</li>
+  </ol>
 
-  <h3 id="s8-3"><span class="secno-heading">8.3</span> Step 2 — Sub-Delegation and Assessment Commission (Holder Mode Only)<a class="self-link" href="#s8-3" title="§ 8.3 Step 2 — Sub-Delegation and Assessment Commission (Holder Mode Only)">§</a></h3>
+  <h3 id="s8-3"><span class="secno-heading">8.3</span> Step 2 — Sub-Delegation and Assessment Commission (Holder / Deposit-Holder)<a class="self-link" href="#s8-3" title="§ 8.3 Step 2 — Sub-Delegation and Assessment Commission (Holder / Deposit-Holder)">§</a></h3>
   <p>
     The holder issues a chained <code>AssessmentSubDelegation</code>, signed with the holder's key
     matching the parent <code>cnf</code>, that names the Assessor as <code>sub</code>, binds the
     assessor's key in <code>cnf</code>, references the parent via <code>parent_jti</code>, and
     narrows or equals the parent <code>scope</code>.
+    Before issuing Link 2 the holder <span class="rfc2119">MUST</span> GET the live
+    TA-partner roster and select the Assessor from it (cloud holder: any Assessor
+    under <code>permitted_trust_authorities</code>; deposit-holder: one of
+    <code>deposited_assessors</code>).
   </p>
   <ol class="algorithm">
     <li>Verify subject-agent signature on parent token (<code>iss</code>, <code>exp</code>, <code>nbf</code>, <code>jti</code>).</li>
     <li>Verify holder signature on sub-delegation matches parent <code>cnf</code>.</li>
     <li>Verify merchant identity matches parent <code>sub</code>.</li>
     <li>Verify own signing key matches sub-delegation <code>cnf</code>.</li>
-    <li>Verify eligibility under <code>permitted_assessors</code> / <code>permitted_trust_authorities</code> and optional filters.</li>
+    <li>Verify eligibility under <code>permitted_trust_authorities</code> (holder Link 1) or <code>permitted_assessors</code> / <code>deposited_assessors</code> (deposit-holder) and the live roster.</li>
     <li>Verify sub-delegation <code>scope</code> ⊆ parent <code>scope</code>.</li>
     <li>Verify replay protection on <code>jti</code>.</li>
     <li>If <code>requester_evidence</code> is present, verify each artifact per §8.3.1 before forwarding Link 2 to the Subject Agent in the assertion chain.</li>
@@ -1895,8 +2246,10 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     The same <code>kind</code>, <code>scheme</code>, and <code>attestation</code> vocabulary applies
     in both carriages.  In <strong>holder mode</strong>, dispute-grade cross-check
     <span class="rfc2119">SHOULD</span> prefer <code>holder_commissioned</code> artifacts on Link 2
-    when present.  In <strong>direct mode</strong>, counterparty material
-    <span class="rfc2119">MUST</span> use <code>agent_observed</code> in the JWE — there is no Link 2.
+    when present. In <strong>direct</strong> and <strong>deposit-direct</strong> there is no
+    Link 2. Counterparty carts and AP2/VI objects typically arrive on deposit-holder Link 2.
+    In <code>browser-context</code> the SA <span class="rfc2119">MAY</span> include an
+    <code>agent_observed</code> cart in the JWE.
   </p>
 
   <h5>Evidence artifact (normative fields)</h5>
@@ -1965,7 +2318,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   "aud": "https://agent.shop.example/checkout-v2",
   "parent_jti": "l1_01HZ...",
   "cnf": { "jkt": "sha256-AssessorKeyThumbprint..." },
-  "scope": ["intent_fidelity", "regulated_goods"],
+  "scope": ["tool_trace", "rail_choices", "session_binding"],
   "requester_evidence": {
     "requester_id": "https://merchant.example",
     "requester_role": "merchant",
@@ -2025,10 +2378,12 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       <tbody>
         <tr><td>Parent <code>AssessmentDelegation</code>: <code>assessment_mode: holder</code>, valid signature, <code>exp</code>/<code>nbf</code>, <code>jti</code></td><td>Invalid, expired, revoked, or wrong mode</td></tr>
         <tr><td><code>agent_cnf.jkt</code> matches Link 1 signature</td><td>Subject Agent key mismatch</td></tr>
+        <tr><td>If <code>key_protection: hardware</code>: <code>hardware_attestation</code> valid for the named <code>profile</code> and binds the same <code>jkt</code></td><td>Hardware claim without a matching attestation</td></tr>
+        <tr><td>If <code>policy_referential</code> requires hardware binding: <code>key_protection</code> is <code>hardware</code> and attestation verifies</td><td>Software key where hardware is required</td></tr>
         <tr><td>Optional <code>attestation</code> valid per <code>scheme</code> when required by <code>policy_referential</code></td><td>Identity or delegation proof failed</td></tr>
         <tr><td><code>AssessmentSubDelegation</code> signature matches parent <code>cnf</code></td><td>Holder key mismatch</td></tr>
         <tr><td>Sub-delegation <code>sub</code> and <code>cnf</code> match assertion signer</td><td>Wrong subject or key</td></tr>
-        <tr><td>Assessor eligible per <code>permitted_assessors</code> / <code>permitted_trust_authorities</code></td><td>Not eligible</td></tr>
+        <tr><td>Assessor eligible per <code>permitted_trust_authorities</code> or <code>deposited_assessors</code> / <code>permitted_assessors</code> and live roster</td><td>Not eligible</td></tr>
         <tr><td>Sub-delegation <code>scope</code> ⊆ parent <code>scope</code></td><td>Scope widened</td></tr>
         <tr><td>Authorization valid for scope and region</td><td>Untrusted or expired</td></tr>
         <tr><td>Assertion signature over nonce; nonce not previously used</td><td>Replay detected</td></tr>
@@ -2036,19 +2391,37 @@ details pre { margin: .5em 0 0; font-size: .72em; }
       </tbody>
     </table>
   </div>
-  <p><em>Scope for JWE release: sub-delegation <code>scope</code> (holder) / Link 1 <code>scope</code> (direct).</em></p>
+  <h4>Direct / deposit verification checklist (Link 1-D + Link 3)</h4>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Check</th><th>Fail closed if</th></tr></thead>
+      <tbody>
+        <tr><td>Link 1-D: <code>assessment_mode</code> <code>direct</code> or <code>deposit</code>, valid signature, <code>exp</code>/<code>nbf</code>, <code>jti</code></td><td>Invalid, expired, revoked, or wrong mode</td></tr>
+        <tr><td><code>agent_cnf.jkt</code> matches Link 1-D signature</td><td>Subject Agent key mismatch</td></tr>
+        <tr><td>If <code>key_protection: hardware</code>: <code>hardware_attestation</code> valid for the named <code>profile</code> and binds the same <code>jkt</code></td><td>Hardware claim without a matching attestation</td></tr>
+        <tr><td>If <code>policy_referential</code> requires hardware binding: <code>key_protection</code> is <code>hardware</code> and attestation verifies</td><td>Software key where hardware is required</td></tr>
+        <tr><td>Link 3 signer matches Link 1-D <code>cnf</code></td><td>Wrong Assessor key</td></tr>
+        <tr><td>Signer appears in <code>permitted_assessors</code> and on the live TA-partner roster</td><td>Not the selected / rostered Assessor</td></tr>
+        <tr><td>Link 1-D has no <code>permitted_trust_authorities</code></td><td>Wrong claim set for Link 1-D</td></tr>
+        <tr><td>Authorization valid for scope and region</td><td>Untrusted or expired</td></tr>
+        <tr><td>Link 3 signature over nonce; nonce not previously used</td><td>Replay detected</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><em>Scope for JWE release: sub-delegation <code>scope</code> (holder) / Link 1-D <code>scope</code> (direct and deposit).</em></p>
 
   <h3 id="s8-5"><span class="secno-heading">8.5</span> Step 4 — Assessment Evidence Response<a class="self-link" href="#s8-5" title="§ 8.5 Step 4 — Assessment Evidence Response">§</a></h3>
   <ol class="algorithm">
-    <li>Build JSON payload scoped per Link 2 <code>scope</code> (holder) or Link 1 <code>scope</code> (direct), filtered server-side before encryption.</li>
-    <li>Encrypt to assessor public key in Link 2 <code>cnf</code> (holder) or Link 1 <code>cnf</code> (direct).</li>
+    <li>Build JSON payload scoped per Link 2 <code>scope</code> (holder) or Link 1-D <code>scope</code> (direct and deposit), filtered before encryption.</li>
+    <li>Encrypt to assessor public key in Link 2 <code>cnf</code> (holder) or Link 1-D <code>cnf</code> (direct and deposit).</li>
     <li>Algorithms: ECDH-ES or RSA-OAEP for key encryption; <strong>A256GCM</strong> for content encryption.</li>
-    <li>Nest a Subject-Agent-signed inner JWS inside the JWE (<span class="rfc2119">MUST</span>); signature key <span class="rfc2119">MUST</span> match <code>agent_cnf.jkt</code> on Link 1.</li>
-    <li>No other party receives this JWE — not the merchant, CP, network, or TA.</li>
+    <li>Nest a Subject-Agent-signed inner JWS inside the JWE (<span class="rfc2119">MUST</span>); signature key <span class="rfc2119">MUST</span> match <code>agent_cnf.jkt</code> on Link 1 or Link 1-D.</li>
+    <li>No other party receives the plaintext — not the merchant, CP, network, or TA. The TA <span class="rfc2119">MAY</span> forward the ciphertext when the subject cannot reach the roster <code>assessor_endpoint</code>.</li>
   </ol>
   <p>
-    Minimum payload: user's natural-language intent + agent reasoning leading to merchant/item selection.
-    Additional categories when in scope: <code>intent_summary</code>, <code>constraint_set</code>,
+    The inner payload <span class="rfc2119">MUST</span> contain only classes listed in the
+    governing <code>scope</code> (§8.0). There is no mandatory natural-language or CoT field.
+    When listed, the package <span class="rfc2119">MAY</span> include <code>intent_summary</code>, <code>constraint_set</code>,
     <code>merchant_selection_reasoning</code>, <code>item_selection_reasoning</code>,
     <code>policy_evaluation_results</code>, <code>evidence_hashes</code>,
     <code>evidence_artifacts[]</code> for counterparty material the Subject Agent observed
@@ -2058,8 +2431,9 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h4 id="s8-5-1">Subject Agent evidence package (JWE inner payload)</h4>
   <p>
-    The inner JWS payload (before encryption) <span class="rfc2119">MUST</span> include the
-    Subject Agent narrative fields below and <span class="rfc2119">MAY</span> include
+    The inner JWS payload (before encryption) <span class="rfc2119">MUST</span> contain only
+    classes listed in the governing <code>scope</code>. Fields below are included when those
+    classes are in scope. The payload <span class="rfc2119">MAY</span> include
     <code>evidence_artifacts[]</code> — the same artifact model as §8.3.1 with
     <code>provenance: agent_observed</code> only.
   </p>
@@ -2078,16 +2452,15 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     </table>
   </div>
   <p>
-    In <strong>direct mode</strong>, when the <code>policy_referential</code> requires cart or
-    mandate cross-check, the Subject Agent <span class="rfc2119">MUST</span> include the
-    corresponding <code>evidence_artifacts</code> (by-value or by-reference with
-    <code>digest</code>).  The Assessor <span class="rfc2119">MUST</span> verify each
-    <code>source_id</code> signature and perform <code>evidence_cross_check</code> (§8.6).
-    In <strong>holder mode</strong>, the SA <span class="rfc2119">MAY</span> include
-    <code>agent_observed</code> copies for convenience; when the same <code>artifact_id</code>
-    appears on Link 2 as <code>holder_commissioned</code>, the Assessor
-    <span class="rfc2119">SHOULD</span> treat the Link 2 copy as authoritative for dispute-grade
-    cross-check.
+    Carts and AP2/VI mandates are typically <code>holder_commissioned</code> on Link 2 when
+    a holder requests Link 4. In <code>browser-context</code> the SA
+    <span class="rfc2119">MAY</span> include an observed cart as
+    <code>agent_observed</code> in the JWE. The Assessor <span class="rfc2119">MUST</span>
+    verify each <code>source_id</code> signature and <span class="rfc2119">SHOULD</span>
+    perform <code>evidence_cross_check</code> (§8.6). When the same
+    <code>artifact_id</code> appears on Link 2 as <code>holder_commissioned</code>, the
+    Assessor <span class="rfc2119">SHOULD</span> treat the Link 2 copy as authoritative
+    for dispute-grade cross-check.
   </p>
   <p>
   Prefer <code>attestation.form: by-reference</code> with <code>digest</code> for large carts and
@@ -2095,7 +2468,7 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     the <code>uri</code>.
   </p>
 
-  <h5>Example — direct mode JWE inner payload (Pattern B)</h5>
+  <h5>Example — JWE inner payload with optional <code>browser-context</code> observed cart</h5>
   <pre>{
   "typ": "atlas-assessment-evidence+jws",
   "transaction_reference": "txn_9f3a2b1c",
@@ -2138,10 +2511,38 @@ details pre { margin: .5em 0 0; font-size: .72em; }
 
   <h3 id="s8-6"><span class="secno-heading">8.6</span> Step 5 — Assessment Result Issuance<a class="self-link" href="#s8-6" title="§ 8.6 Step 5 — Assessment Result Issuance">§</a></h3>
   <p>
-    <code>AssessmentResult</code> is addressed to the merchant/CP (<em>holder mode</em>) or to the
-    subject agent (<em>direct mode</em>). The requester <span class="rfc2119">MUST</span> convey the
+    <code>AssessmentResult</code> is addressed to the merchant/CP (<em>holder</em> and
+    <em>deposit-holder</em>) or to the subject agent (<em>direct</em> and <em>deposit-direct</em>).
+    On deposit the Assessor <span class="rfc2119">MUST NOT</span> issue Link 4 until that request,
+    using the stored JWE plus any <code>holder_commissioned</code> artifacts on Link 2.
+    The requester <span class="rfc2119">MUST</span> convey the
     full signed <code>AssessmentResult</code> peer-to-peer until the merchant processor holds every result
     for that <code>transaction_reference</code>.
+  </p>
+
+  <h4>Verdict when the subject refuses all evidence</h4>
+  <p>
+    If Link 1 / Link 1-D <code>scope</code> is empty, or the JWE is omitted or contains
+    no in-scope classes, the Assessor <span class="rfc2119">MUST</span> still issue
+    Link 4 when the result path asks. Link 4 <span class="rfc2119">MUST</span> carry:
+  </p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Claim</th><th>Value</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>verdict</code></td><td><code>not_assessed</code></td><td>No agent-behaviour method was applied. Not a pass and not a fail. Empty <code>scope</code> / empty JWE is the reason.</td></tr>
+        <tr><td><code>scope_released</code></td><td><code>[]</code></td><td>Classes actually present in the JWE.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    The Assessor <span class="rfc2119">MUST NOT</span> issue
+    <code>compliant</code>, <code>partially_compliant</code>, or
+    <code>not_compliant</code> for subject-agent behaviour when
+    <code>scope_released</code> is empty. A scheme <span class="rfc2119">MAY</span>
+    still attach holder-artifact findings under a separate scheme claim; those
+    artifacts do not change <code>verdict</code> for agent behaviour. ATLAS
+    records <code>not_assessed</code> on Link 4 so rails and later disputes can see it.
   </p>
 
   <h4>Link 4 structure and evidence digests</h4>
@@ -2156,6 +2557,8 @@ details pre { margin: .5em 0 0; font-size: .72em; }
     <table class="data">
       <thead><tr><th>Top-level claim</th><th>Type</th><th>When</th><th>Meaning</th></tr></thead>
       <tbody>
+        <tr><td><code>verdict</code></td><td>Enum</td><td>Always</td><td><code>compliant</code> | <code>partially_compliant</code> | <code>not_compliant</code> | <code>not_assessed</code></td></tr>
+        <tr><td><code>scope_released</code></td><td>Array</td><td>Always</td><td>Evidence classes actually present in the evaluated JWE (empty when the subject released none)</td></tr>
         <tr><td><code>link2_jti</code></td><td>String</td><td>Holder mode</td><td><code>jti</code> of the evaluated <code>AssessmentSubDelegation</code></td></tr>
         <tr><td><code>requester_evidence_digest</code></td><td>String</td><td>Link 2 carried <code>requester_evidence</code></td><td>Canonical hash over Link 2 <code>requester_evidence</code> (<code>holder_commissioned</code> artifacts)</td></tr>
         <tr><td><code>observed_artifacts_digest</code></td><td>String</td><td>JWE carried <code>evidence_artifacts[]</code></td><td>Canonical hash over <code>agent_observed</code> artifacts from the JWE inner payload</td></tr>
@@ -2207,11 +2610,12 @@ details pre { margin: .5em 0 0; font-size: .72em; }
   </p>
   <div class="table-wrap">
     <table class="data">
-      <thead><tr><th>Initiator</th><th>Pattern</th><th><code>AssessmentResult</code> to</th><th><code>report_token</code></th></tr></thead>
+      <thead><tr><th>Initiator</th><th>Mode</th><th><code>AssessmentResult</code> to</th><th><code>report_token</code></th></tr></thead>
       <tbody>
-        <tr><td>Subject agent</td><td>B (direct)</td><td>Subject agent</td><td>0 or 1</td></tr>
-        <tr><td>Merchant</td><td>A (holder)</td><td>Merchant</td><td>0 or 1</td></tr>
-        <tr><td>CP</td><td>A (holder)</td><td>CP</td><td>0 or 1</td></tr>
+        <tr><td>Subject agent</td><td>Cloud direct</td><td>Subject agent</td><td>0 or 1</td></tr>
+        <tr><td>Subject agent</td><td>Deposit-direct</td><td>Subject agent</td><td>0 or 1</td></tr>
+        <tr><td>Merchant or CP</td><td>Cloud holder</td><td>That holder</td><td>0 or 1</td></tr>
+        <tr><td>Merchant or CP</td><td>Deposit-holder</td><td>That holder</td><td>0 or 1</td></tr>
       </tbody>
     </table>
   </div>
@@ -2405,10 +2809,11 @@ Notes:
     <table class="data">
       <thead><tr><th>Step</th><th>Direction</th><th>Artifact</th><th>Meaning</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td>SA → Merchant / CP</td><td><code>AssessmentDelegation</code> (holder)</td><td>Commission assessment; holder issues Link 2</td></tr>
-        <tr><td>2</td><td>Merchant / CP → Assessor</td><td><code>AssessmentSubDelegation</code></td><td>Bind assessor key; optional <code>requester_evidence</code></td></tr>
-        <tr><td>3</td><td>Assessor → SA</td><td><code>AssessorAccessAssertion</code></td><td>Chain + authorization; unlocks JWE</td></tr>
-        <tr><td>—</td><td>SA → Assessor</td><td><code>AssessmentEvidenceResponse</code> JWE</td><td>Encrypted to Link 2 <code>cnf</code></td></tr>
+        <tr><td>1</td><td>SA → Merchant / CP</td><td><code>AssessmentDelegation</code> (holder)</td><td>Cloud holder; deposit-holder after JWE store</td></tr>
+        <tr><td>1-D</td><td>SA → selected Assessor</td><td><code>AssessmentDelegation</code></td><td>Cloud direct and deposit; <code>permitted_assessors</code> from TA-partner roster (no URL)</td></tr>
+        <tr><td>2</td><td>Merchant / CP → Assessor</td><td><code>AssessmentSubDelegation</code></td><td>Cloud holder (after roster select); deposit-holder result request</td></tr>
+        <tr><td>3</td><td>Assessor → SA</td><td><code>AssessorAccessAssertion</code></td><td>Chain + authorization; deposit: on outbound response</td></tr>
+        <tr><td>—</td><td>SA → Assessor (or TA mailbox)</td><td><code>AssessmentEvidenceResponse</code> JWE</td><td>Encrypted to Link 2 or Link 1-D <code>cnf</code></td></tr>
         <tr><td>4</td><td>Assessor → requester</td><td><code>AssessmentResult</code></td><td>Verdict to merchant, CP, or SA</td></tr>
         <tr><td>5</td><td>Assessor / TA</td><td><code>ReportToken</code></td><td>One opaque handle per assessment</td></tr>
         <tr><td>—</td><td>SA/M/CP → Processor</td><td>Conveyed <code>AssessmentResult</code></td><td>Peer-to-peer propagation</td></tr>
@@ -2422,18 +2827,25 @@ Notes:
 <section id="s10">
   <h2><span class="secno-heading">10.</span> End-to-End Sequence<a class="self-link" href="#s10" title="§ 10. End-to-End Sequence">§</a></h2>
   <p>
-    The diagrams below show the complete message flows for each assessment initiation pattern,
-    including Trust Registry API discovery and the downstream path from the payment network
-    to the trust authority.
+    Four sequences. Cloud-based agent: <strong>holder</strong> and <strong>direct</strong>.
+    On-device agent (deposit): <strong>deposit-direct</strong> and <strong>deposit-holder</strong>.
+    Assessor HTTPS URLs come from the roster, not from ATLAS tokens.
+    If the device cannot reach the roster <code>assessor_endpoint</code>, the TA may
+    forward ciphertext. The TA does not select the Assessor.
+    How a device authenticates the roster endpoint (TLS only vs certificate pinning)
+    is out of scope.
+    If <code>scope</code> is empty, Link 4 is still issued as
+    <code>not_assessed</code> (§8.6).
   </p>
 
-  <h3 id="s10-1"><span class="secno-heading">10.1</span> Pattern A — Holder Mode<a class="self-link" href="#s10-1" title="§ 10.1 Pattern A — Holder Mode">§</a></h3>
+  <h3 id="s10-cloud"><span class="secno-heading">10.1</span> Cloud-based agent<a class="self-link" href="#s10-cloud" title="§ 10.1 Cloud-based agent">§</a></h3>
+
+  <h4 id="s10-1"><span class="secno-heading">10.1.1</span> Holder<a class="self-link" href="#s10-1" title="§ 10.1.1 Holder">§</a></h4>
   <div class="informative">This section is non-normative.</div>
   <p>
-    The subject agent delegates assessment authority to the merchant and CP (<em>holders</em>),
-    who each independently select an eligible Assessor from the Trust Registry and issue Link 2.
-    The payment network redeems the <code>ReportToken</code> from the trust authority and
-    uses the resulting stored report as an additional trust signal in the authorisation decision.
+    The subject agent delegates assessment authority to the merchant and CP (<em>holders</em>).
+    Each holder GETs the TA-partner roster, <strong>selects</strong> an Assessor, and issues
+    Link 2. The payment network redeems the <code>ReportToken</code> from the trust authority.
   </p>
 
   <figure>
@@ -2447,41 +2859,43 @@ sequenceDiagram
     participant U  as User
     participant SA as Subject Agent
     participant R  as Trust Registry API
-    participant M  as Merchant / CP
+    participant M  as Merchant or CP
     participant A  as Assessor Agent
     participant MP as Merchant Processor
-    participant N  as Payment Network / Issuer
+    participant N  as Payment Network or Issuer
     participant TA as Trust Authority
 
-    U->>SA: Natural-language intent (constraints, budget, preferences)
+    U->>SA: Natural-language intent
 
-    SA->>R: GET /roster — discover eligible Assessors + TA trust anchors
-    R-->>SA: Assessor entries (keys, TA, regions, assessment types)
+    SA->>R: GET roster - discover Assessors and TA anchors
+    R-->>SA: Assessor entries id, jkt, types
 
-    SA->>M: AssessmentDelegation L1 [assessment_mode:holder, cnf = M key]
-    SA->>M: AssessmentDelegation L1 [assessment_mode:holder, cnf = CP key]
+    SA->>M: AssessmentDelegation L1 holder, cnf equals M key
+    SA->>M: AssessmentDelegation L1 holder, cnf equals CP key
 
-    M->>R: GET /roster — verify Assessor eligibility
-    R-->>M: Eligible Assessor entries
+    M->>R: GET roster - select Assessor
+    R-->>M: Assessor entries id, jkt, assessor_endpoint
+    M->>M: Select Assessor from roster
+    Note over M: ATLAS tokens do not carry assessor_endpoint
 
-    M->>A: AssessmentSubDelegation L2 [parent_jti=L1, cnf = A key, scope ⊆ L1]
-    note over M,A: Merchant AND CP may each commission different Assessors
+    M->>A: AssessmentSubDelegation L2, parent L1, cnf equals A key
+    Note over M,A: Merchant and CP may each commission different Assessors
 
-    A->>SA: AssessorAccessAssertion L3 [chain L1+L2 + authorization, nonce]
-    SA->>A: AssessmentEvidenceResponse JWE [encrypted intent + reasoning — A only]
+    A->>SA: AssessorAccessAssertion L3, chain L1 plus L2
+    SA->>A: AssessmentEvidenceResponse JWE, in-scope only
 
-    A->>M: AssessmentResult L4 + ReportToken L5
-    note over M: AssessmentResult MAY be used during negotiation<br/>(e.g. UCP checkout offer, pricing, terms)
+    A->>M: AssessmentResult L4 and ReportToken L5
+    Note over M: AssessmentResult may be used during negotiation
     M->>SA: convey AssessmentResult
-    note over MP: MP performs risk analysis on AssessmentResult <br/>extracts report_token and assembles redeem_tokens<br/>field carried within existing ISO 8583 / ISO 20022 rails
+    Note over MP: Processor extracts report_token into redeem_tokens
     M->>MP: convey AssessmentResult
-    
-    MP->>N: Payment authorisation + redeem_tokens [ISO 8583 / EMV 3DS / ISO 20022]
-    N->>TA: Redeem ReportToken [GET /report/{token}]
-    TA-->N: Certified trust-assurance report
-    N-->>MP: Authorisation decision (+ ATLAS trust signal)
+
+    MP->>N: Payment authorisation plus redeem_tokens
+    N->>TA: Redeem ReportToken
+    TA-->>N: Certified trust-assurance report
+    N-->>MP: Authorisation decision plus ATLAS trust signal
     </pre>
-    <figcaption>Figure 1 — Pattern A (Holder Mode) end-to-end sequence including Trust Registry discovery and TA report redemption.</figcaption>
+    <figcaption>Figure 1 — Cloud holder: merchant/CP selects the Assessor from the TA-partner roster before Link 2.</figcaption>
   </figure>
 
   <details>
@@ -2491,11 +2905,11 @@ U   ──intent─────────────────────�
 SA  ──GET /roster────────────────────────────────────────► Roster
 SA  ──AssessmentDelegation L1 (holder, cnf=M)─────────────────► M
 SA  ──AssessmentDelegation L1 (holder, cnf=CP)────────────────► CP
-M   ──GET /roster (verify A eligibility)─────────────────► Roster
+M   ──GET /roster (select Assessor)──────────────────────► Roster
 M   ──AssessmentSubDelegation L2 (cnf=A key)──────────────────► A
 CP  ──AssessmentSubDelegation L2 (cnf=A key)──────────────────► A
 A   ──AssessorAccessAssertion L3 (chain + authorization)────► SA
-SA  ──AssessmentEvidenceResponse JWE (intent + reasoning)─────► A
+SA  ──AssessmentEvidenceResponse JWE (in-scope classes)───────► A
 A   ──AssessmentResult L4 + ReportToken L5──────────────────► M / CP
 M   ──convey AssessmentResult─────────────────────────────────► SA, CP, MP
 MP  ──payment auth + redeem_tokens (ISO 8583 / 3DS)──────► N
@@ -2504,13 +2918,13 @@ TA  ──stored trust-assurance report─────────────�
 N   ──authorisation decision (+ ATLAS trust signal)───────► MP</pre>
   </details>
 
-  <h3 id="s10-2"><span class="secno-heading">10.2</span> Pattern B — Direct Mode<a class="self-link" href="#s10-2" title="§ 10.2 Pattern B — Direct Mode">§</a></h3>
+  <h4 id="s10-2"><span class="secno-heading">10.1.2</span> Direct<a class="self-link" href="#s10-2" title="§ 10.1.2 Direct">§</a></h4>
   <div class="informative">This section is non-normative.</div>
   <p>
-    The subject agent self-commissions the assessment — there is no merchant holder and no Link 2.
-    The agent conveys the <code>AssessmentResult</code> directly to downstream parties.  The
-    payment network still redeems the <code>ReportToken</code> from the trust authority
-    to obtain an independent stored report.
+    Cloud direct. The subject agent selects an Assessor from the TA-partner roster,
+    issues Link 1-D to that Assessor (<code>permitted_assessors</code>, no
+    <code>permitted_trust_authorities</code>, no URL claim), receives Link 3 inbound,
+    returns the JWE, and may receive Link 4.
   </p>
 
   <figure>
@@ -2523,48 +2937,184 @@ sequenceDiagram
     autonumber
     participant U  as User
     participant SA as Subject Agent
-    participant R  as Trust Registry API
+    participant R  as Trust Registry
     participant A  as Assessor Agent
     participant MP as Merchant Processor
-    participant N  as Payment Network / Issuer
+    participant N  as Payment Network or Issuer
     participant TA as Trust Authority
 
-    U->>SA: Natural-language intent (constraints, budget, preferences)
+    U->>SA: Natural-language intent
 
-    SA->>R: GET /roster — direct-mode eligible Assessors
-    R-->>SA: Eligible Assessor entries (keys, TA, regions)
+    SA->>R: GET roster - TA-partner Assessor list
+    R-->>SA: Assessor entries id, jkt, assessor_endpoint
+    SA->>SA: Select Assessor from roster
+    Note over SA: L1-D carries permitted_assessors id or jkt, not the URL
 
-    SA->>A: AssessmentDelegation L1-D [assessment_mode:direct, cnf = A key]
-    note over SA,A: No Link 2 — Assessor bound directly in L1-D cnf
+    SA->>A: AssessmentDelegation L1-D direct, cnf equals A, permitted_assessors
+    A->>SA: AssessorAccessAssertion L3, L1-D plus authorization
+    SA->>A: AssessmentEvidenceResponse JWE, in-scope only
 
-    A->>SA: AssessorAccessAssertion L3 [L1-D only + authorization, nonce]
-    SA->>A: AssessmentEvidenceResponse JWE [encrypted intent + reasoning — A only]
+    A->>SA: AssessmentResult L4 and ReportToken L5
+    SA->>MP: convey AssessmentResult via merchant or CP
 
-    A->>SA: AssessmentResult L4 + ReportToken L5
-    SA->>MP: convey AssessmentResult [via M / CP]
-
-    MP->>N: Payment authorisation + redeem_tokens [ISO 8583 / EMV 3DS / ISO 20022]
-    N->>TA: Redeem ReportToken [GET /report/{token}]
-    TA-->N: Certified trust-assurance report
-    N-->>MP: Authorisation decision (+ ATLAS trust signal)
+    MP->>N: Payment authorisation plus redeem_tokens
+    N->>TA: Redeem ReportToken
+    TA-->>N: Certified trust-assurance report
+    N-->>MP: Authorisation decision plus ATLAS trust signal
     </pre>
-    <figcaption>Figure 2 — Pattern B (Direct Mode) end-to-end sequence including Trust Registry discovery and TA report redemption.</figcaption>
+    <figcaption>Figure 2 — Cloud direct: subject selects from the roster, then Link 1-D → Link 3 → JWE → Link 4.</figcaption>
   </figure>
 
   <details>
     <summary>Condensed artifact-flow (text fallback)</summary>
     <pre>
 U   ──intent─────────────────────────────────────────────► SA
-SA  ──GET /roster (direct-mode eligible Assessors)────────► Roster
-SA  ──AssessmentDelegation L1-D (assessment_mode:direct, cnf=A)────► A
-A   ──AssessorAccessAssertion L3 (L1-D only)────────────────► SA
-SA  ──AssessmentEvidenceResponse JWE (intent + reasoning)─────► A
-A   ──AssessmentResult L4 + ReportToken L5──────────────────► SA
-SA  ──convey AssessmentResult─────────────────────────────────► M, CP, MP
+SA  ──GET /roster (TA-partner list)───────────────────────► Roster
+SA  ──selects Assessor
+SA  ──AssessmentDelegation L1-D (direct, cnf=A, permitted_assessors)──► A
+A   ──AssessorAccessAssertion L3──────────────────────────► SA
+SA  ──AssessmentEvidenceResponse JWE──────────────────────► A
+A   ──AssessmentResult L4 + ReportToken L5────────────────► SA
+SA  ──convey AssessmentResult─────────────────────────────► M, CP, MP
 MP  ──payment auth + redeem_tokens (ISO 8583 / 3DS)──────► N
-N   ──redeem ReportToken───────────────────────────────► TA
-TA  ──stored trust-assurance report───────────────────► N
+N   ──redeem ReportToken──────────────────────────────────► TA
+TA  ──stored trust-assurance report───────────────────────► N
 N   ──authorisation decision (+ ATLAS trust signal)───────► MP</pre>
+  </details>
+
+  <h3 id="s10-device"><span class="secno-heading">10.2</span> On-device agent (deposit)<a class="self-link" href="#s10-device" title="§ 10.2 On-device agent (deposit)">§</a></h3>
+  <p>
+    The subject has no inbound URL. It selects from the roster and POSTs Link 1-D plus the
+    JWE to the roster-listed <code>assessor_endpoint</code> (or the TA forwards ciphertext).
+    Tokens do not carry that URL. Roster-endpoint TLS versus certificate pinning is
+    out of scope.
+  </p>
+
+  <h4 id="s10-3"><span class="secno-heading">10.2.1</span> Deposit-direct<a class="self-link" href="#s10-3" title="§ 10.2.1 Deposit-direct">§</a></h4>
+  <div class="informative">This section is non-normative.</div>
+  <p>
+    After the Assessor stores the JWE, the subject agent later requests Link 4
+    (<code>deposit_result: direct</code>).
+  </p>
+
+  <figure>
+    <div class="diagram-toolbar">
+      <span>Scroll to zoom &nbsp;·&nbsp; Drag to pan &nbsp;·&nbsp; Double-click to zoom in</span>
+      <button class="diagram-reset" type="button">⤢ Reset view</button>
+    </div>
+    <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant SA as On-device Subject Agent
+    participant R  as Trust Registry
+    participant A  as Assessor Agent
+    participant MP as Merchant Processor
+    participant N  as Payment Network or Issuer
+    participant TA as Trust Authority
+
+    SA->>R: GET roster - TA-partner Assessor list
+    R-->>SA: Assessor entries id, jkt, assessor_endpoint
+    SA->>SA: Select Assessor from roster
+    Note over SA,R: URL is on the roster, not in ATLAS tokens
+
+    SA->>A: POST L1-D deposit-direct plus JWE to roster endpoint
+    Note over SA,TA: If roster endpoint unreachable, POST JWE to TA for opaque forward
+    A-->>SA: AssessorAccessAssertion L3 on outbound response
+    A->>A: Store JWE, no Link 4 yet
+
+    SA->>A: request AssessmentResult
+    A->>SA: AssessmentResult L4 and ReportToken L5
+    SA->>MP: convey AssessmentResult
+
+    MP->>N: Payment authorisation plus redeem_tokens
+    N->>TA: Redeem ReportToken
+    TA-->>N: Certified trust-assurance report
+    N-->>MP: Authorisation decision plus ATLAS trust signal
+    </pre>
+    <figcaption>Figure 3 — On-device deposit-direct: roster selection, outbound L1-D + JWE, stored JWE, then the subject requests Link 4.</figcaption>
+  </figure>
+
+  <details>
+    <summary>Condensed artifact-flow (text fallback)</summary>
+    <pre>
+SA  ──GET /roster (TA-partner list)───────────────────────► Roster
+SA  ──selects Assessor (URL from roster, not a token claim)
+SA  ──POST L1-D (deposit-direct) + JWE ─or TA forward─────► A
+A   ──AssessorAccessAssertion L3 (on response)────────────► SA
+A   ──store JWE
+SA  ──request AssessmentResult────────────────────────────► A
+A   ──AssessmentResult L4 + ReportToken L5────────────────► SA
+SA  ──convey AssessmentResult─────────────────────────────► MP
+MP  ──payment auth + redeem_tokens────────────────────────► N
+N   ──redeem ReportToken──────────────────────────────────► TA</pre>
+  </details>
+
+  <h4 id="s10-4"><span class="secno-heading">10.2.2</span> Deposit-holder<a class="self-link" href="#s10-4" title="§ 10.2.2 Deposit-holder">§</a></h4>
+  <div class="informative">This section is non-normative.</div>
+  <p>
+    After the same deposit, the subject issues holder Link 1 with
+    <code>deposited_assessors[]</code>. The merchant or wallet GETs the roster, selects
+    (or confirms) an Assessor from that list, issues Link 2 (optional cart / AP2 / VI),
+    and receives Link 4 (<code>deposit_result: holder</code>).
+  </p>
+
+  <figure>
+    <div class="diagram-toolbar">
+      <span>Scroll to zoom &nbsp;·&nbsp; Drag to pan &nbsp;·&nbsp; Double-click to zoom in</span>
+      <button class="diagram-reset" type="button">⤢ Reset view</button>
+    </div>
+    <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant SA as On-device Subject Agent
+    participant R  as Trust Registry
+    participant A  as Assessor Agent
+    participant H  as Holder Merchant or CP
+    participant MP as Merchant Processor
+    participant N  as Payment Network or Issuer
+    participant TA as Trust Authority
+
+    SA->>R: GET roster - TA-partner Assessor list
+    R-->>SA: Assessor entries id, jkt, assessor_endpoint
+    SA->>SA: Select Assessor from roster
+    Note over SA,R: URL is on the roster, not in ATLAS tokens
+
+    SA->>A: POST L1-D deposit-holder plus JWE to roster endpoint
+    Note over SA,TA: If roster endpoint unreachable, POST JWE to TA for opaque forward
+    A-->>SA: AssessorAccessAssertion L3 on outbound response
+    A->>A: Store JWE, no Link 4 yet
+
+    SA->>H: AssessmentDelegation L1 holder, deposited_assessors
+    H->>R: GET roster - select or confirm deposited Assessor
+    R-->>H: Assessor entries id, jkt, assessor_endpoint
+    H->>H: Select Assessor from roster and deposited_assessors
+    H->>A: AssessmentSubDelegation L2 plus optional cart, AP2, VI
+    A->>H: AssessmentResult L4 and ReportToken L5
+    H->>MP: convey AssessmentResult
+
+    MP->>N: Payment authorisation plus redeem_tokens
+    N->>TA: Redeem ReportToken
+    TA-->>N: Certified trust-assurance report
+    N-->>MP: Authorisation decision plus ATLAS trust signal
+    </pre>
+    <figcaption>Figure 4 — On-device deposit-holder: same outbound deposit; holder GETs the roster before Link 2 and receives Link 4.</figcaption>
+  </figure>
+
+  <details>
+    <summary>Condensed artifact-flow (text fallback)</summary>
+    <pre>
+SA  ──GET /roster (TA-partner list)───────────────────────► Roster
+SA  ──selects Assessor (URL from roster, not a token claim)
+SA  ──POST L1-D (deposit-holder) + JWE ─or TA forward─────► A
+A   ──AssessorAccessAssertion L3 (on response)────────────► SA
+A   ──store JWE
+SA  ──AssessmentDelegation L1 (holder, deposited_assessors)─► H
+H   ──GET /roster (select / confirm)──────────────────────► Roster
+H   ──AssessmentSubDelegation L2 + holder artifacts───────► A
+A   ──AssessmentResult L4 + ReportToken L5────────────────► H
+H   ──convey AssessmentResult─────────────────────────────► MP
+MP  ──payment auth + redeem_tokens────────────────────────► N
+N   ──redeem ReportToken──────────────────────────────────► TA</pre>
   </details>
 </section>
 
@@ -2577,7 +3127,7 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
     <table class="data">
       <thead><tr><th>Principle</th><th>How ATLAS applies it</th></tr></thead>
       <tbody>
-        <tr><td><strong>Separation of duties</strong></td><td>L1 authorises commissioning; L3+JWE authorises reading evidence; L5/<code>redeem_tokens</code> authorises downstream redemption only.</td></tr>
+        <tr><td><strong>Separation of duties</strong></td><td>L1 / L1-D authorises commissioning; L3+JWE authorises reading evidence; L5/<code>redeem_tokens</code> authorises downstream redemption only. The TA never decrypts evidence.</td></tr>
         <tr><td><strong>Least privilege</strong></td><td>Sub-delegation <code>scope</code> <span class="rfc2119">MUST NOT</span> exceed parent. Evidence filtered server-side before JWE.</td></tr>
         <tr><td><strong>Fail closed</strong></td><td>Any signature, expiry, scope, eligibility, or binding check failure → no evidence released.</td></tr>
         <tr><td><strong>Cryptographic binding</strong></td><td><code>cnf</code>/<code>jkt</code> binds each link to the next signer; <code>transaction_reference</code> and <code>assessment_id</code> bind to a transaction.</td></tr>
@@ -2590,24 +3140,30 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
   <h3 id="s11-2"><span class="secno-heading">11.2</span> Normative Controls<a class="self-link" href="#s11-2" title="§ 11.2 Normative Controls">§</a></h3>
   <ul>
     <li>All delegation and result artifacts <span class="rfc2119">MUST</span> use asymmetric signatures (e.g. ES256, EdDSA). <span class="rfc2119">MUST</span> prohibit <code>none</code> and deprecated HMAC-as-JWT.</li>
+    <li>If <code>agent_cnf.key_protection</code> is <code>hardware</code>, verifiers <span class="rfc2119">MUST</span> verify <code>hardware_attestation</code> against the named <code>profile</code> and the same <code>jkt</code>. A hardware claim without that proof <span class="rfc2119">MUST</span> be treated as <code>software</code>.</li>
     <li>Every JWT <span class="rfc2119">MUST</span> include <code>exp</code>, <code>nbf</code>, and unique <code>jti</code>. Verifiers <span class="rfc2119">MUST</span> reject expired or reused <code>jti</code>.</li>
     <li><code>aud</code> and <code>iss</code> <span class="rfc2119">MUST</span> be validated on every presentation.</li>
     <li>Link 2 <code>scope</code> <span class="rfc2119">MUST</span> be a subset of Link 1 <code>scope</code>.</li>
-    <li>The SA <span class="rfc2119">MUST</span> issue a fresh, single-use nonce for each <code>AssessorAccessAssertion</code> request.</li>
+    <li>The SA <span class="rfc2119">MUST</span> issue a fresh, single-use nonce for each Link 3 request.</li>
     <li>Any agent receiving a conveyed <code>AssessmentResult</code> <span class="rfc2119">MUST</span> verify the Assessor signature, <code>transaction_reference</code>, <code>assessment_id</code>, and <code>requester_id</code>.</li>
     <li>The merchant processor <span class="rfc2119">MUST NOT</span> mint tokens or accept results without the signed envelope.</li>
   </ul>
 
   <h3 id="s11-3"><span class="secno-heading">11.3</span> Privacy<a class="self-link" href="#s11-3" title="§ 11.3 Privacy">§</a></h3>
   <ul>
-    <li>User intent and agent reasoning <span class="rfc2119">MUST</span> use JWE to Link 2/1 <code>cnf</code> only.</li>
-    <li>Merchants, CPs, and TAs <span class="rfc2119">MUST NOT</span> receive <code>AssessmentEvidenceResponse</code> or decrypted evidence in the base profile.</li>
+    <li>In-scope evidence <span class="rfc2119">MUST</span> use JWE to Link 2 or Link 1-D <code>cnf</code> only. The TA <span class="rfc2119">MUST NOT</span> decrypt a forwarded JWE.</li>
+    <li>Merchants and CPs <span class="rfc2119">MUST NOT</span> receive <code>AssessmentEvidenceResponse</code> or decrypted evidence. The TA <span class="rfc2119">MAY</span> receive the ciphertext only to forward it; it <span class="rfc2119">MUST NOT</span> obtain plaintext.</li>
     <li>Do not log decrypted evidence in production; log <code>assessment_id</code> and hashes only.</li>
   </ul>
 
   <h3 id="s11-4"><span class="secno-heading">11.4</span> Transport<a class="self-link" href="#s11-4" title="§ 11.4 Transport">§</a></h3>
   <p>
-    HTTPS with TLS 1.2+ (1.3 preferred); certificate validation enabled.
+    TLS 1.2+ (1.3 preferred); certificate validation enabled.
+    Cloud subjects typically expose HTTPS servers. On-device subjects use outbound HTTPS to
+    the roster <code>assessor_endpoint</code>, or opaque TA forward if that URL is unreachable.
+    ATLAS artifacts <span class="rfc2119">MUST NOT</span> convey that URL.
+    How a client authenticates the roster HTTPS endpoint (TLS validation only, certificate
+    pinning, or otherwise) is <strong>out of scope</strong> of this specification.
     Application trust does not rely on mTLS or DPoP in the base profile.
   </p>
 
@@ -2626,7 +3182,7 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
 
   <h3 id="s11-6"><span class="secno-heading">11.6</span> Threat-Model Checklist (Implementers)<a class="self-link" href="#s11-6" title="§ 11.6 Threat-Model Checklist (Implementers)">§</a></h3>
   <ul>
-    <li>☐ Compromised merchant issues L2 to colluding Assessor → contained by SA verification at §8.4 and <code>permitted_*</code> on L1.</li>
+    <li>☐ Compromised merchant issues L2 to colluding Assessor → contained by SA verification at §8.4 and <code>permitted_trust_authorities</code> plus live roster (no Assessor pin-list).</li>
     <li>☐ Compromised Assessor requests excessive scope → contained by scope ⊆ parent and SA filter before JWE.</li>
     <li>☐ Compromised SA over-releases evidence → contained by scope; inner JWS + TA assessment trail.</li>
     <li>☐ Replay of assertion or delegation → <code>jti</code>, nonce, short <code>exp</code>.</li>
@@ -2643,9 +3199,11 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
     verifier checks, and receipts; ATLAS adds a standard path for assessing how the subject agent
     interpreted and operationalised the user's intent before and during those actions.      In holder mode, the CP or merchant <span class="rfc2119">MAY</span> attach
     <code>holder_commissioned</code> artifacts on Link 2 (<code>requester_evidence</code>, §8.3.1).
-    In direct mode, the Subject Agent relays counterparty material as
-    <code>agent_observed</code> artifacts in the JWE (§8.5.1).  The Assessor cross-checks verified
-    artifacts against Subject Agent narrative without exposing private reasoning to the requester.
+    In direct and deposit intake, counterparty carts and AP2/VI objects are typically added later
+    as <code>holder_commissioned</code> artifacts when a holder requests Link 4.
+    In <code>browser-context</code> the SA <span class="rfc2119">MAY</span> relay an observed cart
+    in the JWE. The Assessor cross-checks verified artifacts against in-scope subject evidence
+    without exposing the JWE to the requester.
   </p>
   <p>
     ATLAS borrows the <strong>principles</strong> of Verifiable Intent — key-bound credentials,
@@ -2672,25 +3230,20 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
   <div class="informative">This section is non-normative.</div>
   <blockquote style="border-left:4px solid var(--ch-teal);padding:.8em 1em;margin:.8em 0;color:#555;font-style:italic;background:var(--ch-teal-bg);border-radius:0 4px 4px 0">
     <p>
-      ATLAS defines a chained-capability-token assessment framework for agentic commerce with two
-      initiation patterns. A <strong>trust registry</strong> publishes an
-      <strong>Assessor roster</strong> listing every authorized Assessor agent from all TAs under
-      the registry, including Assessor and TA public keys (<code>jkt</code>), assessment types, regions,
-      authorization dates, and TA association.
+      ATLAS defines a chained-capability-token <em>observability</em> protocol for agentic commerce.
+      A <strong>trust registry</strong> publishes an <strong>Assessor roster</strong>.
+      Roster <code>assessment_types</code> are opaque scheme codes (e.g. FACT). Evidence
+      <code>scope</code> lists release classes.
     </p>
     <p>
-      In <strong>holder mode</strong>, the subject agent issues
-      <code>AssessmentDelegation</code> (<code>assessment_mode: holder</code>) to the merchant and CP;
-      a holder commissions an assessment via <code>AssessmentSubDelegation</code> to an eligible Assessor.
-      In <strong>direct mode</strong>, the subject agent issues
-      <code>AssessmentDelegation</code> (<code>assessment_mode: direct</code>) straight to an Assessor —
-      no merchant and no Link 2. In both modes the Assessor presents an
-      <code>AssessorAccessAssertion</code>; the SA verifies the chain and returns
-      <code>AssessmentEvidenceResponse</code> as JWE. the Assessor returns <code>AssessmentResult</code>
-      with one <code>report_token</code>. Each result is conveyed peer-to-peer until the
-      merchant processor collects them, extracts <code>report_token</code> values (up to three),
-      and writes <strong><code>redeem_tokens</code></strong> on ISO 8583 and similar rails.
-      Application trust is chained JWS/JWT plus JWE over HTTPS with standard TLS.
+      Two models. <strong>Cloud-based agent:</strong> holder (merchant/CP GETs the roster and
+      selects before Link 2) or direct (subject selects, then Link 1-D → Link 3 → JWE → Link 4).
+      <strong>On-device agent (deposit):</strong> same roster selection and Link 1-D; JWE is
+      pushed to the roster URL (or TA-forwarded); then deposit-direct or deposit-holder.
+      ATLAS tokens do not carry the Assessor URL. Roster-endpoint TLS versus pinning is
+      out of scope. An empty <code>scope</code> still produces Link 4
+      <code>not_assessed</code>.
+      Processors assemble <code>redeem_tokens</code> on ISO 8583 and similar rails.
     </p>
   </blockquote>
 </section>
@@ -2741,7 +3294,7 @@ N   ──authorisation decision (+ ATLAS trust signal)───────► 
 <footer>
   <img src="data:image/png;base64,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" alt="Consult Hyperion — consulting by fime">
   <p>
-    ATLAS Protocol Specification — Working Draft v0.1 · 8 June 2026<br>
+    ATLAS Protocol Specification — Working Draft v0.2 · September 2026<br>
     Produced by <strong style="color:var(--ch-teal)">Hyperlab</strong>,
     the Innovation Lab within <a href="https://chyp.com/hyperlab/">Consult Hyperion</a>
     (consulting by fime).<br>

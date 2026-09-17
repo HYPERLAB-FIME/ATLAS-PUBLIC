@@ -1,7 +1,7 @@
 # ATLAS — FAQ
 
-**Version:** 1.1
-**Related:** [ATLAS Protocol Specification (working draft)](https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html) · [Glossary of questions](#glossary-of-questions)
+**Version:** 1.6
+**Related:** [ATLAS Protocol Specification v0.2 working draft](https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html) · [Glossary of questions](#glossary-of-questions)
 
 ---
 
@@ -24,6 +24,8 @@ AI agents are starting to shop and pay for us. **ATLAS** is about making that tr
 | 6   | [What problems is this trying to solve?](#6-what-problems-is-this-trying-to-solve)                                                                                                                                             |
 | 7   | [Is ATLAS compatible with emerging standards (KYA-OS, AP2, VI)?](#7-is-atlas-compatible-with-emerging-standards-kya-os-ap2-vi)                                                                                                 |
 | 8   | [Does ATLAS work with browser agents and WebMCP?](#8-does-atlas-work-with-browser-agents-and-webmcp)                                                                                                                           |
+| 8a  | [How does ATLAS work for a cloud agent vs an on-device agent?](#8a-how-does-atlas-work-for-a-cloud-agent-vs-an-on-device-agent)                                                                                                 |
+| 8b  | [What is evidence `scope` — what does the Assessor actually see?](#8b-what-is-evidence-scope--what-does-the-assessor-actually-see)                                                                                              |
 | 9   | [Can I use ATLAS only before payment — or also after a transaction has been processed?](#9-can-i-use-atlas-only-before-payment-or-also-after-a-transaction-has-been-processed)                                                 |
 | 10  | [How do Assessor, Trust Authority, and the certification scheme work together?](#10-how-do-assessor-trust-authority-and-the-certification-scheme-work-together)                                                                |
 | 11  | [How do I find a qualified Assessor — what is the roster, discovery, and opt-in?](#11-how-do-i-find-a-qualified-assessor-what-is-the-roster-discovery-and-opt-in)                                                              |
@@ -68,6 +70,8 @@ Existing work already covers neighbouring jobs: [AP2](https://ap2-protocol.org/a
 | What ATLAS standardises              | What that means in practice                                                                                           |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
 | **Assessment language & messages**   | Common evidence packages, verdicts, and report tokens that any conforming party can produce or consume                |
+| **Evidence `scope` classes**         | A **release ceiling** — which classes the agent is willing to export (dialogue, tool traces, rail choices, …). Chat is not mandatory. |
+| **Deployment models**                | **Cloud-based agent:** holder and direct. **On-device agent (deposit):** deposit-direct and deposit-holder. Assessor URL is on the roster, not in ATLAS tokens. |
 | **Assessor / Trust Authority roles** | How independent Assessors are authorized, how methods are certified, and how evidence stays encrypted to the Assessor |
 | **Pre-transaction behaviour signal** | A portable trust leg **beside** KYA (identity) and AP2/VI (transaction binding) — not a substitute for either         |
 | **Rail-ready outputs**               | Compact signed signals that can travel with payment messaging without shipping the user’s private conversation        |
@@ -111,9 +115,9 @@ A shopping agent is willing to share personal data with an ATLAS Assessor mainly
 
 In ATLAS:
 
-- Evidence is **encrypted so only the chosen Assessor** can read it.
-- Merchants, card networks, and processors **do not** get the raw intent/reasoning package in the base design.
-- Sharing is **scoped**: only what is needed, after the Assessor proves it is allowed.
+- Evidence is **encrypted so only the chosen Assessor** can read it. The Trust Authority may **forward ciphertext** if the device cannot reach the Assessor URL — it must not decrypt.
+- Merchants, card networks, and processors **do not** get the raw evidence package in the base design.
+- Sharing is **scoped**: the agent lists evidence **classes** it will release (`scope`). Chat and chain-of-thought are optional classes, not a minimum payload. See [§8b](#8b-what-is-evidence-scope--what-does-the-assessor-actually-see).
 - What travels on payment rails is typically a **short trust token** (a pointer to a report), not the user’s full conversation.
 
 ---
@@ -214,11 +218,66 @@ ATLAS closes the **runtime behaviour gap** and feeds portable signals back into 
 
 ## 8. Does ATLAS work with browser agents and WebMCP?
 
-Yes in principle. ATLAS cares about **how trust messages are exchanged**, not whether the agent runs in an app, in the cloud, or in a browser.
+Yes. ATLAS cares about **what evidence is released and how it is encrypted**, not whether the agent runs in an app, in the cloud, or in a browser.
 
 **MCP / WebMCP** (in short): ways for agents to call tools and websites. Those tool calls are exactly where intent often gets compressed or dropped — so assessment still matters.
 
-If a browser agent can hold evidence of what it understood, start an ATLAS assessment, and release **encrypted** evidence only to an authorized Assessor, it can participate as a **subject agent**. Detailed browser/WebMCP wiring is still emerging; the protocol is meant to be **agent-architecture agnostic**.
+A browser shopping agent typically sets `subject_channel: browser-context`. Expected evidence then leans toward **navigations, form-submit, checkout origin, and an observed cart** — not a UCP/ACP signed offer. The agent still starts intake the same way as any other subject (holder, direct, or deposit). Detailed WebMCP wiring is emerging; the protocol is **architecture-agnostic**.
+
+How cloud vs on-device subjects actually start that intake is [§8a](#8a-how-does-atlas-work-for-a-cloud-agent-vs-an-on-device-agent). What they release is [§8b](#8b-what-is-evidence-scope--what-does-the-assessor-actually-see).
+
+---
+
+
+
+## 8a. How does ATLAS work for a cloud agent vs an on-device agent?
+
+**Two models, four modes.** The JWE, Link 4 verdict, and `ReportToken` do not change. What changes is who selects the Assessor, whether the subject can accept inbound HTTPS, and **when** Link 4 is issued.
+
+The Assessor’s HTTPS URL is **on the TA-partner roster**, not in any ATLAS token. How an on-device agent authenticates that roster endpoint (TLS only vs certificate pinning) is **out of scope** of ATLAS. There is **no** TA-mediated intake — the TA does not pick the Assessor.
+
+
+| Model | Mode | Who selects the Assessor | How it starts | When Link 4 is issued |
+| ----- | ---- | ------------------------ | ------------- | --------------------- |
+| **Cloud-based agent** (SaaS or hosted) | **Holder** | Merchant/wallet from the roster **before Link 2** | Agent issues Link 1 (`permitted_trust_authorities`). Holder GETs the roster, selects, then Link 2. | Holder receives the verdict after Link 3 + JWE. |
+| **Cloud-based agent** | **Direct** | The shopping agent from the roster **before Link 1-D** | Link 1-D **SA → Assessor** (`permitted_assessors` = roster id/jkt, no URL, no `permitted_trust_authorities`). Assessor sends Link 3 inbound. | The **agent** receives Link 4 after the JWE. |
+| **On-device agent (deposit)** | **Deposit-direct** | The shopping agent from the roster **before Link 1-D** | Same Link 1-D; agent **pushes** the JWE to the roster URL (or the TA forwards ciphertext). Assessor **stores** it. | The agent later asks for Link 4. |
+| **On-device agent (deposit)** | **Deposit-holder** | Agent selects for the deposit; merchant/wallet confirms via the roster **before Link 2** | Same outbound deposit; then holder Link 1 with `deposited_assessors[]`. | Merchant/wallet later asks (Link 2, optional cart / AP2 / VI). |
+
+
+There is no Assessor SDK inside the shopping agent, and no Assessor consumer app on the phone.
+
+**Optional hardware-bound `agent_cnf`:** Link 1 / Link 1-D may set `agent_cnf.key_protection: hardware` plus a `hardware_attestation` that proves the signing key lives in a non-exportable store (phone Secure Enclave / Android Keystore / TPM, or a cloud HSM). The base profile still accepts software keys so SaaS agents can participate. A scheme can require hardware for on-device deposit. A hardware claim without a matching attestation is treated as software.
+
+**Carts and payment mandates** still come from the merchant or wallet on a cloud-holder or deposit-holder Link 2. In a browser session the agent *may* include an observed cart in the encrypted package; a later merchant-signed cart wins if both exist.
+
+---
+
+
+
+## 8b. What is evidence `scope` — what does the Assessor actually see?
+
+`scope` is a **release ceiling**, not a verdict type. The shopping agent lists **classes** it is willing to export. It must not include a class that is not listed. The Assessor must not treat a **missing** class as “we checked that and it passed.”
+
+ATLAS does **not** require the full chat or the model’s chain-of-thought. Those are two optional classes. What a scheme (for example FACT) *needs* for a given method is named by opaque `assessment_types` on the roster — outside this protocol.
+
+
+| Group | Examples of classes | Typical on |
+| ----- | ------------------- | ---------- |
+| **Narrative** | User–agent turns; free-text reasoning / CoT; a typed decision graph | Cloud subjects that already log dialogue. Rarely available on locked-down devices. |
+| **Native structured intent** | In-app toggles and caps (`ui_slots`); a structured constraint set | Any agent with its own UI — not the same as Verifiable Intent. |
+| **Actions / discovery** | Merchants/SKUs considered; tool / MCP / HTTP traces; browser navigations; OS app launches; affiliate tags; pipeline stage names | The usual on-device / no-chat path. Browser agents add `browser_trace`. |
+| **Checkout (agent-side)** | `rail_choices` — instruments the user *could* use ∩ methods the merchant would accept, **before** commit; confirmation event (pay-sheet vs HTML, SCA done) | The **selected** rail is a payment-layer fact (merchant / wallet / network), not an agent class. |
+| **Integrity** | Model/version hash; safety-event enums; hash-chained session log; session / transaction binding | Useful when the OS or runtime can attest the log. |
+
+
+**What is *not* a `scope` class:** merchant carts and AP2 / VI mandates. Those are attached later by the merchant or wallet when they ask for Link 4.
+
+**What a missing class means:** if `agent_reasoning` is not in `scope`, the Assessor did not see CoT — and must not claim it verified “intent from reasoning.” It can still judge from tool traces, consideration set, and holder artefacts.
+
+**If the OS exports zero classes, or the agent lists an empty `scope`:** ATLAS cannot assess agent behaviour — there is nothing to evaluate. The transport still runs (deposit can POST Link 1-D; holder can still send Link 2). The Assessor must not invent a chat, a tool trace, or an “intent verified” claim. When the result path asks, Link 4 **must still be issued** with `verdict: not_assessed`. Empty `scope` is the reason — no extra reason code. That is recorded on the rail-facing token: not silence, and not a pass or a fail. Holder Link 2 artifacts (cart / AP2 / VI) can still be digested on that same Link 4; they do not change the agent-behaviour verdict.
+
+**Beginner takeaway:** `scope` is the agent’s privacy dial. Cloud agents can open more classes; on-device agents can open action and receipt-style classes only. The Assessor is honest about which classes it actually saw — including when the agent refused every class.
 
 ---
 
@@ -231,9 +290,11 @@ If a browser agent can hold evidence of what it understood, start an ATLAS asses
 
 | Mode                        | When                    | Who typically asks                     | What happens                                                                                                                                                                                |
 | --------------------------- | ----------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Direct / synchronous**    | Before the next step    | e.g. merchant, wallet                  | Request assessment and **wait** before checkout, authorisation, or fulfilment                                                                                                               |
-| **Indirect / asynchronous** | Around the same journey | e.g. merchant, wallet                  | Request assessment **without blocking**; get notified when ready (audit / trace)                                                                                                            |
-| **Post-transaction**        | After payment           | e.g. issuer, payment network, acquirer | Ask about a **past** transaction. The **Trust Authority** managing the Assessor fleet **triggers** a post-assessment toward the shopping agent — still subject to that agent’s **policies** |
+| **Direct (cloud)**          | Before the next step    | The shopping agent                     | Agent selects from the roster, Link 1-D → Link 3 → JWE → Link 4; checkout can wait                                                                                                          |
+| **Deposit-direct (on-device)** | At checkout, then later | The shopping agent                     | Same roster selection; JWE stored; agent later asks for Link 4                                                                                                                              |
+| **Deposit-holder (on-device)** | At checkout, then later | Merchant or wallet                     | Same deposit; holder Link 2 (optional cart / AP2 / VI) requests Link 4                                                                                                                      |
+| **Holder (cloud)**          | During negotiation      | Merchant or wallet                     | Agent issues Link 1; holder GETs the roster, selects the Assessor, then Link 2; holder receives Link 4                                                                                      |
+| **Post-transaction**        | After payment           | e.g. issuer, payment network, acquirer | Redeem an existing `ReportToken`, or — if a sealed JWE was stored — request Link 4 later. A TA cannot pull evidence from a phone that never deposited.                                      |
 
 
 ---
@@ -256,11 +317,10 @@ In ATLAS language, what people often call an **“authority scheme”** is essen
 **How they connect (simplified):**
 
 1. The scheme publishes which Assessors are accredited (**roster** — see next question).
-2. The shopping agent or merchant picks an eligible Assessor (and the agent must **opt in** to that Assessor).
-3. The Assessor proves authorization from its Trust Authority.
-4. It receives **encrypted** evidence.
-5. It issues a signed result + report token (certified methods/models).
-6. The payment network can later **redeem** the report from the Trust Authority.
+2. **Cloud direct / deposit:** the shopping agent **selects** an Assessor from that TA-partner roster and names it in `permitted_assessors` on Link 1-D (id / public key — not the URL). **Cloud holder / deposit-holder:** the merchant/wallet GETs the roster and selects before Link 2.
+3. The Assessor proves live authorization; the agent releases **encrypted**, **in-scope** evidence (on-device: pushed to the roster-listed URL, or TA-forwarded ciphertext).
+4. The Assessor issues a signed result + report token when asked (immediately in cloud direct; later on deposit-direct or deposit-holder).
+5. The payment network can later **redeem** the report from the Trust Authority.
 
 ---
 
@@ -284,32 +344,33 @@ A roster entry for a qualified Assessor is meant to support informed choice. In 
 | Field (plain language)                        | Why it matters                                                                                                                  |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | **Qualification / quality score**             | Result of ongoing evaluation and benchmarks — helps compare Assessors, not only “listed vs not listed”                          |
-| **Assessment referential(s)**                 | Which **rulebooks** this Assessor is allowed to judge against (e.g. intent fidelity, regulated goods, network policy, fairness) |
+| **Assessment referential(s)**                 | Which **scheme rulebooks** this Assessor is allowed to apply (opaque codes — e.g. a FACT profile). ATLAS does not define the methods. |
 | **Cost**                                      | Pricing or fee model so merchants/wallets/agents can choose affordably and predictably                                          |
 | **Region**                                    | Where the Assessor is authorized to operate (e.g. EU, US)                                                                       |
-| **Agents that accept this Assessor (opt-in)** | Which shopping agents (subjects) have **agreed** to be assessed by this Assessor — see below                                    |
-| Status, types, Trust Authority                | Active / suspended / revoked; assessment types; owning Trust Authority                                                          |
+| **Owning Trust Authority**                    | The TA that signs this Assessor’s live authorization                                                                            |
+| Status, types                                 | Active / suspended / revoked; opaque `assessment_types`                                                                         |
 
 
 *(The [ATLAS working draft](https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html) already standardises core discovery fields such as regions, assessment types, policy referentials, and authorization status. Qualification score, cost, and the reverse “who accepts me” view help make the roster usable as a real marketplace of Assessors in scheme / programme deployments.)*
 
 ### Discovery
 
-1. Look up the scheme’s roster.
-2. Filter by region, referential, score, cost, and whether the shopping agent accepts that Assessor.
-3. Commission only an Assessor that matches those filters **and** still has live authorization.
+1. Look up the TA-partner roster.
+2. Filter by region, referential, score, cost, and live authorization.
+3. **Cloud direct / deposit:** the shopping agent selects an Assessor and puts that roster id / public key in `permitted_assessors` (not the URL). **Cloud holder / deposit-holder:** the merchant/wallet GETs the roster and selects before Link 2.
 
 
 
-### Opt-in (the shopping agent must accept the Assessor)
+### Opt-in (direct and deposit name the Assessor)
 
-Assessment is not a free-for-all. The **subject (shopping) agent opts in** to which Assessors (and/or Trust Authorities) may request its encrypted evidence. That opt-in is how privacy and control stay with the agent:
+Assessment is not a free-for-all.
 
-- The roster may show **which agents accept** a given Assessor.
-- From the agent’s side, the agent publishes or embeds an allow-list of permitted Assessors when starting an assessment.
-- If an Assessor is not opted-in (or not on the current qualified roster), evidence is **not** released.
+- **Cloud direct and deposit:** the agent **selects** from the published roster and records that choice in `permitted_assessors`. Trust still depends on **live roster authorization**, not on the agent inventing an Assessor.
+- **Cloud holder / deposit-holder:** the agent lists Trust Authorities (`permitted_trust_authorities`) or `deposited_assessors`; the merchant or wallet GETs the roster and picks before Link 2.
+- The Assessor URL is read from the roster. It is **not** an ATLAS claim. How a device authenticates the roster endpoint (TLS vs pinning) is out of scope of ATLAS.
+- `scope` still limits **what** is released, regardless of who was selected.
 
-**Beginner takeaway:** Think of the roster as a **yellow pages of inspected inspectors** — regularly scored and updated — and opt-in as the shopping agent’s **consent** over who may open its private evidence.
+**Beginner takeaway:** Think of the roster as a **yellow pages of inspected inspectors**. In cloud direct and deposit the shopping agent **picks a name from that list**. In cloud holder (and before deposit-holder Link 2) the merchant/wallet does.
 
 ---
 
@@ -333,8 +394,8 @@ Assessment is not a free-for-all. The **subject (shopping) agent opts in** to wh
 
 ### How it works (plain steps)
 
-1. The shopping agent **opts in** to each Assessor it is willing to open evidence for (allow-list — see [roster / opt-in](#11-how-do-i-find-a-qualified-assessor-what-is-the-roster-discovery-and-opt-in)).
-2. Each requester (e.g. merchant, wallet) **discovers** and **commissions** its Assessor from the roster for that transaction.
+1. For each check, an Assessor is **selected from the roster** — by the shopping agent (`permitted_assessors` on Link 1-D) or by a holder (see [roster / opt-in](#11-how-do-i-find-a-qualified-assessor-what-is-the-roster-discovery-and-opt-in)). After a deposit, `deposited_assessors` names who already holds the JWE.
+2. Each requester (e.g. merchant, wallet) **commissions** its Assessor for that transaction (or from `deposited_assessors` on deposit-holder).
 3. Each Assessor proves its **live authorization**, then receives **its own** encrypted evidence package (scoped to what that assessment needs — not a free dump to every Assessor at once beyond what was authorized).
 4. Each Assessor returns **its own signed verdict** and, when required, **its own report token**.
 5. Downstream, the merchant processor can attach **several compact report tokens** to the payment message (ATLAS designs for a small number of tokens on the rail — typically up to a few per authorisation). Networks or issuers can redeem each token from the relevant Trust Authority.
@@ -385,7 +446,7 @@ Each party gets a different slice of value from the same independent assessment 
 6. **Dispute / liability evidence** — independent, redeemable records schemes, issuers, and merchants can use when disputes arise; can **support future liability frameworks if** networks adopt those signals — not a published agent-specific liability shift today.
 7. **Scalable observability** across commercial, on-device, and custom agents — without relying only on SDKs, hosting, or proxies.
 8. **Flexible timing** — sync gate, async audit, and post-transaction review.
-9. **Discoverable, opt-in Assessors** — roster with ongoing evaluation (score, referential, cost, region, accepting agents).
+9. **Discoverable Assessors on the TA-partner roster** — the agent (cloud direct / deposit) or the holder (cloud holder, and before deposit-holder Link 2) selects from that list. The Assessor URL stays on the roster, not in ATLAS tokens.
 10. **Several Assessors per transaction** — merchant, wallet, or different rulebooks can each commission a check; multiple report tokens can travel with the payment.
 11. **Value per segment** — merchant, wallet, shopping agent, network, issuer, processor, and user.
 12. **Open standard** — a shared, vendor-neutral assessment layer the industry can implement, profile, and evolve together.
@@ -471,7 +532,7 @@ Near term, the binding constraint is usually **insufficient trust signals and di
 
 [↑ Back to glossary of questions](#glossary-of-questions)
 
-- [ATLAS: Agent Trust Layer and Assurance Standard — working draft](https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html)
+- [ATLAS: Agent Trust Layer and Assurance Standard — v0.2 working draft](https://hyperlab-fime.github.io/ATLAS-PUBLIC/atlas-protocol-specification-0.1draft.html)
 - [KYA-OS (DIF)](https://github.com/decentralized-identity/kya-os-mcp) — [SPEC.md](https://github.com/decentralized-identity/kya-os-mcp/blob/main/SPEC.md); [introduction](https://modelcontextprotocol-identity.io/mcp/introduction)
 - [AP2 — Agent Payments Protocol](https://ap2-protocol.org/ap2/specification/) ([home](https://ap2-protocol.org/))
 - [Verifiable Intent (VI)](https://verifiableintent.dev/spec/) ([home](https://verifiableintent.dev/))
